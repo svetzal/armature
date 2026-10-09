@@ -294,9 +294,17 @@
   }
 
   @media (forced-colors: active) {
+    /* Focus and selection both map to Highlight here, so they differ by shape:
+       focus is a solid ring outside, selection a solid ring inside, and a
+       focused selection a double ring outside. */
     [aria-selected="true"] {
       outline: var(--armature-focus-width) solid var(--armature-selected-cue);
       outline-offset: calc(var(--armature-focus-width) * -1);
+    }
+
+    [aria-selected="true"]:focus-visible {
+      outline: calc(var(--armature-focus-width) * 2) double var(--armature-focus);
+      outline-offset: var(--armature-focus-offset);
     }
 
     [aria-invalid="true"] {

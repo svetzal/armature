@@ -15,6 +15,8 @@ Until 1.0.0, a minor version can change the public surface.
 - Layered neutral light and dark token defaults and an accessibility base
   stylesheet with focus, screen-reader-only, reduced-motion and forced-colour
   support, and larger control targets for coarse pointers and narrow screens.
+  In forced colours, focus, selection and a focused selection use three
+  distinct outline shapes, because both cues map to the same system colour.
 - Contract-derived checks of actual CSS tokens, contrast in both themes,
   documentation agreement and colour literals confined to token definitions.
 

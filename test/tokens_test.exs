@@ -162,6 +162,26 @@ defmodule Armature.TokensTest do
     assert base =~ "dashed var(--armature-error-emphasis)"
   end
 
+  test "forced colours keep focus, selection and focused selection visually distinct",
+       %{css: css} do
+    [_, base] = String.split(css, "@layer armature.base {")
+    [_, forced] = String.split(base, "@media (forced-colors: active) {")
+
+    # Focus and the selection cue are both Highlight in forced colours, so
+    # each state must differ in outline style or placement, never colour alone.
+    shapes =
+      for selector <- [~s([aria-selected="true"]), ~s([aria-selected="true"]:focus-visible)] do
+        outline_shape(forced, selector)
+      end
+
+    focus = outline_shape(base, ":focus-visible")
+    [selected, focused_selected] = shapes
+
+    assert Enum.uniq([focus, selected, focused_selected]) |> length() == 3
+    assert focused_selected.offset == :outside
+    assert focused_selected.style != selected.style or focused_selected.offset != selected.offset
+  end
+
   test "theme and accessibility media rules apply in cascade order", %{css: css, rules: rules} do
     assert css =~ "@layer armature.tokens, armature.base;"
     assert css =~ "@media (prefers-color-scheme: dark)"
@@ -212,6 +232,16 @@ defmodule Armature.TokensTest do
   defp declarations(body) do
     Regex.scan(~r/(--[\w-]+)\s*:\s*([^;{}]+);/, body)
     |> Enum.map(fn [_, name, value] -> {name, String.trim(value)} end)
+  end
+
+  # The outline style and whether it sits inside or outside the element, for
+  # the first rule in `css` whose selector is exactly `selector`.
+  defp outline_shape(css, selector) do
+    pattern = ~r/(?:^|[}\s])#{Regex.escape(selector)}\s*\{([^}]*)\}/
+    [_, body] = Regex.run(pattern, css)
+    [_, style] = Regex.run(~r/outline:\s*\S+(?:\s*\*\s*\d+\))?\s+(\w+)/, body)
+    [_, offset] = Regex.run(~r/outline-offset:\s*([^;]+);/, body)
+    %{style: style, offset: if(offset =~ "* -1", do: :inside, else: :outside)}
   end
 
   defp rule!(rules, selector) do
