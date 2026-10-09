@@ -14,7 +14,7 @@ Armature provides:
 
 - A level model with enforceable composition rules. The levels are tokens,
   atoms, layouts, molecules, organisms and templates. Each level composes only
-  the levels beneath it.
+  the levels beneath it, except organisms may use distinct peer organisms.
 - A registry behaviour that declares a consumer's components as data, and
   ExUnit helpers that check the registry against the code.
 - A token contract: the names of the CSS custom properties that components
@@ -48,13 +48,11 @@ public surface and do not edit its source.
 ## Versioning
 
 Armature follows semantic versioning. It starts at 0.1.0. Version 1.0.0 marks
-the point where the public surface is stable enough for consumers outside
-Mojility. Before 1.0.0, a minor version can break the public surface; the
-changelog says how.
+the point where the public surface is stable enough for external consumers.
+Before 1.0.0, a minor version can break the public surface; the changelog says how.
 
 ## Target users
 
 Phoenix developers who run more than one application, want each to look like
 itself, and want the same structure and accessibility behaviour underneath.
-The first consumers are Mojility's systems: Bedrock, Roost, and the business
-systems generated for Bedrock's customers.
+Registries and examples use neutral content and remain application independent.

@@ -15,8 +15,9 @@ application want it? If not, it belongs in a consumer.
 ## The level model
 
 The levels are tokens, atoms, layouts, molecules, organisms and templates, in
-that order. Each level composes only the levels beneath it. Layouts arrange
-and carry no meaning of their own. Do not add a level, rename one, or relax a
+that order. Each level composes only the levels beneath it, except organisms
+may use distinct peer organisms. Layouts arrange and carry no meaning of their
+own. Do not add a level, rename one, or relax a
 composition rule without a changelog entry that says why.
 
 ## Rules for the code
@@ -36,8 +37,8 @@ composition rule without a changelog entry that says why.
 ## Versioning and releases
 
 Semantic versioning, starting at 0.1.0. Version 1.0.0 is the signal that the
-public surface is stable enough for consumers outside Mojility. Before 1.0.0,
-a minor version can break the public surface, and its changelog entry says
+public surface is stable enough for external consumers. Before 1.0.0, a minor
+version can break the public surface, and its changelog entry says
 how to migrate. Record every change under `## [Unreleased]` in
 `CHANGELOG.md`. Publishing to Hex needs Stacey's approval.
 

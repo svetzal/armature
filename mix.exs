@@ -19,7 +19,10 @@ defmodule Armature.MixProject do
       name: "Armature",
       source_url: @source_url,
       docs: docs(),
-      test_coverage: [summary: [threshold: 80]]
+      test_coverage: [
+        summary: [threshold: 80],
+        ignore_modules: [~r/^Example\./, First, Inner, Primitive]
+      ]
     ]
   end
 
@@ -57,7 +60,7 @@ defmodule Armature.MixProject do
       main: "readme",
       source_ref: "v#{@version}",
       source_url: @source_url,
-      extras: ["README.md", "CHARTER.md", "CHANGELOG.md"]
+      extras: ["README.md", "CHARTER.md", "CHANGELOG.md", "LICENSE.md"]
     ]
   end
 end
