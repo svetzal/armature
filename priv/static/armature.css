@@ -1,0 +1,311 @@
+/* Consumers override this contract with unlayered CSS. */
+@layer armature.tokens, armature.base;
+
+@layer armature.tokens {
+  :root {
+    color-scheme: light;
+    --armature-ink: #202020;
+    --armature-muted: #505050;
+    --armature-accent: #303030;
+    --armature-on-accent: #ffffff;
+    --armature-paper: #ffffff;
+    --armature-canvas: #f5f5f5;
+    --armature-line: #d0d0d0;
+    --armature-control-border: #707070;
+    --armature-input-border: #707070;
+    --armature-focus: #303030;
+    --armature-success-bg: #eeeeee;
+    --armature-warning-bg: #eaeaea;
+    --armature-error-bg: #e6e6e6;
+    --armature-success-emphasis: #303030;
+    --armature-warning-emphasis: #303030;
+    --armature-error-emphasis: #303030;
+    --armature-stripe: #f2f2f2;
+    --armature-hover: #ededed;
+    --armature-selected: #e5e5e5;
+    --armature-selected-cue: #505050;
+    --armature-image-backdrop: #eeeeee;
+    --armature-font-sans: system-ui, sans-serif;
+    --armature-font-mono: ui-monospace, monospace;
+    --armature-text-small: 0.875rem;
+    --armature-text-base: 1rem;
+    --armature-text-large: 1.25rem;
+    --armature-text-heading: 1.5rem;
+    --armature-line-height: 1.5;
+    --armature-weight-normal: 400;
+    --armature-weight-emphasis: 600;
+    --armature-space-zero: 0px;
+    --armature-space-1: 0.25rem;
+    --armature-space-2: 0.5rem;
+    --armature-space-3: 0.75rem;
+    --armature-space-4: 1rem;
+    --armature-space-6: 1.5rem;
+    --armature-space-8: 2rem;
+    --armature-radius-small: 0.125rem;
+    --armature-radius-base: 0.25rem;
+    --armature-border-width: 1px;
+    --armature-hidden-size: 1px;
+    --armature-hidden-inset: 50%;
+    --armature-duration-fast: 120ms;
+    --armature-duration-base: 200ms;
+    --armature-duration-reduced: 0s;
+    --armature-iterations-reduced: 1;
+    --armature-easing: ease-out;
+    --armature-control-height: 36px;
+    --armature-target-size: 24px;
+    --armature-focus-width: 3px;
+    --armature-focus-offset: 3px;
+  }
+
+  /* Keep specificity equal to :root so later preference overrides win. */
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-armature-theme="light"])) {
+      color-scheme: dark;
+      --armature-ink: #f5f5f5;
+      --armature-muted: #c0c0c0;
+      --armature-accent: #e0e0e0;
+      --armature-on-accent: #202020;
+      --armature-paper: #202020;
+      --armature-canvas: #161616;
+      --armature-line: #484848;
+      --armature-control-border: #a0a0a0;
+      --armature-input-border: #a0a0a0;
+      --armature-focus: #e0e0e0;
+      --armature-success-bg: #292929;
+      --armature-warning-bg: #2d2d2d;
+      --armature-error-bg: #303030;
+      --armature-success-emphasis: #e0e0e0;
+      --armature-warning-emphasis: #e0e0e0;
+      --armature-error-emphasis: #e0e0e0;
+      --armature-stripe: #252525;
+      --armature-hover: #2b2b2b;
+      --armature-selected: #333333;
+      --armature-selected-cue: #c0c0c0;
+      --armature-image-backdrop: #292929;
+      --armature-font-sans: system-ui, sans-serif;
+      --armature-font-mono: ui-monospace, monospace;
+      --armature-text-small: 0.875rem;
+      --armature-text-base: 1rem;
+      --armature-text-large: 1.25rem;
+      --armature-text-heading: 1.5rem;
+      --armature-line-height: 1.5;
+      --armature-weight-normal: 400;
+      --armature-weight-emphasis: 600;
+      --armature-space-zero: 0px;
+      --armature-space-1: 0.25rem;
+      --armature-space-2: 0.5rem;
+      --armature-space-3: 0.75rem;
+      --armature-space-4: 1rem;
+      --armature-space-6: 1.5rem;
+      --armature-space-8: 2rem;
+      --armature-radius-small: 0.125rem;
+      --armature-radius-base: 0.25rem;
+      --armature-border-width: 1px;
+      --armature-hidden-size: 1px;
+      --armature-hidden-inset: 50%;
+      --armature-duration-fast: 120ms;
+      --armature-duration-base: 200ms;
+      --armature-duration-reduced: 0s;
+      --armature-iterations-reduced: 1;
+      --armature-easing: ease-out;
+      --armature-control-height: 36px;
+      --armature-target-size: 24px;
+      --armature-focus-width: 3px;
+      --armature-focus-offset: 3px;
+    }
+  }
+
+  [data-armature-theme="dark"] {
+    color-scheme: dark;
+    --armature-ink: #f5f5f5;
+    --armature-muted: #c0c0c0;
+    --armature-accent: #e0e0e0;
+    --armature-on-accent: #202020;
+    --armature-paper: #202020;
+    --armature-canvas: #161616;
+    --armature-line: #484848;
+    --armature-control-border: #a0a0a0;
+    --armature-input-border: #a0a0a0;
+    --armature-focus: #e0e0e0;
+    --armature-success-bg: #292929;
+    --armature-warning-bg: #2d2d2d;
+    --armature-error-bg: #303030;
+    --armature-success-emphasis: #e0e0e0;
+    --armature-warning-emphasis: #e0e0e0;
+    --armature-error-emphasis: #e0e0e0;
+    --armature-stripe: #252525;
+    --armature-hover: #2b2b2b;
+    --armature-selected: #333333;
+    --armature-selected-cue: #c0c0c0;
+    --armature-image-backdrop: #292929;
+    --armature-font-sans: system-ui, sans-serif;
+    --armature-font-mono: ui-monospace, monospace;
+    --armature-text-small: 0.875rem;
+    --armature-text-base: 1rem;
+    --armature-text-large: 1.25rem;
+    --armature-text-heading: 1.5rem;
+    --armature-line-height: 1.5;
+    --armature-weight-normal: 400;
+    --armature-weight-emphasis: 600;
+    --armature-space-zero: 0px;
+    --armature-space-1: 0.25rem;
+    --armature-space-2: 0.5rem;
+    --armature-space-3: 0.75rem;
+    --armature-space-4: 1rem;
+    --armature-space-6: 1.5rem;
+    --armature-space-8: 2rem;
+    --armature-radius-small: 0.125rem;
+    --armature-radius-base: 0.25rem;
+    --armature-border-width: 1px;
+    --armature-hidden-size: 1px;
+    --armature-hidden-inset: 50%;
+    --armature-duration-fast: 120ms;
+    --armature-duration-base: 200ms;
+    --armature-duration-reduced: 0s;
+    --armature-iterations-reduced: 1;
+    --armature-easing: ease-out;
+    --armature-control-height: 36px;
+    --armature-target-size: 24px;
+    --armature-focus-width: 3px;
+    --armature-focus-offset: 3px;
+  }
+
+  /* Explicit light also works inside a dark-themed subtree. */
+  [data-armature-theme="light"] {
+    color-scheme: light;
+    --armature-ink: #202020;
+    --armature-muted: #505050;
+    --armature-accent: #303030;
+    --armature-on-accent: #ffffff;
+    --armature-paper: #ffffff;
+    --armature-canvas: #f5f5f5;
+    --armature-line: #d0d0d0;
+    --armature-control-border: #707070;
+    --armature-input-border: #707070;
+    --armature-focus: #303030;
+    --armature-success-bg: #eeeeee;
+    --armature-warning-bg: #eaeaea;
+    --armature-error-bg: #e6e6e6;
+    --armature-success-emphasis: #303030;
+    --armature-warning-emphasis: #303030;
+    --armature-error-emphasis: #303030;
+    --armature-stripe: #f2f2f2;
+    --armature-hover: #ededed;
+    --armature-selected: #e5e5e5;
+    --armature-selected-cue: #505050;
+    --armature-image-backdrop: #eeeeee;
+    --armature-font-sans: system-ui, sans-serif;
+    --armature-font-mono: ui-monospace, monospace;
+    --armature-text-small: 0.875rem;
+    --armature-text-base: 1rem;
+    --armature-text-large: 1.25rem;
+    --armature-text-heading: 1.5rem;
+    --armature-line-height: 1.5;
+    --armature-weight-normal: 400;
+    --armature-weight-emphasis: 600;
+    --armature-space-zero: 0px;
+    --armature-space-1: 0.25rem;
+    --armature-space-2: 0.5rem;
+    --armature-space-3: 0.75rem;
+    --armature-space-4: 1rem;
+    --armature-space-6: 1.5rem;
+    --armature-space-8: 2rem;
+    --armature-radius-small: 0.125rem;
+    --armature-radius-base: 0.25rem;
+    --armature-border-width: 1px;
+    --armature-hidden-size: 1px;
+    --armature-hidden-inset: 50%;
+    --armature-duration-fast: 120ms;
+    --armature-duration-base: 200ms;
+    --armature-duration-reduced: 0s;
+    --armature-iterations-reduced: 1;
+    --armature-easing: ease-out;
+    --armature-control-height: 36px;
+    --armature-target-size: 24px;
+    --armature-focus-width: 3px;
+    --armature-focus-offset: 3px;
+  }
+
+  @media (pointer: coarse), (max-width: 40rem) {
+    :root, [data-armature-theme] {
+      --armature-control-height: 44px;
+      --armature-target-size: 44px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root, [data-armature-theme] {
+      --armature-duration-fast: var(--armature-duration-reduced);
+      --armature-duration-base: var(--armature-duration-reduced);
+    }
+  }
+
+  @media (forced-colors: active) {
+    :root, [data-armature-theme] {
+      --armature-ink: CanvasText;
+      --armature-muted: CanvasText;
+      --armature-accent: LinkText;
+      --armature-on-accent: Canvas;
+      --armature-paper: Canvas;
+      --armature-canvas: Canvas;
+      --armature-line: CanvasText;
+      --armature-control-border: ButtonText;
+      --armature-input-border: ButtonText;
+      --armature-focus: Highlight;
+      --armature-success-bg: Canvas;
+      --armature-warning-bg: Canvas;
+      --armature-error-bg: Canvas;
+      --armature-success-emphasis: CanvasText;
+      --armature-warning-emphasis: CanvasText;
+      --armature-error-emphasis: CanvasText;
+      --armature-stripe: Canvas;
+      --armature-hover: Canvas;
+      --armature-selected: Canvas;
+      --armature-selected-cue: Highlight;
+      --armature-image-backdrop: Canvas;
+    }
+  }
+}
+
+@layer armature.base {
+  :focus-visible {
+    outline: var(--armature-focus-width) solid var(--armature-focus);
+    outline-offset: var(--armature-focus-offset);
+  }
+
+  .armature-sr-only {
+    position: absolute;
+    width: var(--armature-hidden-size);
+    height: var(--armature-hidden-size);
+    padding: var(--armature-space-zero);
+    border-width: var(--armature-space-zero);
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(var(--armature-hidden-inset));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: var(--armature-duration-reduced) !important;
+      animation-iteration-count: var(--armature-iterations-reduced) !important;
+      transition-duration: var(--armature-duration-reduced) !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  @media (forced-colors: active) {
+    [aria-selected="true"] {
+      outline: var(--armature-focus-width) solid var(--armature-selected-cue);
+      outline-offset: calc(var(--armature-focus-width) * -1);
+    }
+
+    [aria-invalid="true"] {
+      outline: var(--armature-border-width) dashed var(--armature-error-emphasis);
+      outline-offset: var(--armature-focus-offset);
+    }
+
+    [aria-invalid="true"]:focus-visible {
+      outline: var(--armature-focus-width) solid var(--armature-focus);
+    }
+  }
+}

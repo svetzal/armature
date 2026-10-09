@@ -10,6 +10,14 @@ Until 1.0.0, a minor version can change the public surface.
 
 ### Added
 
+- Plain-data `Armature.Tokens` contract with semantic roles and required WCAG
+  contrast pairs, plus a generated token guide and consumer import examples.
+- Layered neutral light and dark token defaults and an accessibility base
+  stylesheet with focus, screen-reader-only, reduced-motion and forced-colour
+  support, and larger control targets for coarse pointers and narrow screens.
+- Contract-derived checks of actual CSS tokens, contrast in both themes,
+  documentation agreement and colour literals confined to token definitions.
+
 - Project charter, licence and build configuration.
 - Plain-data registry behaviour and node struct, pure checks over compiled-call/metadata
   snapshots, and an ExUnit case template with optional docs and test inventories.

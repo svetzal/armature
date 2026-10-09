@@ -51,7 +51,7 @@ defmodule Armature.MixProject do
       maintainers: ["Stacey Vetzal"],
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url},
-      files: ~w(lib priv .formatter.exs mix.exs README.md CHANGELOG.md LICENSE.md)
+      files: ~w(lib priv guides .formatter.exs mix.exs README.md CHANGELOG.md LICENSE.md)
     ]
   end
 
@@ -60,7 +60,7 @@ defmodule Armature.MixProject do
       main: "readme",
       source_ref: "v#{@version}",
       source_url: @source_url,
-      extras: ["README.md", "CHARTER.md", "CHANGELOG.md", "LICENSE.md"]
+      extras: ["README.md", "guides/tokens.md", "CHARTER.md", "CHANGELOG.md", "LICENSE.md"]
     ]
   end
 end

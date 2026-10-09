@@ -59,8 +59,8 @@ MIT. See [LICENSE.md](LICENSE.md).
 
 ## Declaring and checking a registry
 
-This first increment provides registry governance. Components and token values
-come from your application; Armature does not yet ship components or styles.
+Armature provides registry governance and a token stylesheet. Components come
+from your application; baseline components will follow in later increments.
 Implement the behaviour with plain data:
 
 ```elixir
@@ -189,3 +189,74 @@ and the recorded test inventory once. Each check is a
 pure function of that captured data and returns tagged violation tuples.
 `Armature.Registry.levels/0` lists levels in order, and
 `Armature.Registry.at_level/2` selects a registry's nodes at a given level.
+
+## Token stylesheet
+
+Import the stylesheet into your Phoenix `assets/css/app.css`; the bundler
+inlines it, so no separate static route or JavaScript is needed:
+
+```css
+@import "../../deps/armature/priv/static/armature.css";
+```
+
+For a path dependency, adjust the path to its `priv/static/armature.css`.
+With Tailwind v4, keep CSS imports before other rules and retain the generated
+`source(none)` and `@source` directives. Import Armature first so its layers
+also precede Tailwind's layers:
+
+```css
+@import "../../deps/armature/priv/static/armature.css";
+@import "tailwindcss" source(none);
+
+@source "../css";
+@source "../js";
+@source "../../lib/example_web";
+```
+
+Armature uses `armature.tokens` and `armature.base` cascade layers. Set your
+own values in unlayered CSS after the imports. This neutral example changes
+spacing, typography and surface contrast:
+
+```css
+:root {
+  --armature-font-sans: ui-sans-serif, system-ui, sans-serif;
+  --armature-space-4: 1.125rem;
+  --armature-ink: #181818;
+  --armature-paper: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-armature-theme="light"]) {
+    --armature-ink: #fafafa;
+    --armature-paper: #181818;
+  }
+}
+
+[data-armature-theme="dark"] {
+  --armature-ink: #fafafa;
+  --armature-paper: #181818;
+}
+
+[data-armature-theme="light"] {
+  --armature-ink: #181818;
+  --armature-paper: #ffffff;
+}
+```
+
+Set `data-armature-theme="light"` or `data-armature-theme="dark"` on the
+`html` element to choose a theme; omit it to follow the system preference.
+The attribute also supports themed subtrees. Match all relevant theme selectors
+in consumer overrides: unlayered root values take precedence over layered
+root values, including the automatic dark theme.
+
+The base layer provides focus rings, `.armature-sr-only`, reduced motion and
+forced-colour state cues. It does not reset elements or style components.
+Components use `var(--armature-...)` for their visual properties. Use both
+`--armature-control-height` and `--armature-target-size` as minimum dimensions;
+they rise to 44px for coarse pointers and viewports at most 40rem wide.
+Preserve that minimum in consumer overrides.
+
+[The token guide](guides/tokens.md) lists every role and required contrast pair,
+generated from `Armature.Tokens`. Check those pairs in both themes whenever
+you change colour values. Feedback must include text or a symbol; selected
+items need a non-colour cue such as an outline, marker or label.
