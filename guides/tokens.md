@@ -15,8 +15,10 @@ use the offset token to sit on the surrounding surface, including when a
 control has an accent fill. If a consumer adds another surface or places text
 on a decorative line, it must check that additional pairing itself.
 
-Success, warning and error defaults deliberately share a neutral palette.
-Always provide a text label or symbol with feedback. A selected item needs
+Success, warning and error defaults use muted hues (sage, sand and blush
+surfaces with forest, ochre and brick text) so they sit quietly beside the
+neutral greys. Colour is a second cue, never the only one: always provide a
+text label or symbol with feedback. A selected item needs
 an outline, marker or label in addition to its surface colour. In forced-colour
 mode the base stylesheet adds outlines for `aria-selected="true"` and
 `aria-invalid="true"` using system colour tokens, and preserves keyboard focus.

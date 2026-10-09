@@ -12,7 +12,8 @@ Until 1.0.0, a minor version can change the public surface.
 
 - Plain-data `Armature.Tokens` contract with semantic roles and required WCAG
   contrast pairs, plus a generated token guide and consumer import examples.
-- Layered neutral light and dark token defaults and an accessibility base
+- Layered neutral light and dark token defaults, with muted success, warning
+  and error hues that meet every declared contrast pair, and an accessibility base
   stylesheet with focus, screen-reader-only, reduced-motion and forced-colour
   support, and larger control targets for coarse pointers and narrow screens.
   In forced colours, focus, selection and a focused selection use three
