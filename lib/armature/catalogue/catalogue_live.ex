@@ -56,7 +56,11 @@ defmodule Armature.Catalogue.CatalogueLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id="armature-catalogue" class={["armature-catalogue"]} data-armature-theme={@theme}>
+    <div
+      id="armature-catalogue"
+      class={["armature-catalogue"]}
+      data-armature-theme={if @theme != "auto", do: @theme}
+    >
       <form id="catalogue-theme" phx-change="catalogue:theme" phx-submit="catalogue:theme">
         <label for="catalogue-theme-choice">Example theme</label>
         <select id="catalogue-theme-choice" name="theme" class={["armature-select"]}>

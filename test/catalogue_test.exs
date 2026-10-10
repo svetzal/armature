@@ -73,13 +73,19 @@ defmodule Armature.CatalogueTest do
   test "theme control switches the container and rejects unknown themes" do
     {:ok, view, _} = live(build_conn(), "/ui")
 
-    for theme <- ~w(dark light auto) do
+    # Auto sets no attribute, so the consumer's own :root tokens apply.
+    refute has_element?(view, "#armature-catalogue[data-armature-theme]")
+
+    for theme <- ~w(dark light) do
       view |> form("#catalogue-theme", %{"theme" => theme}) |> render_change()
       assert has_element?(view, "#armature-catalogue[data-armature-theme='#{theme}']")
     end
 
+    view |> form("#catalogue-theme", %{"theme" => "auto"}) |> render_change()
+    refute has_element?(view, "#armature-catalogue[data-armature-theme]")
+
     render_change(view, "catalogue:theme", %{"theme" => "unknown"})
-    assert has_element?(view, "#armature-catalogue[data-armature-theme='auto']")
+    refute has_element?(view, "#armature-catalogue[data-armature-theme]")
   end
 
   test "examples validate fields and keep action state while navigating" do

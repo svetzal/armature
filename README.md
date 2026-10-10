@@ -260,7 +260,7 @@ spacing, typography and surface contrast:
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-armature-theme="light"]), [data-armature-theme="auto"] {
+  :root:not([data-armature-theme="light"]) {
     --armature-ink: #fafafa;
     --armature-paper: #181818;
   }
@@ -278,10 +278,12 @@ spacing, typography and surface contrast:
 ```
 
 Set `data-armature-theme="light"` or `data-armature-theme="dark"` on the
-`html` element to choose a theme; omit it or use `"auto"` to follow the system preference.
-The attribute also supports themed subtrees. Match all relevant theme selectors
-in consumer overrides: unlayered root values take precedence over layered
-root values, including the automatic dark theme.
+`html` element to choose a theme; omit the attribute to follow the system preference.
+There is no `"auto"` value: an element without the attribute inherits the
+page's tokens, including your overrides. The attribute also supports themed
+subtrees, but an element that carries it declares the full light or dark set
+on itself, so your overrides reach it only through the matching selectors
+above. Match all of them in consumer overrides.
 
 The base layer provides focus rings, `.armature-sr-only`, reduced motion and
 forced-colour state cues. It does not reset elements or style components.

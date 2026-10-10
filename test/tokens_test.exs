@@ -72,12 +72,9 @@ defmodule Armature.TokensTest do
     end
 
     assert rule!(rules, "[data-armature-theme=\"dark\"]") ==
-             rule!(
-               rules,
-               ":root:where(:not([data-armature-theme=\"light\"])), [data-armature-theme=\"auto\"]"
-             )
+             rule!(rules, ":root:where(:not([data-armature-theme=\"light\"]))")
 
-    assert rule!(rules, ":root, [data-armature-theme=\"auto\"]") ==
+    assert rule!(rules, ":root") ==
              rule!(rules, "[data-armature-theme=\"light\"]")
   end
 
@@ -335,10 +332,9 @@ defmodule Armature.TokensTest do
 
     assert css =~ ".armature-catalogue-notes"
     assert css =~ "white-space: pre-wrap"
-    assert css =~ ":root, [data-armature-theme=\"auto\"] {"
-
-    assert css =~
-             ":root:where(:not([data-armature-theme=\"light\"])), [data-armature-theme=\"auto\"] {"
+    # "Auto" follows the page. A token rule on any auto container would sit on
+    # a descendant and hide the consumer's :root overrides inside it.
+    refute css =~ ~s([data-armature-theme="auto"])
   end
 
   test "guide table is generated from the contract" do
@@ -350,8 +346,8 @@ defmodule Armature.TokensTest do
 
   defp theme_selectors do
     [
-      ":root, [data-armature-theme=\"auto\"]",
-      ":root:where(:not([data-armature-theme=\"light\"])), [data-armature-theme=\"auto\"]",
+      ":root",
+      ":root:where(:not([data-armature-theme=\"light\"]))",
       "[data-armature-theme=\"dark\"]",
       "[data-armature-theme=\"light\"]"
     ]

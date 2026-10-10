@@ -2,7 +2,7 @@
 @layer armature.tokens, armature.base, armature.components;
 
 @layer armature.tokens {
-  :root, [data-armature-theme="auto"] {
+  :root {
     color-scheme: light;
     --armature-ink: #202020;
     --armature-muted: #505050;
@@ -60,7 +60,7 @@
 
   /* Keep specificity equal to :root so later preference overrides win. */
   @media (prefers-color-scheme: dark) {
-    :root:where(:not([data-armature-theme="light"])), [data-armature-theme="auto"] {
+    :root:where(:not([data-armature-theme="light"])) {
       color-scheme: dark;
       --armature-ink: #f5f5f5;
       --armature-muted: #c0c0c0;

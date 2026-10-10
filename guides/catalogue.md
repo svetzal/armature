@@ -35,11 +35,14 @@ A URL such as `/dev/ui?node=field` selects a component. Navigation uses patches,
 so browser Back and Forward restore entries without resetting example state.
 Unknown identifiers display the index safely. The component navigation marks
 its current entry with `aria-current="page"`, and navigation moves focus to
-the new page heading. Theme selection sets `data-armature-theme` on the
-catalogue container; auto follows the operating system, and light and dark
-exercise your corresponding token values. Match `:root` and themed subtree
-selectors in your unlayered token overrides, including `[data-armature-theme="auto"]`
-in the system-preference media query; see the README token stylesheet example.
+the new page heading.
+
+The theme control defaults to Auto, which sets no attribute: the catalogue
+inherits your page's tokens, so components look exactly as they do in your
+application. Light and Dark set `data-armature-theme` on the catalogue
+container, which declares the full light or dark token set there. They show
+your look only if your overrides also match `[data-armature-theme="light"]`
+and `[data-armature-theme="dark"]`; see the README token stylesheet example.
 
 ## Supplying examples
 

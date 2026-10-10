@@ -14,6 +14,8 @@ Until 1.0.0, a minor version can change the public surface.
   consumer registries, independent examples modules and LiveView-local state.
   Level-grouped navigation, directly linkable query parameters, heading focus,
   derived Uses/Used by links, component documentation and theme controls.
+  The default Auto theme sets no attribute, so mounted components keep the
+  consumer's own token overrides. No token rule targets an "auto" value.
 - Baseline examples for every registered component, including validation and
   synthetic record search, sorting, pagination and retained selection. Mounting
   and examples guide, LiveView integration tests and token-only catalogue styles.
