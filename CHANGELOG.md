@@ -8,6 +8,12 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Changed
+
+- Usage rules warn against broad `:focus-visible` or `outline` rules in a
+  consuming application, which override per-surface focus rings such as the
+  rail's and can drop below 3:1 contrast.
+
 ## [0.2.0] - 2026-10-10
 
 ### Added
