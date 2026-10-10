@@ -28,8 +28,18 @@ composition rule without a changelog entry that says why.
 - Components style themselves only through the token contract (CSS custom
   properties). No hard-coded colours, sizes or fonts. No Tailwind classes in
   library markup; consumers may or may not use Tailwind.
+- Read the design goals in CHARTER.md before you build or change a component.
+  They are requirements, not aspirations.
 - Native elements first. Every control has an accessible name. State is never
-  shown by colour alone. Target WCAG 2.2 AA.
+  shown by colour alone. WCAG 2.2 AA is the floor; meet AAA criteria where the
+  charter says to.
+- Design every state of a component (hover, focus, active, selected, disabled,
+  invalid, empty, loading, error), not only the default one.
+- Check visual work in a browser through the catalogue (`elixir
+  examples/preview.exs`), in light and dark and at a narrow width, before you
+  call it done. Tests alone have missed visual defects here before.
+- Build compositions from lower-level components. Keep application state
+  (data, sort order, selection, pages) out of components.
 - No consumer names, brands or business terms in this repository. Examples use
   neutral synthetic content.
 - Keep the public surface small. Anything public is a semver commitment.
