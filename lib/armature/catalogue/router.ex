@@ -12,10 +12,15 @@ defmodule Armature.Catalogue.Router do
 
   `:live_session_name` defaults to `:armature_catalogue`. Supply distinct atom
   names when mounting more than one catalogue in a router.
+
+  `:token_stylesheets` lists consumer CSS paths in load order. They are read
+  at request time for token values and contrast checks. Use development routes
+  only and load the same stylesheets in your layout.
   """
   defmacro armature_catalogue(path, options) do
     registry = Keyword.fetch!(options, :registry)
     examples = Keyword.fetch!(options, :examples)
+    token_stylesheets = Keyword.get(options, :token_stylesheets, [])
     session = Keyword.get(options, :live_session_name, :armature_catalogue)
 
     quote do
@@ -23,7 +28,10 @@ defmodule Armature.Catalogue.Router do
         import Phoenix.LiveView.Router
 
         live_session unquote(session),
-          on_mount: [{Armature.Catalogue.CatalogueLive, {unquote(registry), unquote(examples)}}] do
+          on_mount: [
+            {Armature.Catalogue.CatalogueLive,
+             {unquote(registry), unquote(examples), unquote(token_stylesheets)}}
+          ] do
           live("/", Armature.Catalogue.CatalogueLive, :index)
         end
       end

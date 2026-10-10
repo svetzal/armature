@@ -3,7 +3,7 @@ defmodule Armature.Catalogue.CatalogueLive do
   use Phoenix.LiveView
   alias Phoenix.LiveView.JS
 
-  def on_mount({registry, examples}, _params, _session, socket) do
+  def on_mount({registry, examples, token_stylesheets}, _params, _session, socket) do
     Code.ensure_loaded!(examples)
     state = if function_exported?(examples, :init, 0), do: examples.init(), else: %{}
 
@@ -12,7 +12,8 @@ defmodule Armature.Catalogue.CatalogueLive do
        nodes: registry.nodes(),
        examples_module: examples,
        example_state: state,
-       theme: "auto"
+       theme: "auto",
+       token_values: Armature.Tokens.Values.read(token_stylesheets)
      )}
   end
 
@@ -27,6 +28,7 @@ defmodule Armature.Catalogue.CatalogueLive do
     {:noreply,
      assign(socket,
        node: node,
+       tokens?: params["section"] == "tokens",
        path: path,
        examples: if(node, do: socket.assigns.examples_module.examples(node.id), else: []),
        usage: if(node, do: usage(node), else: ""),
@@ -71,6 +73,11 @@ defmodule Armature.Catalogue.CatalogueLive do
       </form>
       <div class={["armature-catalogue-columns"]}>
         <nav aria-label="Components">
+          <.link
+            id="catalogue-tokens"
+            patch={@path <> "?section=tokens"}
+            aria-current={if @tokens?, do: "page"}
+          >Tokens</.link>
           <.link patch={@path}>Catalogue index</.link>
           <section :for={level <- Armature.Registry.levels()} data-level={level}>
             <h2>{level_name(level)}</h2>
@@ -89,48 +96,54 @@ defmodule Armature.Catalogue.CatalogueLive do
         </nav>
         <div class={["armature-catalogue-detail"]}>
           <h1
-            id={"armature-catalogue-heading-#{if @node, do: @node.id, else: "index"}"}
+            id={"armature-catalogue-heading-#{if @tokens?, do: "tokens", else: if(@node, do: @node.id, else: "index")}"}
             tabindex="-1"
             phx-mounted={JS.focus()}
           >
-            {if @node, do: @node.id, else: "Component catalogue"}
+            {if @tokens?, do: "Tokens", else: if(@node, do: @node.id, else: "Component catalogue")}
           </h1>
-          <%= if @node do %>
-            <p>Level: {@node.level}</p>
-            <p>{@node.purpose}</p>
-            <section id="catalogue-examples" aria-label="Live examples">
-              <h2>Live examples</h2>
-              <p :if={@examples == []} id="catalogue-no-examples">
-                No examples supplied for this component.
-              </p>
-              <article :for={example <- @examples}>
-                <h3>{example.title}</h3>
-                <p>{example.description}</p>
-                {example.render.(%{state: @example_state, __changed__: nil})}
-              </article>
-            </section>
-            <section id="catalogue-usage">
-              <h2>Usage and accessibility notes</h2>
-              <div class={["armature-catalogue-notes"]}>{@usage}</div>
-            </section>
-            <section id="catalogue-uses">
-              <h2>Uses</h2>
-              <p :if={@uses == []}>No registered ingredients.</p>
-              <ul>
-                <li :for={item <- @uses}><.link patch={node_path(@path, item)}>{item.id}</.link></li>
-              </ul>
-            </section>
-            <section id="catalogue-used-by">
-              <h2>Used by</h2>
-              <p :if={@used_by == []}>No registered dependants.</p>
-              <ul>
-                <li :for={item <- @used_by}>
-                  <.link patch={node_path(@path, item)}>{item.id}</.link>
-                </li>
-              </ul>
-            </section>
+          <%= if @tokens? do %>
+            <Armature.Catalogue.TokenPage.page values={@token_values} theme={@theme} />
           <% else %>
-            <p>Choose a component to explore its purpose, examples, usage and relationships.</p>
+            <%= if @node do %>
+              <p>Level: {@node.level}</p>
+              <p>{@node.purpose}</p>
+              <section id="catalogue-examples" aria-label="Live examples">
+                <h2>Live examples</h2>
+                <p :if={@examples == []} id="catalogue-no-examples">
+                  No examples supplied for this component.
+                </p>
+                <article :for={example <- @examples}>
+                  <h3>{example.title}</h3>
+                  <p>{example.description}</p>
+                  {example.render.(%{state: @example_state, __changed__: nil})}
+                </article>
+              </section>
+              <section id="catalogue-usage">
+                <h2>Usage and accessibility notes</h2>
+                <div class={["armature-catalogue-notes"]}>{@usage}</div>
+              </section>
+              <section id="catalogue-uses">
+                <h2>Uses</h2>
+                <p :if={@uses == []}>No registered ingredients.</p>
+                <ul>
+                  <li :for={item <- @uses}>
+                    <.link patch={node_path(@path, item)}>{item.id}</.link>
+                  </li>
+                </ul>
+              </section>
+              <section id="catalogue-used-by">
+                <h2>Used by</h2>
+                <p :if={@used_by == []}>No registered dependants.</p>
+                <ul>
+                  <li :for={item <- @used_by}>
+                    <.link patch={node_path(@path, item)}>{item.id}</.link>
+                  </li>
+                </ul>
+              </section>
+            <% else %>
+              <p>Choose a component to explore its purpose, examples, usage and relationships.</p>
+            <% end %>
           <% end %>
         </div>
       </div>

@@ -74,6 +74,13 @@ defmodule Armature.CatalogueTest.Router do
       examples: Armature.Catalogue.BaselineExamples
     )
 
+    armature_catalogue("/overrides",
+      registry: Armature.UI.Registry,
+      examples: Armature.Catalogue.BaselineExamples,
+      live_session_name: :override_catalogue,
+      token_stylesheets: [Path.expand("../fixtures/catalogue-tokens.css", __DIR__)]
+    )
+
     armature_catalogue("/empty",
       registry: Armature.UI.Registry,
       examples: Armature.CatalogueTest.EmptyExamples,

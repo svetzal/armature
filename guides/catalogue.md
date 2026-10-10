@@ -17,7 +17,10 @@ import Armature.Catalogue.Router
 if Application.compile_env(:example, :dev_routes) do
   scope "/" do
     pipe_through :browser
-    armature_catalogue "/dev/ui", registry: Example.UI.Registry, examples: Example.UI.Examples
+    armature_catalogue "/dev/ui",
+      registry: Example.UI.Registry,
+      examples: Example.UI.Examples,
+      token_stylesheets: ["assets/css/tokens.css"]
   end
 end
 ```
@@ -43,6 +46,35 @@ application. Light and Dark set `data-armature-theme` on the catalogue
 container, which declares the full light or dark token set there. They show
 your look only if your overrides also match `[data-armature-theme="light"]`
 and `[data-armature-theme="dark"]`; see the README token stylesheet example.
+
+## Tokens
+
+Tokens is the first navigation entry, before Atoms, at `/dev/ui?section=tokens`.
+It is generated from `Armature.Tokens.all/0`, grouped by first appearance of
+its groups in the contract and retaining token order within each group.
+Tokens are foundations, not registry nodes. The page shows colour roles and
+swatches, every required contrast pair, the sans type scale and tabular
+numerals, spacing, radii, control and row density, cue width and focus rings.
+Samples render with `var(--armature-…)`, so the theme control and the token
+stylesheets loaded in your layout govern their appearance.
+
+The optional `:token_stylesheets` router option lists consumer CSS files in
+load order, relative to the application's working directory (absolute paths
+also work). Files are read at request time after Armature's shipped defaults;
+there is no polling. Keep the catalogue in development routes. The option
+reads files for server calculations; it does not load CSS into the browser.
+Load those same files in your existing layout or asset bundle.
+
+Every required colour pair reports its server-calculated WCAG ratio, minimum
+and **Pass** or **Fail** for Light and Dark in both Auto and explicit modes.
+Auto evaluates inherited `:root` tokens under each system preference.
+Explicit modes evaluate the theme container's own declarations over those
+inherited values. Thus a root-only override can change Auto while leaving an
+explicit theme unchanged. Values for all four modes are listed alongside
+each token, independent of the currently selected visual theme.
+
+See [the token guide](tokens.md#checking-consumer-overrides) for the supported
+stylesheet syntax and the one-call consumer test.
 
 ## Supplying examples
 

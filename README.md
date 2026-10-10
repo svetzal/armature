@@ -108,7 +108,9 @@ end
 ```
 
 The catalogue uses your registry, pipeline, root layout and stylesheet. It groups
-components by level, shows live examples and component documentation, and links
+components by level after a contract-generated Tokens entry with server-calculated
+contrast results. Pass `token_stylesheets: ["assets/css/tokens.css"]` to include
+your overrides in those results. It shows live examples and component documentation, and links
 both directions through the composition graph. Use
 `Armature.Catalogue.BaselineExamples` for the baseline registry, or delegate
 baseline node ids to it from your examples module. Example state is local to the

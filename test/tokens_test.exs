@@ -2,6 +2,7 @@ defmodule Armature.TokensTest do
   use ExUnit.Case, async: true
 
   alias Armature.Tokens
+  alias Armature.Tokens.Values
 
   @stylesheet Path.expand("../priv/static/armature.css", __DIR__)
   @guide Path.expand("../guides/tokens.md", __DIR__)
@@ -33,9 +34,7 @@ defmodule Armature.TokensTest do
   setup do
     css = File.read!(@stylesheet)
 
-    rules =
-      Regex.scan(~r/([^{}]+)\{([^{}]*)\}/, Regex.replace(~r{/\*.*?\*/}s, css, ""))
-      |> Enum.map(fn [_, selector, body] -> {String.trim(selector), declarations(body)} end)
+    rules = Values.rules(css)
 
     {:ok, css: css, rules: rules}
   end
@@ -84,21 +83,8 @@ defmodule Armature.TokensTest do
     assert names == expected
   end
 
-  test "actual light and dark colour values meet every declared WCAG contrast pair", %{
-    rules: rules
-  } do
-    for selector <- theme_selectors() do
-      values = rules |> rule!(selector) |> Map.new()
-
-      for %{group: :colour} = token <- Tokens.all(), pair <- token.contrast do
-        foreground = Map.fetch!(values, token.name)
-        background = Map.fetch!(values, pair.background)
-        ratio = contrast(foreground, background)
-
-        assert ratio >= pair.ratio,
-               "#{selector}: #{token.name} on #{pair.background} is #{ratio}:1, needs #{pair.ratio}:1"
-      end
-    end
+  test "actual light and dark colour values meet every declared WCAG contrast pair" do
+    assert :ok = Values.check!()
   end
 
   test "colour literals appear only in colour token definitions", %{css: css} do
@@ -135,14 +121,6 @@ defmodule Armature.TokensTest do
 
     refute colour_literal?("white-space: nowrap; outline: var(--armature-focus);")
     refute colour_literal?(".red-label { font-family: \"Black\"; }")
-  end
-
-  test "contrast calculation uses WCAG relative luminance" do
-    # Reference extremes and a middle grey exercise both transfer-function branches.
-    assert contrast("#000000", "#ffffff") == 21.0
-    assert contrast("#ffffff", "#000000") == 21.0
-    assert contrast("#777777", "#777777") == 1.0
-    assert_in_delta contrast("#777777", "#ffffff"), 4.478, 0.001
   end
 
   test "base and component rules use declared variables for dimensions and motion", %{css: css} do
@@ -469,11 +447,6 @@ defmodule Armature.TokensTest do
     ]
   end
 
-  defp declarations(body) do
-    Regex.scan(~r/(--[\w-]+)\s*:\s*([^;{}]+);/, body)
-    |> Enum.map(fn [_, name, value] -> {name, String.trim(value)} end)
-  end
-
   # The outline style and whether it sits inside or outside the element, for
   # the first rule in `css` whose selector is exactly `selector`.
   defp outline_shape(css, selector) do
@@ -498,25 +471,4 @@ defmodule Armature.TokensTest do
     Regex.match?(~r/#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\s*\(/i, text) or
       Regex.match?(Regex.compile!("\\b(?:#{named})\\b", "i"), text)
   end
-
-  defp contrast(foreground, background) do
-    first = luminance(foreground)
-    second = luminance(background)
-    (max(first, second) + 0.05) / (min(first, second) + 0.05)
-  end
-
-  defp luminance("#" <> hex) when byte_size(hex) == 6 do
-    <<red::binary-size(2), green::binary-size(2), blue::binary-size(2)>> = hex
-
-    [red, green, blue]
-    |> Enum.map(fn channel ->
-      channel |> String.to_integer(16) |> Kernel./(255) |> linearise()
-    end)
-    |> Enum.zip([0.2126, 0.7152, 0.0722])
-    |> Enum.map(fn {channel, weight} -> channel * weight end)
-    |> Enum.sum()
-  end
-
-  defp linearise(channel) when channel <= 0.04045, do: channel / 12.92
-  defp linearise(channel), do: :math.pow((channel + 0.055) / 1.055, 2.4)
 end

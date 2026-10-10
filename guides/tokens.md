@@ -38,6 +38,46 @@ See the [README](../README.md#token-stylesheet) for imports, theme selection
 and consumer overrides. Tests read `priv/static/armature.css` directly; no
 parallel palette lives in Elixir or the tests.
 
+## Checking consumer overrides
+
+Use the same evaluator as the catalogue in your application's test suite:
+
+```elixir
+test "token overrides preserve required contrast" do
+  assert :ok = Armature.Tokens.Values.check!(["assets/css/tokens.css"])
+end
+```
+
+`check!/1` reads Armature's defaults and then your files in order. It raises
+`ArgumentError` listing each failing theme, foreground, background, actual
+ratio and required minimum. Unsupported or unresolved colours also fail.
+`Armature.Tokens.Values.read/1` returns a map keyed by `:light`, `:dark`,
+`:explicit_light` and `:explicit_dark`. Each contains `:values` (resolved CSS
+custom properties) and `:pairs` (foreground, background, ratio, minimum,
+`pass?` and error). The first two evaluate automatic roots; the latter two
+include declarations on explicit catalogue theme containers.
+
+The evaluator supports token declarations on `:root`, the default automatic
+dark selector `:root:where(:not([data-armature-theme="light"]))`,
+`[data-armature-theme]`, and the explicit light/dark attribute selectors,
+including comma-separated lists, cascade layers, `!important`, source order
+and selector specificity. Dark preference rules are evaluated under
+`@media (prefers-color-scheme: dark)`. Other media conditions are excluded
+because these checks describe ordinary colour schemes, not forced colours
+or viewport and motion preferences.
+
+Use opaque three- or six-digit hex or `rgb()` colours, including percentage
+RGB channels; `var()` aliases and literal fallbacks are supported. This scoped
+evaluator is not a browser CSS engine: colour functions such as `oklch()`,
+alpha compositing and arbitrary selectors are not evaluated. Supply imported
+files as separate paths in load order. Check additional application-specific
+surfaces separately. Files must exist and be readable; file errors raise.
+
+To display these same values and results in the development catalogue, pass
+`token_stylesheets: ["assets/css/tokens.css"]` to `armature_catalogue/2` and
+load the files in your layout as usual. The [Tokens page](catalogue.md#tokens)
+uses the contract directly, and its samples follow the catalogue theme control.
+
 <!-- tokens:start -->
 | Token | Group | Role | Required contrast |
 | --- | --- | --- | --- |

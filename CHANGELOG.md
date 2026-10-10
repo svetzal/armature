@@ -10,6 +10,13 @@ Until 1.0.0, a minor version can change the public surface.
 
 ### Added
 
+- Contract-generated Tokens entry before Atoms in the catalogue, with colour
+  swatches and server-computed contrast results in automatic and explicit light
+  and dark themes, type specimens, spacing, shape and density samples.
+- `Armature.Tokens.Values.read/1` and `check!/1` for shared stylesheet resolution
+  and consumer contrast tests; optional catalogue `:token_stylesheets` paths
+  read at request time. Document supported CSS and failure reporting.
+
 - Optional Barlow 400/600 font stylesheet, bundled font files and SIL Open
   Font License; documented static serving and imports.
 - Registered `facts` description-list molecule and compact table density,
@@ -73,6 +80,9 @@ Until 1.0.0, a minor version can change the public surface.
 - Include the licence in generated documentation so the README link resolves.
 
 ### Changed
+
+- Token tests use the library stylesheet parser and contrast evaluator instead
+  of private copies. Keep version 0.1.0 and tokens outside the registry.
 
 - Refine default typography, controls, status chips, notices, tables, toolbars,
   pagination and inspector surfaces through measurement tokens, preserving the

@@ -17,6 +17,40 @@ defmodule Armature.CatalogueTest do
     :ok
   end
 
+  test "configured consumer stylesheet changes server contrast results" do
+    {:ok, view, _html} = live(build_conn(), "/overrides?section=tokens")
+    assert has_element?(view, "#token-armature-ink tr[data-theme='light'] td", "1.00:1")
+    assert has_element?(view, "#token-armature-ink tr[data-theme='light'] td", "Fail")
+    assert has_element?(view, "#token-armature-ink tr[data-theme='explicit_light'] td", "Fail")
+    assert has_element?(view, "#token-armature-ink tr[data-theme='dark'] td", "Pass")
+  end
+
+  test "tokens precede atoms and show contract samples and both theme results" do
+    {:ok, view, _html} = live(build_conn(), "/ui?section=tokens")
+    assert has_element?(view, "nav > a:first-child#catalogue-tokens[aria-current='page']")
+    assert has_element?(view, "#armature-catalogue-heading-tokens", "Tokens")
+    assert has_element?(view, "#token-armature-ink .armature-token-swatch")
+    assert has_element?(view, "#token-armature-ink tr[data-theme='light']", "Pass")
+    assert has_element?(view, "#token-armature-ink tr[data-theme='dark']", "Pass")
+    assert has_element?(view, "#token-armature-text-base .armature-token-type")
+    assert has_element?(view, "#token-armature-space-4 .armature-token-space")
+    assert has_element?(view, "#token-armature-radius-base .armature-token-radius")
+    assert has_element?(view, "#token-armature-control-height-compact .armature-token-height")
+    assert has_element?(view, "#catalogue-focus-sample")
+    assert has_element?(view, "#catalogue-tabular-sample")
+
+    for token <- Armature.Tokens.all() do
+      assert has_element?(view, "#token-#{String.trim_leading(token.name, "--")}")
+    end
+
+    view |> form("#catalogue-theme", %{theme: "dark"}) |> render_change()
+    assert has_element?(view, "#armature-catalogue[data-armature-theme='dark']")
+    view |> element("#catalogue-node-button") |> render_click()
+    assert has_element?(view, "#catalogue-tokens")
+    view |> element("#catalogue-tokens") |> render_click()
+    assert has_element?(view, "#armature-catalogue-heading-tokens")
+  end
+
   test "index groups components in level order and renders one heading" do
     {:ok, view, html} = live(build_conn(), "/ui")
     assert has_element?(view, "h1", "Component catalogue")

@@ -1,0 +1,7 @@
+:root, [data-armature-theme="light"] {
+  --armature-ink: #ffffff;
+  --armature-paper: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --armature-ink: #e1eadf; --armature-paper: #20382f; }
+}

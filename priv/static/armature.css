@@ -803,4 +803,21 @@
     .armature-table-inspector > .armature-split > div:last-child { flex-basis: 100%; }
     .armature-table-inspector .armature-inspector { border-inline-start: none; border-top: var(--armature-border-width) solid var(--armature-line); }
   }
+
+  .armature-token-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, calc(var(--armature-layout-min-width) * 2)), 1fr)); gap: var(--armature-space-4); }
+  .armature-token-card { min-width: var(--armature-space-zero); padding: var(--armature-space-4); border: var(--armature-border-width) solid var(--armature-line); border-radius: var(--armature-radius-panel); background: var(--armature-paper); }
+  .armature-token-card h3, .armature-token-card dd { overflow-wrap: anywhere; }
+  .armature-token-card dl { font-size: var(--armature-text-small); }
+  .armature-token-card dd { margin-inline-start: var(--armature-space-zero); font-family: var(--armature-font-mono); }
+  .armature-token-card dt { font-weight: var(--armature-weight-emphasis); }
+  .armature-token-swatch { height: var(--armature-control-height); border: var(--armature-border-width) solid var(--armature-control-border); border-radius: var(--armature-radius-small); }
+  .armature-token-space { height: var(--armature-space-4); max-width: 100%; background: var(--armature-accent); }
+  .armature-token-radius { width: var(--armature-control-height); height: var(--armature-control-height); border: var(--armature-border-width) solid var(--armature-control-border); background: var(--armature-selected); }
+  .armature-token-height { border: var(--armature-border-width) solid var(--armature-control-border); background: var(--armature-canvas); }
+  .armature-token-cue { height: var(--armature-control-height); border-inline-start: var(--armature-cue-width) solid var(--armature-selected-cue); }
+  .armature-token-type { font-family: var(--armature-font-sans); }
+  .armature-token-label { font-size: var(--armature-text-small); font-weight: var(--armature-weight-normal); }
+  .armature-token-tabular { font-family: var(--armature-font-sans); font-variant-numeric: tabular-nums; }
+  .armature-token-focus { margin: var(--armature-space-2); outline: var(--armature-focus-width) solid var(--armature-focus); outline-offset: var(--armature-focus-offset); }
+  .armature-token-pairs caption { text-align: start; font-weight: var(--armature-weight-emphasis); }
 }
