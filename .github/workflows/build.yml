@@ -1,8 +1,10 @@
-name: Validate
+name: Validate and publish
 
 on:
   push:
     branches: ["main"]
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -49,3 +51,31 @@ jobs:
 
       - name: Build documentation
         run: mix docs
+
+  publish-hex:
+    needs: validate
+    # Publishing happens only when a GitHub release is published.
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.18.5"
+          otp-version: "28.5.0.7"
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Check the release tag matches the version
+        run: |
+          version=$(grep -m1 '@version' mix.exs | cut -d'"' -f2)
+          test "v$version" = "${{ github.event.release.tag_name }}"
+
+      # Hex reads HEX_API_KEY from the environment; the key is never written to disk.
+      - name: Publish to Hex.pm
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+        run: mix hex.publish --yes

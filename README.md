@@ -25,7 +25,12 @@ Armature checks these rules in your test suite, not only in documentation.
 
 ## How a consumer uses it
 
-1. Add the dependency.
+1. Add the dependency to `mix.exs`:
+
+   ```elixir
+   {:armature, "~> 0.1"}
+   ```
+
 2. Set the token values in your own stylesheet. Each application looks like
    itself.
 3. Declare your own components in your registry, next to the baseline ones.

@@ -8,6 +8,10 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-10
+
+First release. The public surface can change in minor versions until 1.0.0.
+
 ### Added
 
 - Contract-generated Tokens entry before Atoms in the catalogue, with colour
@@ -83,44 +87,18 @@ Until 1.0.0, a minor version can change the public surface.
   with neutral compiled fixtures and consumer-facing examples.
 - Include the licence in generated documentation so the README link resolves.
 
-### Changed
+### Requirements and notes
 
-- Token tests use the library stylesheet parser and contrast evaluator instead
-  of private copies. Keep version 0.1.0 and tokens outside the registry.
+- Elixir 1.15 or later and Phoenix LiveView 1.1 or later.
+- Registry checks read component calls from compiled BEAM debug info, which is
+  on by default in dev and test. A module without debug info fails the check
+  with a message that says so.
+- The optional test-coverage check needs `Armature.Registry.TestTracer.install()`
+  in `test/test_helper.exs`, and the registry case that runs it must not be
+  `async: true`, because Mix compiles test files while asynchronous tests run.
+- Each level composes only the levels beneath it. Organisms may also use other
+  organisms, never themselves. Layouts use atoms only. Tokens are CSS custom
+  properties, not registry nodes.
 
-- Refine default typography, controls, status chips, notices, tables, toolbars,
-  pagination and inspector surfaces through measurement tokens, preserving the
-  palette and contrast contract. Tables include selected-row bars, inline sort
-  affordances and secondary cell text; search includes a named clear action.
-- Reflow catalogue navigation above examples at narrow widths and contain
-  wide tables in scrolling regions. Show both densities, selected records and
-  facts in the examples. Keep version 0.1.0.
-
-- Replace the hand-built preview with the router-mounted catalogue and move its
-  synthetic record generator into the internal catalogue records module.
-- Automatic theme containers follow the system preference independently of an
-  ancestor's explicit theme; explicit light and dark controls still override it.
-
-- Replace source-text alias/import resolution with expanded BEAM debug info.
-  Follow private component captures and Phoenix default-attribute wrappers;
-  require debug info (enabled by default in dev and test), failing clearly when
-  absent. Component source files are no longer read.
-- Keep the optional test inventory using compiler-resolved calls and captures.
-  Migration: add `Armature.Registry.TestTracer.install()` to test/test_helper.exs
-  and remove `async: true` from inventory registry cases. Mix compiles test
-  files while asynchronous tests run; synchronous cases guarantee a complete
-  inventory of the selected test files. Direct snapshot users must likewise
-  use synchronous tests. Run the full matching suite for inventory validation.
-- Preserve registry, checks, node and case APIs, including the `markup_uses/1`
-  name. Snapshot `calls` now contains atom module/function identities and
-  `test_source` contains the traced identity set rather than source strings.
-  Code constructing snapshots directly must migrate those fields. Exact
-  identities cover nested self aliases, `__MODULE__`, required aliases,
-  lexical alias scopes and import filters; namesakes never receive credit.
-
-- Permit organisms to compose distinct peer organisms for reusable sections;
-  self-use remains forbidden and every other level composes strictly downward.
-  Layouts use atoms only, and tokens remain outside the registry.
-- Pin exact CI patch versions within the existing Elixir 1.18 / OTP 28 families
-  so formatting and validation use a reproducible toolchain.
-- Remove application-specific references from the charter and agent guidance.
+[Unreleased]: https://github.com/svetzal/armature/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/svetzal/armature/releases/tag/v0.1.0
