@@ -360,7 +360,11 @@ defmodule Armature.Components do
                   @sort_direction == "asc",
                   do: " ↑",
                   else: " ↓"
-                )}</span>
+                )}</span><span
+                  :if={@sort_by != col.sort_key}
+                  class={["armature-sort-hint"]}
+                  aria-hidden="true"
+                > ↕</span>
               </button>
               <span :if={!@sort_event || !col[:sort_key]}>{col.label}</span>
             </th>

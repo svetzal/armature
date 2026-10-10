@@ -401,7 +401,7 @@ defmodule Armature.ComponentsTest do
   end
 
   test "data tables expose scoped sortable headings and named record selection" do
-    for direction <- ~w(asc desc) do
+    for sort_by <- ~w(name score), direction <- ~w(asc desc) do
       doc =
         document(
           fn assigns ->
@@ -410,7 +410,7 @@ defmodule Armature.ComponentsTest do
               id="records"
               rows={[%{id: "R-1", name: "Example", score: 12}, %{id: "R-2", name: "Other", score: 3}]}
               caption="Example records"
-              sort_by="score"
+              sort_by={@sort_by}
               sort_direction={@direction}
               sort_event="order"
               select_event="choose"
@@ -423,8 +423,23 @@ defmodule Armature.ComponentsTest do
             <C.inspector id="details" title="Record details">Supporting information</C.inspector>
             """
           end,
-          %{direction: direction}
+          %{direction: direction, sort_by: sort_by}
         )
+
+      # aria-sort belongs to the heading whose button sorts by `sort_by`, and
+      # to no other heading.
+      [inactive] = ~w(name score) -- [sort_by]
+      assert present?(doc, "th[aria-sort] button[phx-value-key=#{sort_by}]")
+      assert present?(doc, "th:not([aria-sort]) button[phx-value-key=#{inactive}]")
+      refute present?(doc, "th[aria-sort] button[phx-value-key=#{inactive}]")
+
+      # Unsorted sortable columns show a decorative hint; the sorted one shows its arrow.
+      assert present?(
+               doc,
+               "button[phx-value-key=#{inactive}] .armature-sort-hint[aria-hidden=true]"
+             )
+
+      refute present?(doc, "th[aria-sort] .armature-sort-hint")
 
       assert text(doc, "table caption") == "Example records"
 
