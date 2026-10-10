@@ -7,7 +7,7 @@ for Phoenix component libraries. It gives you the levels, the composition
 rules, the token contract and a set of accessible baseline components. Your
 application supplies the look and the components that are its own.
 
-> **Status:** 0.2.1, early. The public surface can change between minor
+> **Status:** 0.2.2, early. The public surface can change between minor
 > versions until 1.0.0. See [CHARTER.md](CHARTER.md) for scope.
 
 ## The level model

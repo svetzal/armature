@@ -8,17 +8,10 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
-### Changed
+## [0.2.2] - 2026-10-10
 
-- Documentation: the app shell's skip link is a plain fragment link that moves
-  focus to the `tabindex="-1"` heading without JavaScript, and its LiveView
-  `JS.focus` command is an enhancement. The README says that a content
-  security policy needs `font-src 'self'` for the bundled Barlow fonts, or the
-  application can omit `armature-fonts.css` and use the system font.
-- Usage rules for controller-rendered pages: load `armature-theme.js` for the
-  theme switch, treat sorting, paging, selectable rows, the toolbar search and
-  the grouped-navigation picker as LiveView-only, and use ordinary links and
-  `GET` forms instead.
+No change breaks the public surface: attributes only became optional, and
+no call site that compiled against 0.2.1 stops compiling or rendering.
 
 ### Added
 
@@ -30,6 +23,18 @@ Until 1.0.0, a minor version can change the public surface.
   README's `Plug.Static` example now serves it.
 - `theme_switch` renders `data-armature-theme-switch` on its form for the
   script, and its `event` is now optional; omit it on pages without LiveView.
+
+### Changed
+
+- Documentation: the app shell's skip link is a plain fragment link that moves
+  focus to the `tabindex="-1"` heading without JavaScript, and its LiveView
+  `JS.focus` command is an enhancement. The README says that a content
+  security policy needs `font-src 'self'` for the bundled Barlow fonts, or the
+  application can omit `armature-fonts.css` and use the system font.
+- Usage rules for controller-rendered pages: load `armature-theme.js` for the
+  theme switch, treat sorting, paging, selectable rows, the toolbar search and
+  the grouped-navigation picker as LiveView-only, and use ordinary links and
+  `GET` forms instead.
 
 ### Fixed
 
@@ -191,7 +196,8 @@ First release. The public surface can change in minor versions until 1.0.0.
   organisms, never themselves. Layouts use atoms only. Tokens are CSS custom
   properties, not registry nodes.
 
-[Unreleased]: https://github.com/svetzal/armature/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/svetzal/armature/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/svetzal/armature/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/svetzal/armature/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/svetzal/armature/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/svetzal/armature/releases/tag/v0.1.0
