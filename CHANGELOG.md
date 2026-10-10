@@ -8,6 +8,17 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Added
+
+- `priv/static/armature-theme.js`, a progressive enhancement that makes
+  `theme_switch` work on controller-rendered pages under a strict content
+  security policy. It sets or removes `data-armature-theme` on the `html`
+  element, remembers the choice in `localStorage`, restores it on load and
+  announces it politely. It leaves switches inside a LiveView alone. The
+  README's `Plug.Static` example now serves it.
+- `theme_switch` renders `data-armature-theme-switch` on its form for the
+  script, and its `event` is now optional; omit it on pages without LiveView.
+
 ### Fixed
 
 - `side_nav` and `app_shell` no longer carry the catalogue's words as defaults.

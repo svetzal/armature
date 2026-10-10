@@ -180,18 +180,30 @@ defmodule Armature.Components do
 
   @doc """
   A labelled native Light/Dark/Auto choice that announces the current selection.
-  `event` receives `theme`; the consumer applies its chosen theme. Auto must
-  remove the theme attribute to inherit consumer tokens without overwriting them.
+
+  In a LiveView, `event` receives `theme` and the consumer applies its chosen
+  theme. Auto must remove the theme attribute to inherit consumer tokens
+  without overwriting them. On a page without a LiveView socket, omit `event`
+  and load `armature-theme.js`: it finds the form by its
+  `data-armature-theme-switch` attribute, applies and remembers the choice on
+  the document element and announces it. The script leaves alone any switch
+  inside a LiveView.
   """
   attr(:id, :string, required: true)
   attr(:value, :string, default: "auto", values: ~w(auto light dark))
   attr(:label, :string, default: "Theme")
-  attr(:event, :string, required: true)
+  attr(:event, :string, default: nil)
   slot(:inner_block)
 
   def theme_switch(assigns) do
     ~H"""
-    <form id={@id} class={["armature-theme-switch"]} phx-change={@event} phx-submit={@event}>
+    <form
+      id={@id}
+      class={["armature-theme-switch"]}
+      data-armature-theme-switch
+      phx-change={@event}
+      phx-submit={@event}
+    >
       <label for={@id <> "-choice"}>{@label}</label>
       <.select
         id={@id <> "-choice"}

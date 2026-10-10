@@ -80,7 +80,7 @@ Serve Armature's static files from your endpoint, before its router:
 plug Plug.Static,
   at: "/armature",
   from: {:armature, "priv/static"},
-  only: ~w(armature.css armature-fonts.css fonts)
+  only: ~w(armature.css armature-fonts.css armature-theme.js fonts)
 ```
 
 Then add these stylesheet links in your root layout:
@@ -95,6 +95,33 @@ static assets, including both fonts and their licence, are included in the
 Hex package through its `priv` file entry. Consumer token overrides belong
 after the library stylesheet. See the [token guide](guides/tokens.md) and
 [component guide](guides/components.md) for compact table density and facts.
+
+## Pages without LiveView
+
+Armature's components render on controller pages too. Interaction that sends
+events (sorting, paging, selectable rows, the table toolbar's search and the
+grouped navigation picker) needs a LiveView today; on a controller page use
+ordinary links and `GET` forms instead.
+
+`theme_switch` works on a controller page through `armature-theme.js`, a small
+script that ships in `priv/static`. Serve it with the `Plug.Static` entry
+above and load it in the root layout's `head`, so a remembered theme applies
+before the page paints:
+
+```heex
+<script src="/armature/armature-theme.js"></script>
+```
+
+Omit the switch's `event` on these pages. The script finds every theme switch
+outside a LiveView, sets or removes `data-armature-theme` on the `html`
+element, remembers the choice in `localStorage` (and carries on without it
+when storage is blocked) and announces the change politely. It uses no inline
+script, `eval` or inline styles, so it runs under `script-src 'self'`. A theme
+your server renders on the `html` element wins over a remembered one.
+
+LiveView applications do not need the script: the switch sends its `event`,
+and the LiveView applies the theme. The script ignores any switch inside a
+LiveView, so an application with both kinds of page can load it everywhere.
 
 ## Vendoring
 

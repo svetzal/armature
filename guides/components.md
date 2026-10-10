@@ -103,8 +103,11 @@ supplied destinations before calling `push_patch` or `push_navigate`. Its option
 content slot can supply guidance. Keep current selection in caller state.
 
 `theme_switch` is a labelled native select; `value` is `"light"`, `"dark"` or
-`"auto"`. It emits `theme` on the required `event`; the caller applies it.
-Auto removes the theme attribute, inheriting consumer tokens. Its optional
+`"auto"`. In a LiveView it emits `theme` on `event`; the caller applies it.
+On a page without LiveView, omit `event` and load `armature-theme.js` (see
+the README), which applies, remembers and announces the choice. The form
+carries `data-armature-theme-switch` for the script; the script skips any
+switch inside a LiveView. Auto removes the theme attribute, inheriting consumer tokens. Its optional
 content slot can explain the choice. Native selection announces the current
 value and supports keyboard operation; it is not a binary toggle.
 
