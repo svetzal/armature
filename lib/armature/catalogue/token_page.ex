@@ -161,6 +161,7 @@ defmodule Armature.Catalogue.TokenPage do
             title="Library"
             subtitle={width <> " rail"}
             label={width <> " rail demonstration"}
+            section_label="Library"
             items={[
               %{label: "Current section", href: "#catalogue-token-rail", current: true},
               %{label: "Other section", href: "#catalogue-token-reference"}

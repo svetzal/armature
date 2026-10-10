@@ -103,6 +103,9 @@ defmodule Armature.Catalogue.CatalogueLive do
     <A.app_shell
       id="armature-catalogue"
       title={@title}
+      subtitle="Component catalogue"
+      nav_label="Library sections"
+      section_label="Library"
       home_patch={@path}
       items={rail_items(@path, @level, @tokens?)}
       context={@title <> " / Component catalogue"}

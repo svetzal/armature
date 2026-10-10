@@ -21,18 +21,21 @@ defmodule Armature.Components do
   end
 
   @doc """
-  A named navigation landmark with a brand, section links and optional footnote.
+  A named navigation landmark with an optional brand, section links and footnote.
 
   Each item has `:label` and one of `:href`, `:patch` or `:navigate`, with optional
-  `:id` and `:current`. Optional `home_patch` links the wordmark to an index.
-  The caller owns the current page. The rail becomes a
-  wrapping row on small screens; its subtitle, label and footnote then hide.
+  `:id` and `:current`. `label` names the navigation landmark; it defaults to
+  "Main", so give a second rail on the same page its own name. `title` and
+  `subtitle` form the brand, and `section_label` adds a caption above the links.
+  Each renders only when given. Optional `home_patch` links the wordmark to an
+  index. The caller owns the current page. The rail becomes a wrapping row on
+  small screens; its subtitle, caption and footnote then hide.
   """
   attr(:id, :string, required: true)
-  attr(:title, :string, default: "Armature")
-  attr(:subtitle, :string, default: "Component catalogue")
-  attr(:label, :string, default: "Library sections")
-  attr(:section_label, :string, default: "Library")
+  attr(:title, :string, default: nil)
+  attr(:subtitle, :string, default: nil)
+  attr(:label, :string, default: "Main")
+  attr(:section_label, :string, default: nil)
   attr(:home_patch, :string, default: nil)
   attr(:items, :list, required: true)
   slot(:footnote)
@@ -40,12 +43,14 @@ defmodule Armature.Components do
   def side_nav(assigns) do
     ~H"""
     <div id={@id} class={["armature-side-nav"]}>
-      <div class={["armature-side-nav-brand"]}>
-        <.link :if={@home_patch} patch={@home_patch} aria-label={@title <> " home"}>{@title}</.link>
-        <span :if={!@home_patch}>{@title}</span>
-        <small>{@subtitle}</small>
+      <div :if={@title || @subtitle} class={["armature-side-nav-brand"]}>
+        <.link :if={@title && @home_patch} patch={@home_patch} aria-label={@title <> " home"}>
+          {@title}
+        </.link>
+        <span :if={@title && !@home_patch}>{@title}</span>
+        <small :if={@subtitle}>{@subtitle}</small>
       </div>
-      <.eyebrow>{@section_label}</.eyebrow>
+      <.eyebrow :if={@section_label}>{@section_label}</.eyebrow>
       <nav aria-label={@label}>
         <.link
           :for={item <- @items}
@@ -225,14 +230,16 @@ defmodule Armature.Components do
   @doc """
   An application shell with a skip link, side navigation, context bar and page heading.
   Supply globally unique `id` and `heading_id`. Item navigation and theme state
-  belong to the consumer. The rail narrows below 800px and stacks below 520px
-  of the shell's own inline size.
+  belong to the consumer. `title`, `subtitle`, `nav_label` and `section_label`
+  pass to `side_nav/1`, which renders a brand and caption only when given.
+  The rail narrows below 800px and stacks below 520px of the shell's own inline size.
   `heading_rest` forwards LiveView focus commands to the h1 after patch navigation.
   """
   attr(:id, :string, required: true)
-  attr(:title, :string, default: "Armature")
-  attr(:subtitle, :string, default: "Component catalogue")
-  attr(:nav_label, :string, default: "Library sections")
+  attr(:title, :string, default: nil)
+  attr(:subtitle, :string, default: nil)
+  attr(:nav_label, :string, default: "Main")
+  attr(:section_label, :string, default: nil)
   attr(:items, :list, required: true)
   attr(:context, :string, required: true)
   attr(:heading, :string, required: true)
@@ -260,6 +267,7 @@ defmodule Armature.Components do
           title={@title}
           subtitle={@subtitle}
           label={@nav_label}
+          section_label={@section_label}
           home_patch={@home_patch}
           items={@items}
         >

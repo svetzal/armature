@@ -867,7 +867,7 @@ defmodule Armature.ComponentsTest do
            )
 
     assert present?(doc, "main[aria-labelledby=overview] h1#overview[tabindex='-1']")
-    assert present?(doc, "nav[aria-label='Library sections'] #overview-link[aria-current=page]")
+    assert present?(doc, "nav[aria-label='Main'] #overview-link[aria-current=page]")
 
     assert present?(
              doc,
@@ -880,6 +880,56 @@ defmodule Armature.ComponentsTest do
     assert present?(doc, "label[for=theme-choice]")
     assert present?(doc, "#theme-choice option[value=dark][selected]")
     assert text(doc, ".armature-side-nav-footnote") == "Synthetic examples"
+  end
+
+  test "an app shell carries no catalogue words when the caller gives no brand or caption" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.app_shell
+          id="plain-shell"
+          heading="Orders"
+          heading_id="orders"
+          context="Orders"
+          items={[%{label: "Orders", href: "/orders", current: true}]}
+        >
+          <p>Content</p>
+        </C.app_shell>
+        """
+      end)
+
+    refute LazyHTML.text(doc) =~ "Library"
+    refute LazyHTML.text(doc) =~ "catalogue"
+    refute LazyHTML.text(doc) =~ "Armature"
+    refute present?(doc, ".armature-side-nav > .armature-eyebrow")
+    refute present?(doc, ".armature-side-nav-brand")
+    assert present?(doc, "#plain-shell-rail nav[aria-label='Main'] a[aria-current=page]")
+  end
+
+  test "an app shell renders the brand, navigation name and section caption it is given" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.app_shell
+          id="named-shell"
+          title="Ledger"
+          subtitle="Finance"
+          nav_label="Ledger sections"
+          section_label="Accounts"
+          heading="Overview"
+          heading_id="named-overview"
+          context="Ledger"
+          items={[%{label: "Overview", href: "/"}]}
+        >
+          <p>Content</p>
+        </C.app_shell>
+        """
+      end)
+
+    assert text(doc, "#named-shell-rail > .armature-eyebrow") == "Accounts"
+    assert text(doc, "#named-shell-rail .armature-side-nav-brand span") == "Ledger"
+    assert text(doc, "#named-shell-rail .armature-side-nav-brand small") == "Finance"
+    assert present?(doc, "#named-shell-rail nav[aria-label='Ledger sections']")
   end
 
   test "grouped navigation provides matching links and a labelled native picker" do

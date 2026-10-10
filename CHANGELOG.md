@@ -8,6 +8,17 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Fixed
+
+- `side_nav` and `app_shell` no longer carry the catalogue's words as defaults.
+  The navigation name defaults to "Main" instead of "Library sections", and
+  `title`, `subtitle` and the section caption (`section_label`) default to
+  nothing and render only when given. `app_shell` now passes `section_label`
+  through to its rail. The catalogue passes its own "Library" labels. A shell
+  that relied on the old defaults keeps working but shows no "Armature" brand,
+  "Component catalogue" subtitle or "Library" caption; pass `title`,
+  `subtitle`, `nav_label` and `section_label` to set your own.
+
 ## [0.2.1] - 2026-10-10
 
 ### Changed

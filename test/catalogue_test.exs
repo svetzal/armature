@@ -20,6 +20,14 @@ defmodule Armature.CatalogueTest do
   test "shell level navigation, picker, skip target and history preserve the selected component" do
     {:ok, view, _} = live(build_conn(), "/ui?node=button")
     assert has_element?(view, "#armature-catalogue-rail nav[aria-label='Library sections']")
+    assert has_element?(view, "#armature-catalogue-rail > .armature-eyebrow", "Library")
+
+    assert has_element?(
+             view,
+             "#armature-catalogue-rail .armature-side-nav-brand small",
+             "catalogue"
+           )
+
     assert has_element?(view, "#catalogue-level-atom[aria-current=page]")
     assert has_element?(view, "main[aria-labelledby=armature-catalogue-heading-button]")
     assert has_element?(view, "a.armature-skip-link[href='#armature-catalogue-heading-button']")

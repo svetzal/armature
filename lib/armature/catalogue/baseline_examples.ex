@@ -146,7 +146,14 @@ defmodule Armature.Catalogue.BaselineExamples do
         <A.theme_switch id="example-theme" value={@state.theme} event="example:theme" />
         <p role="status">Selected theme: {@state.theme}</p>
       <% :side_nav -> %>
-        <A.side_nav id="example-rail" title="Library" items={example_nav()}>
+        <A.side_nav
+          id="example-rail"
+          title="Library"
+          subtitle="Example application"
+          label="Example sections"
+          section_label="Sections"
+          items={example_nav()}
+        >
           <:footnote>Synthetic content</:footnote>
         </A.side_nav>
       <% :top_bar -> %>
@@ -176,6 +183,8 @@ defmodule Armature.Catalogue.BaselineExamples do
         <A.app_shell
           id="example-shell"
           title="Library"
+          nav_label="Example sections"
+          section_label="Sections"
           heading="Example page"
           heading_id="example-shell-heading"
           eyebrow="Library / Examples"

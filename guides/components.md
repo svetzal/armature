@@ -63,7 +63,10 @@ Tables are checked against `Armature.UI.Registry` by the test suite.
 
 `app_shell` composes `side_nav`, `top_bar` and `page_heading`. Its first link
 skips to the unique, focusable `heading_id`; the main landmark is named by that
-heading. Set `title` and `subtitle` for your application. Navigation items have
+heading. Set `title` and `subtitle` for your application's brand, `nav_label`
+to name the rail's navigation (default "Main") and `section_label` for an
+optional caption above its links. The brand and caption render only when you
+give them. Navigation items have
 `:label`, one of `:href`, `:patch` or `:navigate`, and optional `:id` and `:current`.
 Set `home_patch` to make the wordmark a patch link back to your index.
 Current links announce `aria-current="page"` and use weight as well as colour.
@@ -84,7 +87,9 @@ slots supply supporting content and named controls.
 </.app_shell>
 ```
 
-`side_nav` names its navigation with `label` (default "Library sections").
+`side_nav` names its navigation with `label` (default "Main"); give each
+further navigation on a page its own name. Its `title`, `subtitle` and
+`section_label` are optional and render nothing when omitted.
 `top_bar` carries a visible `context` and optional `actions`. `page_heading`
 uses an h1 and optional `eyebrow` and `actions`; `eyebrow` alone adds context,
 not a heading. `panel` names a region with its h2 and optional `actions`.
