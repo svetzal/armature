@@ -144,7 +144,7 @@ defmodule Armature.TokensTest do
     assert_in_delta contrast("#777777", "#ffffff"), 4.478, 0.001
   end
 
-  test "base rules use declared variables for dimensions and motion", %{css: css} do
+  test "base and component rules use declared variables for dimensions and motion", %{css: css} do
     [_, base] = String.split(css, "@layer armature.base {")
     refute Regex.match?(~r/--[\w-]+\s*:/, base)
     refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s|%)\b/, base)
@@ -160,6 +160,37 @@ defmodule Armature.TokensTest do
     assert base =~ "[aria-invalid=\"true\"]"
     assert base =~ "solid var(--armature-selected-cue)"
     assert base =~ "dashed var(--armature-error-emphasis)"
+  end
+
+  test "component layer uses only tokens for presentation and gives layouts only arrangement", %{
+    css: css
+  } do
+    [_, components] = String.split(css, "@layer armature.components {")
+    refute colour_literal?(components)
+    refute Regex.match?(~r/--[\w-]+\s*:/, components)
+    refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s)\b/, components)
+
+    assert components =~
+             "min-height: max(var(--armature-control-height), var(--armature-target-size))"
+
+    assert components =~ "min-width: var(--armature-target-size)"
+    assert components =~ "color: var(--armature-on-accent)"
+    assert components =~ "background: var(--armature-accent)"
+
+    for tone <- ~w(success warning error) do
+      assert components =~ "color: var(--armature-#{tone}-emphasis)"
+      assert components =~ "background: var(--armature-#{tone}-bg)"
+    end
+
+    for [_, declarations] <-
+          Regex.scan(~r/\.armature-(?:stack|cluster|grid|split)[^{]*\{([^}]+)\}/, components) do
+      refute declarations =~ "color"
+      refute declarations =~ "border"
+      refute declarations =~ "background"
+    end
+
+    assert components =~ "min(100%, var(--armature-layout-min-width))"
+    assert components =~ ".armature-button:disabled"
   end
 
   test "forced colours keep focus, selection and focused selection visually distinct",
@@ -183,7 +214,7 @@ defmodule Armature.TokensTest do
   end
 
   test "theme and accessibility media rules apply in cascade order", %{css: css, rules: rules} do
-    assert css =~ "@layer armature.tokens, armature.base;"
+    assert css =~ "@layer armature.tokens, armature.base, armature.components;"
     assert css =~ "@media (prefers-color-scheme: dark)"
     assert css =~ "@media (pointer: coarse), (max-width: 40rem)"
 

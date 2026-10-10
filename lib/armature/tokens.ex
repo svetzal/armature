@@ -22,6 +22,11 @@ defmodule Armature.Tokens do
 
   @tokens [
     %{
+      name: "--armature-layout-min-width",
+      group: :space,
+      role: "Minimum item width before grid and split regions stack."
+    },
+    %{
       name: "--armature-ink",
       group: :colour,
       role: "Primary text on content surfaces.",

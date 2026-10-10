@@ -1,5 +1,5 @@
 /* Consumers override this contract with unlayered CSS. */
-@layer armature.tokens, armature.base;
+@layer armature.tokens, armature.base, armature.components;
 
 @layer armature.tokens {
   :root {
@@ -34,6 +34,7 @@
     --armature-line-height: 1.5;
     --armature-weight-normal: 400;
     --armature-weight-emphasis: 600;
+    --armature-layout-min-width: 12rem;
     --armature-space-zero: 0px;
     --armature-space-1: 0.25rem;
     --armature-space-2: 0.5rem;
@@ -91,7 +92,8 @@
       --armature-line-height: 1.5;
       --armature-weight-normal: 400;
       --armature-weight-emphasis: 600;
-      --armature-space-zero: 0px;
+      --armature-layout-min-width: 12rem;
+    --armature-space-zero: 0px;
       --armature-space-1: 0.25rem;
       --armature-space-2: 0.5rem;
       --armature-space-3: 0.75rem;
@@ -147,6 +149,7 @@
     --armature-line-height: 1.5;
     --armature-weight-normal: 400;
     --armature-weight-emphasis: 600;
+    --armature-layout-min-width: 12rem;
     --armature-space-zero: 0px;
     --armature-space-1: 0.25rem;
     --armature-space-2: 0.5rem;
@@ -203,6 +206,7 @@
     --armature-line-height: 1.5;
     --armature-weight-normal: 400;
     --armature-weight-emphasis: 600;
+    --armature-layout-min-width: 12rem;
     --armature-space-zero: 0px;
     --armature-space-1: 0.25rem;
     --armature-space-2: 0.5rem;
@@ -316,4 +320,86 @@
       outline: var(--armature-focus-width) solid var(--armature-focus);
     }
   }
+}
+
+@layer armature.components {
+  .armature-button, .armature-input, .armature-select, .armature-textarea {
+    box-sizing: border-box;
+    min-height: max(var(--armature-control-height), var(--armature-target-size));
+    min-width: var(--armature-target-size);
+    padding: var(--armature-space-2) var(--armature-space-3);
+    border: var(--armature-border-width) solid var(--armature-input-border);
+    border-radius: var(--armature-radius-base);
+    font-family: var(--armature-font-sans);
+    font-size: var(--armature-text-base);
+    line-height: var(--armature-line-height);
+    color: var(--armature-ink);
+    background: var(--armature-paper);
+  }
+
+  .armature-button {
+    cursor: pointer;
+    font-weight: var(--armature-weight-emphasis);
+    border-color: var(--armature-control-border);
+    transition: box-shadow var(--armature-duration-fast) var(--armature-easing);
+  }
+
+  .armature-button-primary {
+    color: var(--armature-on-accent);
+    background: var(--armature-accent);
+  }
+
+  .armature-button:hover {
+    box-shadow: inset var(--armature-space-zero) var(--armature-space-zero) var(--armature-space-zero) var(--armature-border-width) var(--armature-control-border);
+  }
+
+  .armature-button:disabled { cursor: not-allowed; border-style: dashed; }
+  .armature-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--armature-target-size);
+    min-width: var(--armature-target-size);
+    color: var(--armature-accent);
+    text-decoration: underline;
+  }
+
+  .armature-icon { display: inline-flex; vertical-align: middle; }
+  .armature-icon svg { width: var(--armature-text-large); height: var(--armature-text-large); }
+  .armature-input, .armature-select, .armature-textarea { max-width: 100%; }
+  .armature-textarea { resize: vertical; }
+  .armature-field, .armature-status, .armature-notice, .armature-link {
+    font-family: var(--armature-font-sans);
+    font-size: var(--armature-text-base);
+    line-height: var(--armature-line-height);
+  }
+
+  .armature-field { color: var(--armature-ink); display: grid; gap: var(--armature-space-2); }
+  .armature-label, .armature-notice-title { font-weight: var(--armature-weight-emphasis); }
+  .armature-hint { color: var(--armature-muted); }
+  .armature-errors { color: var(--armature-error-emphasis); }
+  .armature-field p { margin: var(--armature-space-zero); }
+  .armature-hint, .armature-errors, .armature-status { font-size: var(--armature-text-small); }
+  .armature-status {
+    display: inline-flex;
+    padding: var(--armature-space-1) var(--armature-space-2);
+    border-radius: var(--armature-radius-small);
+  }
+
+  .armature-tone-neutral { color: var(--armature-ink); background: var(--armature-canvas); }
+  .armature-tone-success { color: var(--armature-success-emphasis); background: var(--armature-success-bg); }
+  .armature-tone-warning { color: var(--armature-warning-emphasis); background: var(--armature-warning-bg); }
+  .armature-tone-error { color: var(--armature-error-emphasis); background: var(--armature-error-bg); }
+  .armature-notice { padding: var(--armature-space-4); border-radius: var(--armature-radius-base); }
+  .armature-notice-title { margin: var(--armature-space-zero) var(--armature-space-zero) var(--armature-space-2); }
+  .armature-notice-actions { margin-top: var(--armature-space-3); }
+  .armature-stack { display: flex; flex-direction: column; gap: var(--armature-space-4); }
+  .armature-cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--armature-space-4); }
+  .armature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--armature-layout-min-width)), 1fr));
+    gap: var(--armature-space-4);
+  }
+
+  .armature-split { display: flex; flex-wrap: wrap; gap: var(--armature-space-4); }
+  .armature-split > div { flex: 1 1 var(--armature-layout-min-width); min-width: var(--armature-space-zero); }
 }

@@ -60,7 +60,14 @@ defmodule Armature.MixProject do
       main: "readme",
       source_ref: "v#{@version}",
       source_url: @source_url,
-      extras: ["README.md", "guides/tokens.md", "CHARTER.md", "CHANGELOG.md", "LICENSE.md"]
+      extras: [
+        "README.md",
+        "guides/tokens.md",
+        "guides/components.md",
+        "CHARTER.md",
+        "CHANGELOG.md",
+        "LICENSE.md"
+      ]
     ]
   end
 end

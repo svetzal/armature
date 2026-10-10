@@ -59,8 +59,8 @@ MIT. See [LICENSE.md](LICENSE.md).
 
 ## Declaring and checking a registry
 
-Armature provides registry governance and a token stylesheet. Components come
-from your application; baseline components will follow in later increments.
+Armature provides registry governance, a token stylesheet and baseline components.
+Add your own components alongside `Armature.UI.Registry.nodes/0`.
 Implement the behaviour with plain data:
 
 ```elixir
@@ -260,3 +260,31 @@ Preserve that minimum in consumer overrides.
 generated from `Armature.Tokens`. Check those pairs in both themes whenever
 you change colour values. Feedback must include text or a symbol; selected
 items need a non-colour cue such as an outline, marker or label.
+
+## Using baseline components
+
+`Armature.Components` is the public import for all baseline levels. In your
+consumer's HTML helpers, exclude Phoenix's link before importing Armature:
+
+```elixir
+import Phoenix.Component, except: [link: 1]
+import Armature.Components
+```
+
+Then use:
+
+```heex
+<.form for={@form} id="example-form">
+  <.stack>
+    <.field field={@form[:name]} label="Name" hint="Use a short name." />
+    <.cluster>
+      <.button type="submit">Save</.button>
+      <.link href="/">Return</.link>
+    </.cluster>
+  </.stack>
+</.form>
+```
+
+Create `@form` with `Phoenix.Component.to_form/2`. Import the stylesheet as
+shown in [the token guide](guides/tokens.md). See [the component guide](guides/components.md)
+for plain controls, translation, notices, layouts and accessibility responsibilities.

@@ -10,6 +10,11 @@ Until 1.0.0, a minor version can change the public surface.
 
 ### Added
 
+- Baseline native atoms, arrangement layouts and labelled form/notice molecules
+  through `Armature.Components`, with token-only component styles, accessibility
+  tests and a governed `Armature.UI.Registry` checked against the component guide.
+  Add `--armature-layout-min-width` to govern responsive grid and split wrapping.
+
 - Plain-data `Armature.Tokens` contract with semantic roles and required WCAG
   contrast pairs, plus a generated token guide and consumer import examples.
 - Layered neutral light and dark token defaults, with muted success, warning

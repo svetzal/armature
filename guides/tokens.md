@@ -38,6 +38,7 @@ parallel palette lives in Elixir or the tests.
 <!-- tokens:start -->
 | Token | Group | Role | Required contrast |
 | --- | --- | --- | --- |
+| `--armature-layout-min-width` | space | Minimum item width before grid and split regions stack. |  |
 | `--armature-ink` | colour | Primary text on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1 |
 | `--armature-muted` | colour | Secondary text that remains readable on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1 |
 | `--armature-accent` | colour | Emphasised text and links on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1 |
