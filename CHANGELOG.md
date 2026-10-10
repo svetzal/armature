@@ -15,6 +15,10 @@ Until 1.0.0, a minor version can change the public surface.
   `JS.focus` command is an enhancement. The README says that a content
   security policy needs `font-src 'self'` for the bundled Barlow fonts, or the
   application can omit `armature-fonts.css` and use the system font.
+- Usage rules for controller-rendered pages: load `armature-theme.js` for the
+  theme switch, treat sorting, paging, selectable rows, the toolbar search and
+  the grouped-navigation picker as LiveView-only, and use ordinary links and
+  `GET` forms instead.
 
 ### Added
 

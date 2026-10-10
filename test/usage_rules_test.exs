@@ -5,8 +5,9 @@ defmodule Armature.UsageRulesTest do
 
   @rules File.read!(Path.expand("../usage-rules.md", __DIR__))
 
-  # Backticked words that are values rather than component, attribute or slot names.
-  @values ~w(select textarea checkbox compact attr slot outline)
+  # Backticked words that are values or HTML and CSS terms rather than
+  # component, attribute or slot names.
+  @values ~w(select textarea checkbox compact attr slot outline script head)
 
   test "the rules file ships in the Hex package" do
     files = Mix.Project.config()[:package][:files]

@@ -37,6 +37,20 @@ and register what you add. Full guides: `deps/armature/README.md` and
   actions, use a non-selectable table with links, or a details pattern.
 - Use `density="compact"` for data-heavy screens.
 
+## Controller-rendered pages
+
+- Armature components render without a LiveView socket, but their events do
+  not. Sorting (`sort_event`), paging (`page_event`, `size_event`), selectable
+  rows (`select_event`), the `table_toolbar` search and the `grouped_nav`
+  picker are LiveView-only today. On a controller page, use `link` with
+  `href` and ordinary `GET` forms instead, and leave those events unset.
+- For `theme_switch` on a controller page, omit `event` and load
+  `/armature/armature-theme.js` with a `script` tag in the root layout's
+  `head`, served by `Plug.Static` from Armature's `priv/static`. Do not write
+  your own theme script or an inline one. LiveView pages do not need it.
+- Under a content security policy, allow `font-src 'self'` for the bundled
+  fonts, or leave out `armature-fonts.css`.
+
 ## Tokens and styling
 
 - Armature styles everything through `--armature-*` CSS custom properties in
