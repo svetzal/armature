@@ -53,6 +53,18 @@ mix format --check-formatted
 mix credo --strict
 ```
 
+To see the components in a browser, run the one-file preview. It loads
+Armature from this checkout and opens <http://localhost:4020>:
+
+```bash
+elixir examples/preview.exs
+```
+
+It shows every baseline component in its states, with a light, dark and
+automatic theme switch. Set `PORT` to use another port and `OPEN=0` to skip
+opening the browser. The preview is a development aid and is not part of the
+Hex package.
+
 ## Licence
 
 MIT. See [LICENSE.md](LICENSE.md).

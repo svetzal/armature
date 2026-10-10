@@ -190,7 +190,36 @@ defmodule Armature.TokensTest do
     end
 
     assert components =~ "min(100%, var(--armature-layout-min-width))"
-    assert components =~ ".armature-button:disabled"
+    # Disabled must not inherit a variant's fill, or a primary button's dashed
+    # border disappears into its own background.
+    [_, disabled] = Regex.run(~r/\.armature-button:disabled[^{]*\{([^}]+)\}/, components)
+
+    for declaration <- [
+          "background: var(--armature-canvas)",
+          "color: var(--armature-muted)",
+          "border-color: var(--armature-control-border)",
+          "border-style: dashed"
+        ] do
+      assert disabled =~ declaration
+    end
+
+    # Disabled form controls look disabled too, not only buttons.
+    [_, disabled_controls] =
+      Regex.run(~r/\.armature-input:disabled[^{]*\{([^}]+)\}/, components)
+
+    assert disabled_controls =~ "border-style: dashed"
+    assert disabled_controls =~ "color: var(--armature-muted)"
+
+    # An invalid control shows its state on the control itself, in error colour.
+    [_, invalid] =
+      Regex.run(~r/\.armature-input\[aria-invalid="true"\][^{]*\{([^}]+)\}/, components)
+
+    assert invalid =~ "border-color: var(--armature-error-emphasis)"
+    assert invalid =~ "var(--armature-error-emphasis)" and invalid =~ "box-shadow"
+
+    # A checkbox is sized as a box, not stretched like a text input.
+    [_, check] = Regex.run(~r/\.armature-check \.armature-input\s*\{([^}]+)\}/, components)
+    assert check =~ "width: var(--armature-space-4)"
   end
 
   test "forced colours keep focus, selection and focused selection visually distinct",

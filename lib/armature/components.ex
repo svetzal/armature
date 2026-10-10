@@ -167,7 +167,7 @@ defmodule Armature.Components do
 
     ~H"""
     <div class={["armature-field"]}>
-      <label for={@id} class={["armature-label"]}>{@label}</label>
+      <label :if={@type != "checkbox"} for={@id} class={["armature-label"]}>{@label}</label>
       <%= case @type do %>
         <% "select" -> %>
           <.select
@@ -182,22 +182,26 @@ defmodule Armature.Components do
         <% "textarea" -> %>
           <.textarea id={@id} name={@name} value={@value} {@control_rest} />
         <% "checkbox" -> %>
-          <%!-- An unchecked box submits nothing; the hidden input sends "false" instead. --%>
-          <input
-            type="hidden"
-            name={@name}
-            value="false"
-            disabled={@control_rest[:disabled]}
-            form={@control_rest[:form]}
-          />
-          <.input
-            id={@id}
-            name={@name}
-            value="true"
-            type="checkbox"
-            checked={@checked}
-            {@control_rest}
-          />
+          <%!-- A checkbox sits before its label, and the row is the touch target.
+               An unchecked box submits nothing; the hidden input sends "false". --%>
+          <div class={["armature-check"]}>
+            <input
+              type="hidden"
+              name={@name}
+              value="false"
+              disabled={@control_rest[:disabled]}
+              form={@control_rest[:form]}
+            />
+            <.input
+              id={@id}
+              name={@name}
+              value="true"
+              type="checkbox"
+              checked={@checked}
+              {@control_rest}
+            />
+            <label for={@id} class={["armature-label"]}>{@label}</label>
+          </div>
         <% _ -> %>
           <.input id={@id} name={@name} value={@value} type={@type} {@control_rest} />
       <% end %>

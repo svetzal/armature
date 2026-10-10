@@ -353,7 +353,17 @@
     box-shadow: inset var(--armature-space-zero) var(--armature-space-zero) var(--armature-space-zero) var(--armature-border-width) var(--armature-control-border);
   }
 
-  .armature-button:disabled { cursor: not-allowed; border-style: dashed; }
+  /* Disabled looks the same for every variant: a primary fill would hide a
+     dashed border drawn in its own colour. */
+  .armature-button:disabled,
+  .armature-button:disabled:hover {
+    cursor: not-allowed;
+    background: var(--armature-canvas);
+    color: var(--armature-muted);
+    border-color: var(--armature-control-border);
+    border-style: dashed;
+    box-shadow: none;
+  }
   .armature-link {
     display: inline-flex;
     align-items: center;
@@ -374,6 +384,39 @@
   }
 
   .armature-field { color: var(--armature-ink); display: grid; gap: var(--armature-space-2); }
+
+  /* A checkbox is a small box beside its label; the whole row meets the target size. */
+  .armature-check {
+    display: flex;
+    align-items: center;
+    gap: var(--armature-space-2);
+    min-height: var(--armature-target-size);
+  }
+
+  .armature-check .armature-input {
+    width: var(--armature-space-4);
+    height: var(--armature-space-4);
+    min-width: var(--armature-space-4);
+    min-height: var(--armature-space-4);
+    padding: var(--armature-space-zero);
+    accent-color: var(--armature-accent);
+  }
+
+  .armature-input:disabled, .armature-select:disabled, .armature-textarea:disabled {
+    cursor: not-allowed;
+    background: var(--armature-canvas);
+    color: var(--armature-muted);
+    border-style: dashed;
+  }
+
+  /* Invalid controls take the error colour at double weight, so the state
+     does not rest on a colour change alone; the message carries the words. */
+  .armature-input[aria-invalid="true"],
+  .armature-select[aria-invalid="true"],
+  .armature-textarea[aria-invalid="true"] {
+    border-color: var(--armature-error-emphasis);
+    box-shadow: inset var(--armature-space-zero) var(--armature-space-zero) var(--armature-space-zero) var(--armature-border-width) var(--armature-error-emphasis);
+  }
   .armature-label, .armature-notice-title { font-weight: var(--armature-weight-emphasis); }
   .armature-hint { color: var(--armature-muted); }
   .armature-errors { color: var(--armature-error-emphasis); }

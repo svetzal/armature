@@ -274,7 +274,11 @@ defmodule Armature.ComponentsTest do
 
       assert present?(doc, "input#sample_accepted[type=checkbox][value=true]")
       assert present?(doc, "input#sample_accepted[checked]") == checked?
-      assert present?(doc, "label[for=sample_accepted]")
+      # The box comes before its label, together in one row.
+      assert present?(doc, ".armature-check > input#sample_accepted + label[for=sample_accepted]")
+
+      assert doc |> LazyHTML.query("label[for=sample_accepted]") |> LazyHTML.to_tree() |> length() ==
+               1
 
       # The hidden fallback precedes the box, so a ticked box's later value wins.
       [hidden, box] =

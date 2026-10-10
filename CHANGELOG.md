@@ -16,6 +16,11 @@ Until 1.0.0, a minor version can change the public surface.
   Add `--armature-layout-min-width` to govern responsive grid and split wrapping.
   Checkbox fields check themselves from the bound value and send `false` through
   a hidden input when unticked; a disabled checkbox sends nothing.
+  A checkbox renders as a small box before its label in one row. Disabled
+  buttons and form controls share one muted, dashed treatment, whatever the
+  button variant. Invalid controls take a double-weight error-colour border.
+- `examples/preview.exs`, a one-file browser preview of every component in its
+  states with a theme switch (`elixir examples/preview.exs`).
 
 - Plain-data `Armature.Tokens` contract with semantic roles and required WCAG
   contrast pairs, plus a generated token guide and consumer import examples.
