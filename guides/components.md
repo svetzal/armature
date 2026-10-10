@@ -174,7 +174,7 @@ filtered and paged collection so it survives those operations.
 </.table_inspector>
 ```
 
-`examples/preview.exs` demonstrates this contract with 200 generated records,
+The mountable catalogue (also served by `examples/preview.exs`) demonstrates this contract with 200 generated records,
 search across the complete set, text and numeric sorting, 10/25/50 page sizes,
 and selection retained across search and paging. Its theme controls exercise
 the same table, hover, selected and focus tokens in light and dark modes.

@@ -1,4 +1,4 @@
-defmodule PreviewRecords do
+defmodule Armature.Catalogue.Records do
   @moduledoc false
 
   def all do

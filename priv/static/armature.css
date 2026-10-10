@@ -2,7 +2,7 @@
 @layer armature.tokens, armature.base, armature.components;
 
 @layer armature.tokens {
-  :root {
+  :root, [data-armature-theme="auto"] {
     color-scheme: light;
     --armature-ink: #202020;
     --armature-muted: #505050;
@@ -60,7 +60,7 @@
 
   /* Keep specificity equal to :root so later preference overrides win. */
   @media (prefers-color-scheme: dark) {
-    :root:where(:not([data-armature-theme="light"])) {
+    :root:where(:not([data-armature-theme="light"])), [data-armature-theme="auto"] {
       color-scheme: dark;
       --armature-ink: #f5f5f5;
       --armature-muted: #c0c0c0;
@@ -522,5 +522,50 @@
   .armature-table-inspector > .armature-split { margin-top: var(--armature-space-3); }
   .armature-table-inspector > .armature-split > div {
     flex-basis: calc(var(--armature-layout-min-width) * 2);
+  }
+
+  .armature-catalogue {
+    background: var(--armature-canvas);
+    color: var(--armature-ink);
+    font-family: var(--armature-font-sans);
+    line-height: var(--armature-line-height);
+    padding: var(--armature-space-6);
+  }
+  .armature-catalogue-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--armature-space-8);
+    margin-top: var(--armature-space-6);
+  }
+  .armature-catalogue-detail {
+    flex: 1;
+    min-width: min(100%, var(--armature-layout-min-width));
+  }
+  .armature-catalogue h1 {
+    font-size: var(--armature-text-heading);
+  }
+  .armature-catalogue h2 {
+    font-size: var(--armature-text-large);
+  }
+  .armature-catalogue a {
+    color: var(--armature-accent);
+    display: inline-block;
+    min-height: var(--armature-target-size);
+  }
+  .armature-catalogue [aria-current="page"] {
+    font-weight: var(--armature-weight-emphasis);
+    border-inline-start: var(--armature-border-width) solid var(--armature-selected-cue);
+    padding-inline-start: var(--armature-space-2);
+  }
+  .armature-catalogue article {
+    background: var(--armature-paper);
+    border: var(--armature-border-width) solid var(--armature-line);
+    border-radius: var(--armature-radius-base);
+    padding: var(--armature-space-4);
+    margin-block: var(--armature-space-4);
+  }
+  .armature-catalogue-notes {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 }

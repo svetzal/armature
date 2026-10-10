@@ -72,9 +72,13 @@ defmodule Armature.TokensTest do
     end
 
     assert rule!(rules, "[data-armature-theme=\"dark\"]") ==
-             rule!(rules, ":root:where(:not([data-armature-theme=\"light\"]))")
+             rule!(
+               rules,
+               ":root:where(:not([data-armature-theme=\"light\"])), [data-armature-theme=\"auto\"]"
+             )
 
-    assert rule!(rules, ":root") == rule!(rules, "[data-armature-theme=\"light\"]")
+    assert rule!(rules, ":root, [data-armature-theme=\"auto\"]") ==
+             rule!(rules, "[data-armature-theme=\"light\"]")
   end
 
   test "all overrides and references belong to the contract", %{css: css} do
@@ -322,6 +326,21 @@ defmodule Armature.TokensTest do
     assert Map.new(forced)["--armature-error-emphasis"] == "CanvasText"
   end
 
+  test "catalogue styling uses the same theme and accessibility contract", %{css: css} do
+    assert css =~ ".armature-catalogue {"
+    assert css =~ ".armature-catalogue [aria-current=\"page\"]"
+
+    assert css =~
+             "border-inline-start: var(--armature-border-width) solid var(--armature-selected-cue)"
+
+    assert css =~ ".armature-catalogue-notes"
+    assert css =~ "white-space: pre-wrap"
+    assert css =~ ":root, [data-armature-theme=\"auto\"] {"
+
+    assert css =~
+             ":root:where(:not([data-armature-theme=\"light\"])), [data-armature-theme=\"auto\"] {"
+  end
+
   test "guide table is generated from the contract" do
     guide = File.read!(@guide)
     [_, generated] = String.split(guide, "<!-- tokens:start -->\n")
@@ -331,8 +350,8 @@ defmodule Armature.TokensTest do
 
   defp theme_selectors do
     [
-      ":root",
-      ":root:where(:not([data-armature-theme=\"light\"]))",
+      ":root, [data-armature-theme=\"auto\"]",
+      ":root:where(:not([data-armature-theme=\"light\"])), [data-armature-theme=\"auto\"]",
       "[data-armature-theme=\"dark\"]",
       "[data-armature-theme=\"light\"]"
     ]

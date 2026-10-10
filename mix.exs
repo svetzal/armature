@@ -64,6 +64,7 @@ defmodule Armature.MixProject do
         "README.md",
         "guides/tokens.md",
         "guides/components.md",
+        "guides/catalogue.md",
         "CHARTER.md",
         "CHANGELOG.md",
         "LICENSE.md"

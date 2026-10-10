@@ -65,6 +65,28 @@ automatic theme switch. Set `PORT` to use another port and `OPEN=0` to skip
 opening the browser. The preview is a development aid and is not part of the
 Hex package.
 
+## Component catalogue
+
+Import `Armature.Catalogue.Router` in your router and mount the development page
+inside your browser scope, guarded by your application's `:dev_routes` flag:
+
+```elixir
+if Application.compile_env(:example, :dev_routes) do
+  scope "/" do
+    pipe_through :browser
+    armature_catalogue "/dev/ui", registry: Example.UI.Registry, examples: Example.UI.Examples
+  end
+end
+```
+
+The catalogue uses your registry, pipeline, root layout and stylesheet. It groups
+components by level, shows live examples and component documentation, and links
+both directions through the composition graph. Use
+`Armature.Catalogue.BaselineExamples` for the baseline registry, or delegate
+baseline node ids to it from your examples module. Example state is local to the
+LiveView and resets on refresh. See [the catalogue guide](guides/catalogue.md)
+for the examples behaviour and interactive demonstrations.
+
 ## Licence
 
 MIT. See [LICENSE.md](LICENSE.md).
@@ -225,12 +247,12 @@ also precede Tailwind's layers:
 @source "../../lib/example_web";
 ```
 
-Armature uses `armature.tokens` and `armature.base` cascade layers. Set your
+Armature uses `armature.tokens`, `armature.base` and `armature.components` cascade layers. Set your
 own values in unlayered CSS after the imports. This neutral example changes
 spacing, typography and surface contrast:
 
 ```css
-:root {
+:root, [data-armature-theme] {
   --armature-font-sans: ui-sans-serif, system-ui, sans-serif;
   --armature-space-4: 1.125rem;
   --armature-ink: #181818;
@@ -238,7 +260,7 @@ spacing, typography and surface contrast:
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-armature-theme="light"]) {
+  :root:not([data-armature-theme="light"]), [data-armature-theme="auto"] {
     --armature-ink: #fafafa;
     --armature-paper: #181818;
   }
@@ -256,7 +278,7 @@ spacing, typography and surface contrast:
 ```
 
 Set `data-armature-theme="light"` or `data-armature-theme="dark"` on the
-`html` element to choose a theme; omit it to follow the system preference.
+`html` element to choose a theme; omit it or use `"auto"` to follow the system preference.
 The attribute also supports themed subtrees. Match all relevant theme selectors
 in consumer overrides: unlayered root values take precedence over layered
 root values, including the automatic dark theme.

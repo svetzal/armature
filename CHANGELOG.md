@@ -10,6 +10,14 @@ Until 1.0.0, a minor version can change the public surface.
 
 ### Added
 
+- Mountable development catalogue through `Armature.Catalogue.Router`, with
+  consumer registries, independent examples modules and LiveView-local state.
+  Level-grouped navigation, directly linkable query parameters, heading focus,
+  derived Uses/Used by links, component documentation and theme controls.
+- Baseline examples for every registered component, including validation and
+  synthetic record search, sorting, pagination and retained selection. Mounting
+  and examples guide, LiveView integration tests and token-only catalogue styles.
+
 - Native data tables, labelled search toolbars, pagination, record headers and
   complementary inspectors through `Armature.Components`, with caller-owned state.
   Sort headings read as heading text with an arrow on the sorted column and a
@@ -53,6 +61,11 @@ Until 1.0.0, a minor version can change the public surface.
 - Include the licence in generated documentation so the README link resolves.
 
 ### Changed
+
+- Replace the hand-built preview with the router-mounted catalogue and move its
+  synthetic record generator into the internal catalogue records module.
+- Automatic theme containers follow the system preference independently of an
+  ancestor's explicit theme; explicit light and dark controls still override it.
 
 - Replace source-text alias/import resolution with expanded BEAM debug info.
   Follow private component captures and Phoenix default-attribute wrappers;
