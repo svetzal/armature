@@ -21,6 +21,83 @@ defmodule Armature.Tokens do
   @cue_contrast Enum.map(@content_surfaces, &%{background: &1, ratio: 3})
 
   @tokens [
+    %{name: "--armature-hover-mix", group: :shape, role: "Subtle ink blend on hovered buttons."},
+    %{
+      name: "--armature-text-micro",
+      group: :typography,
+      role: "Size of table headings, cell metadata and status chips."
+    },
+    %{
+      name: "--armature-text-control",
+      group: :typography,
+      role: "Size of controls, table cells and notices."
+    },
+    %{name: "--armature-radius-panel", group: :shape, role: "Corner radius of content panels."},
+    %{name: "--armature-space-half", group: :space, role: "Smallest chip inset."},
+    %{name: "--armature-space-control", group: :space, role: "Button inset and icon gap."},
+    %{name: "--armature-space-input", group: :space, role: "Input and chip inset."},
+    %{
+      name: "--armature-space-detail",
+      group: :space,
+      role: "Fact gap, input inset and heading inset."
+    },
+    %{name: "--armature-space-notice", group: :space, role: "Notice vertical inset."},
+    %{name: "--armature-space-text", group: :space, role: "Notice horizontal inset."},
+    %{name: "--armature-space-panel", group: :space, role: "Record header and inspector inset."},
+    %{
+      name: "--armature-control-height-compact",
+      group: :control,
+      role: "Height of compact toolbar fields and buttons before target overrides."
+    },
+    %{
+      name: "--armature-table-cell-padding",
+      group: :space,
+      role: "Default table cell vertical and horizontal inset."
+    },
+    %{
+      name: "--armature-table-cell-padding-compact",
+      group: :space,
+      role: "Compact table cell vertical and horizontal inset."
+    },
+    %{
+      name: "--armature-table-row-height",
+      group: :control,
+      role: "Minimum default table row height."
+    },
+    %{
+      name: "--armature-table-row-height-compact",
+      group: :control,
+      role: "Minimum compact table row height."
+    },
+    %{name: "--armature-search-width", group: :control, role: "Preferred toolbar search width."},
+    %{
+      name: "--armature-inspector-width",
+      group: :space,
+      role: "Preferred inspector column width."
+    },
+    %{
+      name: "--armature-cue-width",
+      group: :shape,
+      role: "Width of notice rules and selected row bars."
+    },
+    %{
+      name: "--armature-chevron-size",
+      group: :shape,
+      role: "Size of each select chevron stroke."
+    },
+    %{
+      name: "--armature-chevron-angle",
+      group: :shape,
+      role: "Angle of the drawn select chevron."
+    },
+    %{
+      name: "--armature-chevron-stop",
+      group: :shape,
+      role: "Gradient stop and vertical position of the select chevron."
+    },
+    %{name: "--armature-sort-opacity", group: :shape, role: "Opacity of an inactive sort arrow."},
+    %{name: "--armature-opacity-full", group: :shape, role: "Opacity of an active affordance."},
+    %{name: "--armature-press-offset", group: :shape, role: "Displacement of a pressed action."},
     %{
       name: "--armature-layout-min-width",
       group: :space,

@@ -22,15 +22,17 @@ defmodule Armature.Catalogue.BaselineExamples do
 
   @impl true
   def init do
+    selected = Enum.min_by(Records.all(), & &1.name)
+
     refresh(%{
       query: "",
       sort_by: "name",
       sort_direction: "asc",
       page: 1,
       page_size: 25,
-      selected: nil,
-      selected_id: nil,
-      selection_label: "No record selected.",
+      selected: selected,
+      selected_id: selected.id,
+      selection_label: "Selected #{selected.id}, #{selected.name}.",
       form: to_form(%{"name" => "", "accepted" => false}, as: :sample),
       saved: false,
       count: 0
@@ -109,7 +111,7 @@ defmodule Armature.Catalogue.BaselineExamples do
 
   defp description(id) when id in [:data_table, :table_toolbar, :pagination, :table_inspector],
     do:
-      "Synthetic records with local search, sorting, paging and selection. State carries across examples."
+      "Synthetic records in compact density with local search, sorting, paging and selection. State carries across examples."
 
   defp description(_id), do: "A named native control or region using the current theme."
 
@@ -217,9 +219,16 @@ defmodule Armature.Catalogue.BaselineExamples do
             An error result is an alert.
           </A.notice>
         </A.stack>
+      <% :facts -> %>
+        <A.facts>
+          <:fact label="Identifier">R-001</:fact>
+          <:fact label="Score">42</:fact>
+          <:fact label="State"><A.status label="Available" tone="success" /></:fact>
+        </A.facts>
       <% :data_table -> %>
         <A.data_table
           id="example-table"
+          density="compact"
           rows={@state.records.rows}
           caption="Synthetic records"
           sort_by={@state.sort_by}
@@ -229,7 +238,7 @@ defmodule Armature.Catalogue.BaselineExamples do
           selected_id={@state.selected_id}
           inspector_id="example-details"
         >
-          <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+          <:col :let={row} label="Name" sort_key="name">{row.name}<small>{row.group}</small></:col>
           <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
         </A.data_table>
         <A.inspector id="example-details" title="Selected record">
@@ -237,6 +246,16 @@ defmodule Armature.Catalogue.BaselineExamples do
         </A.inspector>
         <A.data_table id="example-empty-table" rows={[]} caption="Empty records">
           <:col label="Name" />
+        </A.data_table>
+        <h3>Default density</h3>
+        <A.data_table
+          id="example-table-default"
+          rows={Enum.take(@state.records.rows, 3)}
+          caption="Default density records"
+        >
+          <:col :let={row} label="Identifier">{row.id}</:col>
+          <:col :let={row} label="Name">{row.name}<small>{row.group}</small></:col>
+          <:col :let={row} label="Score" numeric>{row.score}</:col>
         </A.data_table>
       <% :table_toolbar -> %>
         <A.table_toolbar
@@ -274,6 +293,7 @@ defmodule Armature.Catalogue.BaselineExamples do
       <% :table_inspector -> %>
         <A.table_inspector
           id="example-records"
+          density="compact"
           rows={@state.records.rows}
           caption="Synthetic records"
           query={@state.query}
@@ -295,7 +315,7 @@ defmodule Armature.Catalogue.BaselineExamples do
           size_event="record_size"
         >
           <:col :let={row} label="Identifier">{row.id}</:col>
-          <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+          <:col :let={row} label="Name" sort_key="name">{row.name}<small>{row.group}</small></:col>
           <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
           <:details><.details state={@state} /></:details>
         </A.table_inspector>
@@ -314,7 +334,10 @@ defmodule Armature.Catalogue.BaselineExamples do
         context={@state.selected.id}
         status="Available"
       />
-      <p>{@state.selected.group}</p><p>Score: {@state.selected.score}</p>
+      <A.facts>
+        <:fact label="Group">{@state.selected.group}</:fact>
+        <:fact label="Score">{@state.selected.score}</:fact>
+      </A.facts>
       <p :if={!Enum.any?(@state.records.rows, &(&1.id == @state.selected_id))}>
         The selected record is outside the current results.
       </p>

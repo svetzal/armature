@@ -106,6 +106,14 @@ defmodule Armature.UI.Registry do
         uses: [:input, :select, :textarea]
       },
       %Node{
+        id: :facts,
+        level: :molecule,
+        module: Armature.Components,
+        function: :facts,
+        purpose: "Labelled record facts in a description list.",
+        uses: []
+      },
+      %Node{
         id: :notice,
         level: :molecule,
         module: Armature.Components,
@@ -119,7 +127,7 @@ defmodule Armature.UI.Registry do
         module: Armature.Components,
         function: :table_toolbar,
         purpose: "A labelled search and announced result count.",
-        uses: [:input]
+        uses: [:input, :icon, :button]
       },
       %Node{
         id: :pagination,

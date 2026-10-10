@@ -25,12 +25,12 @@
     --armature-selected: #e2ecd9;
     --armature-selected-cue: #245e49;
     --armature-image-backdrop: #fafaf8;
-    --armature-font-sans: system-ui, sans-serif;
+    --armature-font-sans: "Barlow", system-ui, sans-serif;
     --armature-font-mono: ui-monospace, monospace;
-    --armature-text-small: 0.875rem;
-    --armature-text-base: 1rem;
-    --armature-text-large: 1.25rem;
-    --armature-text-heading: 1.5rem;
+    --armature-text-small: 0.75rem;
+    --armature-text-base: 0.875rem;
+    --armature-text-large: 1rem;
+    --armature-text-heading: 1.25rem;
     --armature-line-height: 1.5;
     --armature-weight-normal: 400;
     --armature-weight-emphasis: 600;
@@ -42,8 +42,8 @@
     --armature-space-4: 1rem;
     --armature-space-6: 1.5rem;
     --armature-space-8: 2rem;
-    --armature-radius-small: 0.125rem;
-    --armature-radius-base: 0.25rem;
+    --armature-radius-small: 0.25rem;
+    --armature-radius-base: 0.3125rem;
     --armature-border-width: 1px;
     --armature-hidden-size: 1px;
     --armature-hidden-inset: 50%;
@@ -56,6 +56,31 @@
     --armature-target-size: 24px;
     --armature-focus-width: 3px;
     --armature-focus-offset: 3px;
+    --armature-text-micro: 0.6875rem;
+    --armature-text-control: 0.8125rem;
+    --armature-radius-panel: 0.375rem;
+    --armature-space-half: 0.125rem;
+    --armature-space-control: 0.375rem;
+    --armature-space-input: 0.4375rem;
+    --armature-space-detail: 0.625rem;
+    --armature-space-notice: 0.6875rem;
+    --armature-space-text: 0.875rem;
+    --armature-space-panel: 1.25rem;
+    --armature-control-height-compact: 32px;
+    --armature-table-cell-padding: 0.75rem 1rem;
+    --armature-table-cell-padding-compact: 0.375rem 1rem;
+    --armature-table-row-height: 44px;
+    --armature-table-row-height-compact: 34px;
+    --armature-search-width: 15rem;
+    --armature-inspector-width: 18.125rem;
+    --armature-cue-width: 3px;
+    --armature-chevron-size: 5px;
+    --armature-chevron-angle: 45deg;
+    --armature-chevron-stop: 50%;
+    --armature-sort-opacity: 0.6;
+    --armature-opacity-full: 1;
+    --armature-press-offset: 1px;
+    --armature-hover-mix: 5%;
   }
 
   /* Keep specificity equal to :root so later preference overrides win. */
@@ -83,12 +108,12 @@
       --armature-selected: #365c43;
       --armature-selected-cue: #a8d3b4;
       --armature-image-backdrop: #1c3229;
-      --armature-font-sans: system-ui, sans-serif;
+      --armature-font-sans: "Barlow", system-ui, sans-serif;
       --armature-font-mono: ui-monospace, monospace;
-      --armature-text-small: 0.875rem;
-      --armature-text-base: 1rem;
-      --armature-text-large: 1.25rem;
-      --armature-text-heading: 1.5rem;
+      --armature-text-small: 0.75rem;
+      --armature-text-base: 0.875rem;
+      --armature-text-large: 1rem;
+      --armature-text-heading: 1.25rem;
       --armature-line-height: 1.5;
       --armature-weight-normal: 400;
       --armature-weight-emphasis: 600;
@@ -100,8 +125,8 @@
       --armature-space-4: 1rem;
       --armature-space-6: 1.5rem;
       --armature-space-8: 2rem;
-      --armature-radius-small: 0.125rem;
-      --armature-radius-base: 0.25rem;
+      --armature-radius-small: 0.25rem;
+      --armature-radius-base: 0.3125rem;
       --armature-border-width: 1px;
       --armature-hidden-size: 1px;
       --armature-hidden-inset: 50%;
@@ -114,6 +139,31 @@
       --armature-target-size: 24px;
       --armature-focus-width: 3px;
       --armature-focus-offset: 3px;
+      --armature-text-micro: 0.6875rem;
+      --armature-text-control: 0.8125rem;
+      --armature-radius-panel: 0.375rem;
+      --armature-space-half: 0.125rem;
+      --armature-space-control: 0.375rem;
+      --armature-space-input: 0.4375rem;
+      --armature-space-detail: 0.625rem;
+      --armature-space-notice: 0.6875rem;
+      --armature-space-text: 0.875rem;
+      --armature-space-panel: 1.25rem;
+      --armature-control-height-compact: 32px;
+      --armature-table-cell-padding: 0.75rem 1rem;
+      --armature-table-cell-padding-compact: 0.375rem 1rem;
+      --armature-table-row-height: 44px;
+      --armature-table-row-height-compact: 34px;
+      --armature-search-width: 15rem;
+      --armature-inspector-width: 18.125rem;
+      --armature-cue-width: 3px;
+      --armature-chevron-size: 5px;
+      --armature-chevron-angle: 45deg;
+      --armature-chevron-stop: 50%;
+      --armature-sort-opacity: 0.6;
+      --armature-opacity-full: 1;
+      --armature-press-offset: 1px;
+    --armature-hover-mix: 5%;
     }
   }
 
@@ -140,12 +190,12 @@
     --armature-selected: #365c43;
     --armature-selected-cue: #a8d3b4;
     --armature-image-backdrop: #1c3229;
-    --armature-font-sans: system-ui, sans-serif;
+    --armature-font-sans: "Barlow", system-ui, sans-serif;
     --armature-font-mono: ui-monospace, monospace;
-    --armature-text-small: 0.875rem;
-    --armature-text-base: 1rem;
-    --armature-text-large: 1.25rem;
-    --armature-text-heading: 1.5rem;
+    --armature-text-small: 0.75rem;
+    --armature-text-base: 0.875rem;
+    --armature-text-large: 1rem;
+    --armature-text-heading: 1.25rem;
     --armature-line-height: 1.5;
     --armature-weight-normal: 400;
     --armature-weight-emphasis: 600;
@@ -157,8 +207,8 @@
     --armature-space-4: 1rem;
     --armature-space-6: 1.5rem;
     --armature-space-8: 2rem;
-    --armature-radius-small: 0.125rem;
-    --armature-radius-base: 0.25rem;
+    --armature-radius-small: 0.25rem;
+    --armature-radius-base: 0.3125rem;
     --armature-border-width: 1px;
     --armature-hidden-size: 1px;
     --armature-hidden-inset: 50%;
@@ -171,6 +221,31 @@
     --armature-target-size: 24px;
     --armature-focus-width: 3px;
     --armature-focus-offset: 3px;
+    --armature-text-micro: 0.6875rem;
+    --armature-text-control: 0.8125rem;
+    --armature-radius-panel: 0.375rem;
+    --armature-space-half: 0.125rem;
+    --armature-space-control: 0.375rem;
+    --armature-space-input: 0.4375rem;
+    --armature-space-detail: 0.625rem;
+    --armature-space-notice: 0.6875rem;
+    --armature-space-text: 0.875rem;
+    --armature-space-panel: 1.25rem;
+    --armature-control-height-compact: 32px;
+    --armature-table-cell-padding: 0.75rem 1rem;
+    --armature-table-cell-padding-compact: 0.375rem 1rem;
+    --armature-table-row-height: 44px;
+    --armature-table-row-height-compact: 34px;
+    --armature-search-width: 15rem;
+    --armature-inspector-width: 18.125rem;
+    --armature-cue-width: 3px;
+    --armature-chevron-size: 5px;
+    --armature-chevron-angle: 45deg;
+    --armature-chevron-stop: 50%;
+    --armature-sort-opacity: 0.6;
+    --armature-opacity-full: 1;
+    --armature-press-offset: 1px;
+    --armature-hover-mix: 5%;
   }
 
   /* Explicit light also works inside a dark-themed subtree. */
@@ -197,12 +272,12 @@
     --armature-selected: #e2ecd9;
     --armature-selected-cue: #245e49;
     --armature-image-backdrop: #fafaf8;
-    --armature-font-sans: system-ui, sans-serif;
+    --armature-font-sans: "Barlow", system-ui, sans-serif;
     --armature-font-mono: ui-monospace, monospace;
-    --armature-text-small: 0.875rem;
-    --armature-text-base: 1rem;
-    --armature-text-large: 1.25rem;
-    --armature-text-heading: 1.5rem;
+    --armature-text-small: 0.75rem;
+    --armature-text-base: 0.875rem;
+    --armature-text-large: 1rem;
+    --armature-text-heading: 1.25rem;
     --armature-line-height: 1.5;
     --armature-weight-normal: 400;
     --armature-weight-emphasis: 600;
@@ -214,8 +289,8 @@
     --armature-space-4: 1rem;
     --armature-space-6: 1.5rem;
     --armature-space-8: 2rem;
-    --armature-radius-small: 0.125rem;
-    --armature-radius-base: 0.25rem;
+    --armature-radius-small: 0.25rem;
+    --armature-radius-base: 0.3125rem;
     --armature-border-width: 1px;
     --armature-hidden-size: 1px;
     --armature-hidden-inset: 50%;
@@ -228,6 +303,31 @@
     --armature-target-size: 24px;
     --armature-focus-width: 3px;
     --armature-focus-offset: 3px;
+    --armature-text-micro: 0.6875rem;
+    --armature-text-control: 0.8125rem;
+    --armature-radius-panel: 0.375rem;
+    --armature-space-half: 0.125rem;
+    --armature-space-control: 0.375rem;
+    --armature-space-input: 0.4375rem;
+    --armature-space-detail: 0.625rem;
+    --armature-space-notice: 0.6875rem;
+    --armature-space-text: 0.875rem;
+    --armature-space-panel: 1.25rem;
+    --armature-control-height-compact: 32px;
+    --armature-table-cell-padding: 0.75rem 1rem;
+    --armature-table-cell-padding-compact: 0.375rem 1rem;
+    --armature-table-row-height: 44px;
+    --armature-table-row-height-compact: 34px;
+    --armature-search-width: 15rem;
+    --armature-inspector-width: 18.125rem;
+    --armature-cue-width: 3px;
+    --armature-chevron-size: 5px;
+    --armature-chevron-angle: 45deg;
+    --armature-chevron-stop: 50%;
+    --armature-sort-opacity: 0.6;
+    --armature-opacity-full: 1;
+    --armature-press-offset: 1px;
+    --armature-hover-mix: 5%;
   }
 
   @media (pointer: coarse), (max-width: 40rem) {
@@ -327,17 +427,23 @@
     box-sizing: border-box;
     min-height: max(var(--armature-control-height), var(--armature-target-size));
     min-width: var(--armature-target-size);
-    padding: var(--armature-space-2) var(--armature-space-3);
-    border: var(--armature-border-width) solid var(--armature-input-border);
+    padding: var(--armature-space-input) var(--armature-space-detail);
+    border: var(--armature-border-width) solid var(--armature-control-border);
     border-radius: var(--armature-radius-base);
     font-family: var(--armature-font-sans);
-    font-size: var(--armature-text-base);
+    font-size: var(--armature-text-control);
     line-height: var(--armature-line-height);
     color: var(--armature-ink);
     background: var(--armature-paper);
   }
 
   .armature-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--armature-space-control);
+    min-height: max(var(--armature-control-height-compact), var(--armature-target-size));
+    padding: var(--armature-space-control) var(--armature-space-3);
     cursor: pointer;
     font-weight: var(--armature-weight-emphasis);
     border-color: var(--armature-control-border);
@@ -350,8 +456,12 @@
   }
 
   .armature-button:hover {
+    background: color-mix(in srgb, var(--armature-paper), var(--armature-ink) var(--armature-hover-mix));
     box-shadow: inset var(--armature-space-zero) var(--armature-space-zero) var(--armature-space-zero) var(--armature-border-width) var(--armature-control-border);
   }
+
+  .armature-button-primary:hover { background: color-mix(in srgb, var(--armature-accent), var(--armature-ink) var(--armature-hover-mix)); }
+  .armature-button:active { transform: translateY(var(--armature-press-offset)); }
 
   /* Disabled looks the same for every variant: a primary fill would hide a
      dashed border drawn in its own colour. */
@@ -423,8 +533,12 @@
   .armature-field p { margin: var(--armature-space-zero); }
   .armature-hint, .armature-errors, .armature-status { font-size: var(--armature-text-small); }
   .armature-status {
+    font-size: var(--armature-text-micro);
+    font-weight: var(--armature-weight-emphasis);
+    white-space: nowrap;
+    border: var(--armature-border-width) solid var(--armature-line);
     display: inline-flex;
-    padding: var(--armature-space-1) var(--armature-space-2);
+    padding: var(--armature-space-half) var(--armature-space-input);
     border-radius: var(--armature-radius-small);
   }
 
@@ -432,7 +546,15 @@
   .armature-tone-success { color: var(--armature-success-emphasis); background: var(--armature-success-bg); }
   .armature-tone-warning { color: var(--armature-warning-emphasis); background: var(--armature-warning-bg); }
   .armature-tone-error { color: var(--armature-error-emphasis); background: var(--armature-error-bg); }
-  .armature-notice { padding: var(--armature-space-4); border-radius: var(--armature-radius-base); }
+  .armature-notice {
+    background: none;
+    color: var(--armature-ink);
+    font-size: var(--armature-text-control);
+    border-inline-start: var(--armature-cue-width) solid var(--armature-accent);
+    padding: var(--armature-space-notice) var(--armature-space-text);
+  }
+  .armature-notice.armature-tone-warning { border-inline-start-color: var(--armature-warning-emphasis); }
+  .armature-notice.armature-tone-error { border-inline-start-color: var(--armature-error-emphasis); }
   .armature-notice-title { margin: var(--armature-space-zero) var(--armature-space-zero) var(--armature-space-2); }
   .armature-notice-actions { margin-top: var(--armature-space-3); }
   .armature-stack { display: flex; flex-direction: column; gap: var(--armature-space-4); }
@@ -456,23 +578,23 @@
   .armature-table-scroll {
     overflow: auto;
     max-height: calc(var(--armature-control-height) * 12);
-    padding: var(--armature-focus-width);
+    padding: calc(var(--armature-focus-width) + var(--armature-focus-offset));
     scroll-padding: var(--armature-space-4);
   }
 
-  .armature-table { width: 100%; border-collapse: separate; border-spacing: var(--armature-space-zero); }
-  .armature-table caption { text-align: start; padding: var(--armature-space-3); font-weight: var(--armature-weight-emphasis); }
+  .armature-table { width: 100%; white-space: nowrap; border-collapse: separate; border-spacing: var(--armature-space-zero); }
+  .armature-table caption { white-space: normal; text-align: start; padding: var(--armature-space-3); font-weight: var(--armature-weight-emphasis); }
   .armature-table th, .armature-table td {
-    padding: var(--armature-space-3);
+    padding: var(--armature-table-cell-padding);
     text-align: start;
     border-bottom: var(--armature-border-width) solid var(--armature-line);
   }
-  .armature-table th { position: sticky; top: var(--armature-space-zero); background: var(--armature-paper); }
+  .armature-table th { position: sticky; top: var(--armature-space-zero); background: var(--armature-canvas); color: var(--armature-muted); font-size: var(--armature-text-micro); font-weight: var(--armature-weight-emphasis); padding: var(--armature-space-detail) var(--armature-space-4); }
   /* During keyboard interaction, headings join the flow so they cannot obscure focus. */
   .armature-table-scroll:focus-within th { position: static; }
   .armature-table .armature-numeric { text-align: end; font-variant-numeric: tabular-nums; }
   .armature-table-striped tbody tr:nth-child(even) { background: var(--armature-stripe); }
-  .armature-table tbody tr:hover { background: var(--armature-hover); }
+  .armature-table tbody tr:hover, .armature-table tbody tr:focus-within { background: var(--armature-hover); }
   .armature-table tbody tr.armature-row-selected { background: var(--armature-selected); }
   .armature-row-selected .armature-row-select {
     outline: var(--armature-border-width) dashed var(--armature-selected-cue);
@@ -484,9 +606,9 @@
     outline-offset: var(--armature-focus-offset);
   }
   .armature-sort, .armature-row-select {
-    min-height: max(var(--armature-control-height), var(--armature-target-size));
+    min-height: var(--armature-target-size);
     min-width: var(--armature-target-size);
-    padding: var(--armature-space-2) var(--armature-space-3);
+    padding: var(--armature-space-zero) var(--armature-space-1);
     border: var(--armature-border-width) solid var(--armature-control-border);
     border-radius: var(--armature-radius-base);
     font: inherit;
@@ -503,8 +625,15 @@
     background: none;
     padding-inline: var(--armature-space-1);
     font-weight: var(--armature-weight-emphasis);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--armature-space-control);
+    color: var(--armature-muted);
   }
-  .armature-sort-hint { color: var(--armature-muted); }
+  .armature-sort-hint {
+    color: var(--armature-muted);
+    opacity: var(--armature-sort-opacity);
+  }
   .armature-table-toolbar, .armature-pagination, .armature-record-header,
   .armature-toolbar-actions, .armature-record-actions {
     display: flex;
@@ -514,12 +643,27 @@
   }
   .armature-table-toolbar, .armature-pagination, .armature-record-header { justify-content: space-between; padding: var(--armature-space-3); }
   .armature-table-toolbar form, .armature-pagination form { display: flex; flex-wrap: wrap; align-items: center; gap: var(--armature-space-2); }
-  .armature-inspector { padding: var(--armature-space-4); background: var(--armature-paper); border: var(--armature-border-width) solid var(--armature-line); }
-  .armature-inspector:focus-visible { outline-offset: calc(var(--armature-focus-width) * -1); }
-  .armature-inspector h2, .armature-record-header h2 { font-size: var(--armature-text-heading); margin: var(--armature-space-zero); }
+  .armature-inspector {
+    padding: var(--armature-space-panel);
+    background: var(--armature-canvas);
+    border: none;
+    border-inline-start: var(--armature-border-width) solid var(--armature-line);
+  }
+
+  .armature-inspector:focus-visible { outline-offset: var(--armature-focus-offset); }
+  .armature-inspector h2 { font-size: var(--armature-text-base); font-weight: var(--armature-weight-emphasis); margin: var(--armature-space-zero); }
+  .armature-record-header h2 { font-size: var(--armature-text-heading); font-weight: var(--armature-weight-emphasis); margin: var(--armature-space-zero); }
   .armature-record-header p, .armature-table-empty { margin: var(--armature-space-zero); padding-block: var(--armature-space-3); }
-  .armature-table-inspector > .armature-link { display: inline-flex; align-items: center; min-height: var(--armature-target-size); }
-  .armature-table-inspector > .armature-split { margin-top: var(--armature-space-3); }
+  .armature-table-inspector > .armature-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--armature-target-size);
+    margin: var(--armature-space-2) var(--armature-space-4);
+  }
+  .armature-table-inspector > .armature-split {
+    margin-top: var(--armature-space-zero);
+    gap: var(--armature-space-zero);
+  }
   .armature-table-inspector > .armature-split > div {
     flex-basis: calc(var(--armature-layout-min-width) * 2);
   }
@@ -528,8 +672,9 @@
     background: var(--armature-canvas);
     color: var(--armature-ink);
     font-family: var(--armature-font-sans);
+    font-size: var(--armature-text-base);
     line-height: var(--armature-line-height);
-    padding: var(--armature-space-6);
+    padding: var(--armature-space-panel);
   }
   .armature-catalogue-columns {
     display: flex;
@@ -539,18 +684,25 @@
   }
   .armature-catalogue-detail {
     flex: 1;
-    min-width: min(100%, var(--armature-layout-min-width));
+    min-width: var(--armature-space-zero);
+    overflow-wrap: anywhere;
   }
   .armature-catalogue h1 {
+    font-weight: var(--armature-weight-emphasis);
     font-size: var(--armature-text-heading);
   }
-  .armature-catalogue h2 {
+  .armature-catalogue nav h2, .armature-catalogue-detail > section > h2 {
+    font-weight: var(--armature-weight-emphasis);
     font-size: var(--armature-text-large);
   }
   .armature-catalogue a {
+    min-width: var(--armature-target-size);
+    box-sizing: border-box;
     color: var(--armature-accent);
     display: inline-block;
     min-height: var(--armature-target-size);
+    padding: var(--armature-space-1);
+    border-radius: var(--armature-radius-small);
   }
   .armature-catalogue [aria-current="page"] {
     font-weight: var(--armature-weight-emphasis);
@@ -560,12 +712,76 @@
   .armature-catalogue article {
     background: var(--armature-paper);
     border: var(--armature-border-width) solid var(--armature-line);
-    border-radius: var(--armature-radius-base);
+    border-radius: var(--armature-radius-panel);
     padding: var(--armature-space-4);
+    min-width: var(--armature-space-zero);
     margin-block: var(--armature-space-4);
   }
   .armature-catalogue-notes {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
+  .armature-select {
+    appearance: auto;
+    padding-inline-end: var(--armature-control-height-compact);
+    background-image: none;
+    background-position: calc(100% - var(--armature-space-4)) var(--armature-chevron-stop), calc(100% - var(--armature-space-4) + var(--armature-chevron-size)) var(--armature-chevron-stop);
+    background-size: var(--armature-chevron-size) var(--armature-chevron-size);
+    background-repeat: no-repeat;
+  }
+  .armature-input:hover, .armature-select:hover, .armature-textarea:hover { border-color: var(--armature-accent); }
+  .armature-table td { height: var(--armature-table-row-height); box-sizing: border-box; font-size: var(--armature-text-control); }
+  .armature-table[data-density="compact"] td { padding: var(--armature-table-cell-padding-compact); height: var(--armature-table-row-height-compact); }
+  .armature-table td small { display: block; color: var(--armature-muted); font-size: var(--armature-text-micro); }
+  .armature-table tbody tr.armature-row-selected td:first-child { box-shadow: inset var(--armature-cue-width) var(--armature-space-zero) var(--armature-space-zero) var(--armature-accent); }
+
+
+  .armature-sort:hover .armature-sort-hint { opacity: var(--armature-opacity-full); }
+  th[aria-sort] .armature-sort { color: var(--armature-ink); }
+  .armature-row-select { border-style: none; background: none; }
+  .armature-table-toolbar { padding: var(--armature-space-2) var(--armature-space-4); border-bottom: var(--armature-border-width) solid var(--armature-line); justify-content: start; }
+  .armature-table-toolbar [role="status"] { color: var(--armature-muted); font-size: var(--armature-text-small); font-variant-numeric: tabular-nums; }
+  .armature-toolbar-actions { margin-inline-start: auto; }
+  .armature-table-toolbar form { max-width: 100%; min-width: var(--armature-space-zero); }
+  .armature-search { display: flex; position: relative; align-items: center; width: var(--armature-search-width); max-width: 100%; }
+  .armature-search > .armature-icon { position: absolute; inset-inline-start: var(--armature-space-detail); pointer-events: none; }
+  .armature-search .armature-input { width: 100%; min-width: var(--armature-space-zero); min-height: max(var(--armature-control-height-compact), var(--armature-target-size)); padding-block: var(--armature-space-1); padding-inline: var(--armature-control-height-compact) calc(var(--armature-target-size) + var(--armature-space-2)); }
+  .armature-search .armature-input::-webkit-search-cancel-button { appearance: none; }
+  .armature-search .armature-button { position: absolute; inset-inline-end: var(--armature-border-width); min-width: var(--armature-target-size); min-height: var(--armature-target-size); padding: var(--armature-space-zero); border-style: none; background: none; color: var(--armature-muted); }
+  .armature-pagination { padding: var(--armature-space-detail) var(--armature-space-4); border-top: var(--armature-border-width) solid var(--armature-line); font-size: var(--armature-text-small); color: var(--armature-muted); font-variant-numeric: tabular-nums; }
+  .armature-pagination .armature-select { min-height: max(var(--armature-control-height-compact), var(--armature-target-size)); }
+  .armature-pagination .armature-button { padding-inline: var(--armature-space-detail); }
+  .armature-record-header { padding: var(--armature-space-panel); border-bottom: var(--armature-border-width) solid var(--armature-line); }
+  .armature-record-header p { color: var(--armature-muted); font-size: var(--armature-text-small); padding-block: var(--armature-space-1); }
+
+  .armature-table-inspector { container-type: inline-size; border: var(--armature-border-width) solid var(--armature-line); border-radius: var(--armature-radius-panel); background: var(--armature-paper); }
+
+
+  .armature-table-inspector > .armature-split > div:first-child { flex: 1 1 calc(var(--armature-layout-min-width) * 2); }
+  .armature-table-inspector > .armature-split > div:last-child { flex: 0 1 var(--armature-inspector-width); }
+  .armature-table-inspector .armature-inspector { min-height: 100%; box-sizing: border-box; }
+  .armature-inspector .armature-record-header { padding-inline: var(--armature-space-zero); }
+  .armature-facts { display: grid; gap: var(--armature-space-detail); font-family: var(--armature-font-sans); font-size: var(--armature-text-base); line-height: var(--armature-line-height); color: var(--armature-ink); }
+  .armature-facts dt { font-size: var(--armature-text-small); color: var(--armature-muted); }
+  .armature-facts dd { margin: var(--armature-space-zero); font-weight: var(--armature-weight-emphasis); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .armature-catalogue-columns > nav { flex: 1 1 var(--armature-layout-min-width); display: flex; flex-wrap: wrap; align-content: start; gap: var(--armature-space-4); }
+  .armature-catalogue-columns > nav > a { flex-basis: 100%; }
+  .armature-catalogue-columns > nav section { flex: 1 1 var(--armature-layout-min-width); }
+  .armature-catalogue-columns > .armature-catalogue-detail { flex: 4 1 calc(var(--armature-layout-min-width) * 3); }
+  .armature-catalogue ul { list-style: none; padding: var(--armature-space-zero); margin: var(--armature-space-zero); }
+
+  .armature-catalogue a:hover { background: var(--armature-hover); }
+  .armature-catalogue h3 { font-size: var(--armature-text-base); font-weight: var(--armature-weight-emphasis); }
+  .armature-catalogue p { overflow-wrap: anywhere; }
+
+}
+
+@media (forced-colors: active) {
+  .armature-select { appearance: auto; background-image: none; }
+}
+
+/* A narrow composition stacks even inside a wide consumer viewport. */
+@container (max-width: 44rem) {
+  .armature-table-inspector > .armature-split > div:last-child { flex-basis: 100%; }
+  .armature-table-inspector .armature-inspector { border-inline-start: none; border-top: var(--armature-border-width) solid var(--armature-line); }
 }

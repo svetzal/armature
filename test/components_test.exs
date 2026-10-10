@@ -671,6 +671,63 @@ defmodule Armature.ComponentsTest do
     refute present?(doc, "[autofocus], aside[aria-live]")
   end
 
+  test "facts associate each visible label with its value" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.facts>
+          <:fact label="Identifier">R-001</:fact>
+          <:fact label="Score">42</:fact>
+        </C.facts>
+        """
+      end)
+
+    assert text(doc, "dl.armature-facts > div:first-child dt") == "Identifier"
+    assert text(doc, "dl.armature-facts > div:first-child dd") == "R-001"
+    assert text(doc, "dl.armature-facts > div:last-child dt") == "Score"
+    assert text(doc, "dl.armature-facts > div:last-child dd") == "42"
+  end
+
+  test "search clear is named and sends an empty query, with a decorative search icon" do
+    for query <- ["", "Example"] do
+      doc =
+        document(
+          fn assigns ->
+            ~H"""
+            <C.table_toolbar id="search" search_event="filter" query={@query} total={1} />
+            """
+          end,
+          %{query: query}
+        )
+
+      assert present?(doc, ".armature-search > .armature-icon[aria-hidden=true]")
+
+      assert present?(
+               doc,
+               "#search-clear[aria-label='Clear search'][phx-click=filter][phx-value-query='']"
+             ) == (query != "")
+    end
+  end
+
+  test "table density defaults to default and accepts compact" do
+    for density <- ~w(default compact) do
+      doc =
+        document(
+          fn assigns ->
+            ~H"""
+            <C.data_table id="density" caption="Records" rows={[%{id: "R-001"}]} density={@density}>
+              <:col :let={row} label="Identifier">{row.id}</:col>
+            </C.data_table>
+            """
+          end,
+          %{density: density}
+        )
+
+      assert present?(doc, "table#density[data-density=#{density}]")
+      assert text(doc, "#density td") == "R-001"
+    end
+  end
+
   defp document(component, assigns \\ %{}) do
     component |> render_component(assigns) |> LazyHTML.from_fragment()
   end

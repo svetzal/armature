@@ -285,17 +285,35 @@ defmodule Armature.Components do
     """
   end
 
+  @doc "A description list of labelled facts. Values may contain lower-level components."
+  slot :fact, required: true do
+    attr(:label, :string, required: true)
+  end
+
+  def facts(assigns) do
+    ~H"""
+    <dl class={["armature-facts"]}>
+      <div :for={fact <- @fact}>
+        <dt>{fact.label}</dt>
+        <dd>{render_slot(fact)}</dd>
+      </div>
+    </dl>
+    """
+  end
+
   @doc """
   A native table with scoped headings and caller-owned ordering and selection.
 
   Columns render each row through `:let`; `sort_key` buttons send `key` to
   `sort_event`. Selection buttons send `id` to `select_event`. Supply an existing
   `inspector_id` when enabling selection. Row identifiers must be unique and DOM-safe.
+  `density="compact"` reduces cell padding and row height on fine pointers.
   `caption_hidden` hides only the caption visually. Empty results use words.
   """
   attr(:id, :string, required: true)
   attr(:rows, :list, required: true)
   attr(:caption, :string, required: true)
+  attr(:density, :string, default: "default", values: ~w(default compact))
   attr(:caption_hidden, :boolean, default: false)
   attr(:empty_label, :string, default: "No records to display.")
   attr(:striped, :boolean, default: true)
@@ -333,6 +351,7 @@ defmodule Armature.Components do
         :if={@rows != []}
         id={@id}
         class={["armature-table", @striped && "armature-table-striped"]}
+        data-density={@density}
       >
         <caption class={[@caption_hidden && "armature-sr-only"]}>{@caption}</caption>
         <thead>
@@ -411,8 +430,29 @@ defmodule Armature.Components do
     ~H"""
     <div id={@id} class={["armature-table-toolbar"]}>
       <form id={@id <> "-search-form"} phx-change={@search_event} phx-submit={@search_event}>
-        <label for={@id <> "-search"}>{@search_label}</label>
-        <.input id={@id <> "-search"} type="search" name="query" value={@query} />
+        <label for={@id <> "-search"} class={["armature-sr-only"]}>{@search_label}</label>
+        <div class={["armature-search"]}>
+          <.icon>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="10" cy="10" r="6" /><path d="m15 15 6 6" />
+            </svg>
+          </.icon>
+          <.input id={@id <> "-search"} type="search" name="query" value={@query} />
+          <.button
+            :if={@query != ""}
+            id={@id <> "-clear"}
+            variant="secondary"
+            phx-click={@search_event}
+            phx-value-query=""
+            aria-label="Clear search"
+          >
+            <.icon>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m6 6 12 12M18 6 6 18" />
+              </svg>
+            </.icon>
+          </.button>
+        </div>
       </form>
       <span id={@id <> "-count"} role="status" aria-live="polite" aria-atomic="true">{format_count(
         @total
@@ -517,6 +557,7 @@ defmodule Armature.Components do
   attr(:id, :string, required: true)
   attr(:rows, :list, required: true)
   attr(:caption, :string, required: true)
+  attr(:density, :string, default: "default", values: ~w(default compact))
   attr(:query, :string, default: "")
   attr(:search_event, :string, required: true)
   attr(:sort_event, :string, required: true)
@@ -572,6 +613,7 @@ defmodule Armature.Components do
           id={@id <> "-table"}
           rows={@rows}
           caption={@caption}
+          density={@density}
           sort_by={@sort_by}
           sort_direction={@sort_direction}
           sort_event={@sort_event}

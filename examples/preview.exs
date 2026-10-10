@@ -6,7 +6,25 @@ Mix.install([
 
 defmodule PreviewLayout do
   use Phoenix.Component
-  @stylesheet File.read!(Path.expand("../priv/static/armature.css", __DIR__))
+  # Keep the one-file preview self-contained: the playground re-evaluates this
+  # script on requests, so simultaneous font requests can race module compilation.
+  @font_stylesheet Enum.reduce(
+                     [400, 600],
+                     File.read!(Path.expand("../priv/static/armature-fonts.css", __DIR__)),
+                     fn weight, css ->
+                       font =
+                         File.read!(
+                           Path.expand("../priv/static/fonts/barlow-#{weight}.woff2", __DIR__)
+                         )
+
+                       String.replace(
+                         css,
+                         "fonts/barlow-#{weight}.woff2",
+                         "data:font/woff2;base64," <> Base.encode64(font)
+                       )
+                     end
+                   )
+  @stylesheet @font_stylesheet <> File.read!(Path.expand("../priv/static/armature.css", __DIR__))
 
   def root(assigns) do
     assigns = assign(assigns, :stylesheet, @stylesheet)

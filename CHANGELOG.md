@@ -10,6 +10,11 @@ Until 1.0.0, a minor version can change the public surface.
 
 ### Added
 
+- Optional Barlow 400/600 font stylesheet, bundled font files and SIL Open
+  Font License; documented static serving and imports.
+- Registered `facts` description-list molecule and compact table density,
+  including rendered and token-contract regression tests.
+
 - Mountable development catalogue through `Armature.Catalogue.Router`, with
   consumer registries, independent examples modules and LiveView-local state.
   Level-grouped navigation, directly linkable query parameters, heading focus,
@@ -64,6 +69,14 @@ Until 1.0.0, a minor version can change the public surface.
 - Include the licence in generated documentation so the README link resolves.
 
 ### Changed
+
+- Refine default typography, controls, status chips, notices, tables, toolbars,
+  pagination and inspector surfaces through measurement tokens, preserving the
+  palette and contrast contract. Tables include selected-row bars, inline sort
+  affordances and secondary cell text; search includes a named clear action.
+- Reflow catalogue navigation above examples at narrow widths and contain
+  wide tables in scrolling regions. Show both densities, selected records and
+  facts in the examples. Keep version 0.1.0.
 
 - Replace the hand-built preview with the router-mounted catalogue and move its
   synthetic record generator into the internal catalogue records module.

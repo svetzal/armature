@@ -140,6 +140,17 @@ defmodule Armature.CatalogueTest do
     assert has_element?(view, "#example-selected-record", "R-001")
   end
 
+  test "search clears through the named action and restores the result count" do
+    {:ok, view, _} = live(build_conn(), "/ui?node=table_inspector")
+    view |> form("#example-records-toolbar-search-form", %{"query" => "R-001"}) |> render_change()
+    assert has_element?(view, "#example-records-toolbar-clear[aria-label='Clear search']")
+    assert has_element?(view, "#example-records-table[data-density=compact]")
+    view |> element("#example-records-toolbar-clear") |> render_click()
+    assert has_element?(view, "#example-records-toolbar-search[value='']")
+    assert has_element?(view, "#example-records-toolbar-count", "200 results")
+    refute has_element?(view, "#example-records-toolbar-clear")
+  end
+
   test "an aliased nested scope renders the consumer registry and extensions" do
     {:ok, view, _} = live(build_conn(), "/nested/ui?node=marker")
 

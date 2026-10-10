@@ -31,6 +31,34 @@ Armature checks these rules in your test suite, not only in documentation.
 3. Declare your own components in your registry, next to the baseline ones.
 4. Run the registry checks in your tests.
 
+## Styles and optional Barlow fonts
+
+The sans token selects Barlow with a system fallback. Barlow 400 and 600 ship
+under the SIL Open Font License in `priv/static/fonts/OFL.txt`; the library
+code remains MIT licensed. Loading the font stylesheet is optional.
+
+Serve Armature's static files from your endpoint, before its router:
+
+```elixir
+plug Plug.Static,
+  at: "/armature",
+  from: {:armature, "priv/static"},
+  only: ~w(armature.css armature-fonts.css fonts)
+```
+
+Then add these stylesheet links in your root layout:
+
+```heex
+<link rel="stylesheet" href="/armature/armature.css" />
+<link rel="stylesheet" href="/armature/armature-fonts.css" />
+```
+
+The font stylesheet uses relative font URLs and `font-display: swap`. All
+static assets, including both fonts and their licence, are included in the
+Hex package through its `priv` file entry. Consumer token overrides belong
+after the library stylesheet. See the [token guide](guides/tokens.md) and
+[component guide](guides/components.md) for compact table density and facts.
+
 ## Vendoring
 
 Armature is MIT licensed. To own a frozen copy, put the source in your

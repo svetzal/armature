@@ -41,6 +41,31 @@ parallel palette lives in Elixir or the tests.
 <!-- tokens:start -->
 | Token | Group | Role | Required contrast |
 | --- | --- | --- | --- |
+| `--armature-hover-mix` | shape | Subtle ink blend on hovered buttons. |  |
+| `--armature-text-micro` | typography | Size of table headings, cell metadata and status chips. |  |
+| `--armature-text-control` | typography | Size of controls, table cells and notices. |  |
+| `--armature-radius-panel` | shape | Corner radius of content panels. |  |
+| `--armature-space-half` | space | Smallest chip inset. |  |
+| `--armature-space-control` | space | Button inset and icon gap. |  |
+| `--armature-space-input` | space | Input and chip inset. |  |
+| `--armature-space-detail` | space | Fact gap, input inset and heading inset. |  |
+| `--armature-space-notice` | space | Notice vertical inset. |  |
+| `--armature-space-text` | space | Notice horizontal inset. |  |
+| `--armature-space-panel` | space | Record header and inspector inset. |  |
+| `--armature-control-height-compact` | control | Height of compact toolbar fields and buttons before target overrides. |  |
+| `--armature-table-cell-padding` | space | Default table cell vertical and horizontal inset. |  |
+| `--armature-table-cell-padding-compact` | space | Compact table cell vertical and horizontal inset. |  |
+| `--armature-table-row-height` | control | Minimum default table row height. |  |
+| `--armature-table-row-height-compact` | control | Minimum compact table row height. |  |
+| `--armature-search-width` | control | Preferred toolbar search width. |  |
+| `--armature-inspector-width` | space | Preferred inspector column width. |  |
+| `--armature-cue-width` | shape | Width of notice rules and selected row bars. |  |
+| `--armature-chevron-size` | shape | Size of each select chevron stroke. |  |
+| `--armature-chevron-angle` | shape | Angle of the drawn select chevron. |  |
+| `--armature-chevron-stop` | shape | Gradient stop and vertical position of the select chevron. |  |
+| `--armature-sort-opacity` | shape | Opacity of an inactive sort arrow. |  |
+| `--armature-opacity-full` | shape | Opacity of an active affordance. |  |
+| `--armature-press-offset` | shape | Displacement of a pressed action. |  |
 | `--armature-layout-min-width` | space | Minimum item width before grid and split regions stack. |  |
 | `--armature-ink` | colour | Primary text on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1 |
 | `--armature-muted` | colour | Secondary text that remains readable on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1 |

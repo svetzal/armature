@@ -30,8 +30,9 @@ and override its tokens in your own CSS. Components share light and dark token v
 | Component | Uses | Purpose |
 | --- | --- | --- |
 | `field` | `input`, `select`, `textarea` | A labelled control with hint and validation. |
+| `facts` | — | Labelled values in a description list. |
 | `notice` | — | Static guidance or reported results with actions. |
-| `table_toolbar` | `input` | A labelled search and announced result count. |
+| `table_toolbar` | `input`, `icon`, `button` | A labelled search and announced result count. |
 | `pagination` | `button`, `select` | Named paging controls and an announced range. |
 | `record_header` | `status` | A record heading with context and actions. |
 
@@ -178,3 +179,63 @@ The mountable catalogue (also served by `examples/preview.exs`) demonstrates thi
 search across the complete set, text and numeric sorting, 10/25/50 page sizes,
 and selection retained across search and paging. Its theme controls exercise
 the same table, hover, selected and focus tokens in light and dark modes.
+
+## Density and facts
+
+`data_table` and `table_inspector` accept `density="default"` (the default) or
+`density="compact"`. Default cells use 12px × 16px insets and 44px rows;
+compact cells use 6px × 16px insets and 34px rows. Row heights are minimums:
+wrapping content may grow them. Narrow screens and coarse pointers retain
+44px control targets in either density. Secondary cell text can use a `small`
+element; it occupies its own line at 11px.
+
+```heex
+<.facts>
+  <:fact label="Identifier">R-001</:fact>
+  <:fact label="Score">42</:fact>
+</.facts>
+```
+
+Facts render as a native description list with muted labels and tabular,
+emphasised values. They hold no record state. The toolbar's decorative search
+icon and named Clear search button are built in; clearing sends an empty
+`query` to the same `search_event`. The clear button appears for a nonempty query.
+
+## Reference measurements
+
+All names below have the `--armature-` prefix. Rem values use the browser's
+16px default; they scale with the reader's font preferences. Row heights and
+control sizes are minimums, allowing text to grow.
+
+| Measurement | Token or component rule |
+| --- | --- |
+| Barlow 400/600, system fallback, swap loading | `font-sans`, `weight-normal`, `weight-emphasis`; optional `armature-fonts.css` |
+| Body 14px, line height 1.5 | `text-base`, `line-height` |
+| Cells, buttons, notices, search 13px | `text-control` |
+| Hints, context, counts, ranges and fact labels 12px | `text-small` |
+| Table headings, cell metadata and status chips 11px | `text-micro` |
+| Record title 20px/600; inspector heading 14px/600 | `text-heading`, `text-base`, `weight-emphasis` |
+| Numbers and counts tabular | Numeric cells, facts values, toolbar counts and pagination use `font-variant-numeric: tabular-nums` |
+| Buttons: 32px minimum, 6px × 12px, 5px radius, 1px border | `control-height-compact`, `space-control`, `space-3`, `radius-base`, `border-width` |
+| Buttons: accent/paper primary; paper secondary; subtle hover; 6px icon gap | Button variant rules, `hover-mix`, `space-control` |
+| Inputs/selects: 36px minimum, 7px × 10px, 5px radius, control border | `control-height`, `space-input`, `space-detail`, `radius-base`, `control-border` |
+| Toolbar fields: 32px minimum | `control-height-compact`; compact vertical inset in the search rule |
+| Select chevron; native in forced colours | `chevron-size`, `chevron-angle`, `chevron-stop`; forced-colour appearance override |
+| Status: 11px/600, 2px × 7px, 4px radius, 1px line border, tone background, no wrap | `text-micro`, `weight-emphasis`, `space-half`, `space-input`, `radius-small`, `border-width`, tone rules |
+| Notice: unfilled, 3px rule, 11px × 14px, 13px, title 600 | `cue-width`, `space-notice`, `space-text`, `text-control`, `weight-emphasis`; accent/warning/error rule colours |
+| Table headings: 11px/600, muted/canvas, 10px × 16px, sticky | `text-micro`, `weight-emphasis`, `muted`, `canvas`, `space-detail`, `space-4`; heading rule |
+| Default cells: 13px, 12px × 16px, 44px rows | `text-control`, `table-cell-padding`, `table-row-height` |
+| Compact cells: 6px × 16px, 34px rows | `table-cell-padding-compact`, `table-row-height-compact`; `data-density="compact"` |
+| Rows: 1px line dividers, hover/focus surface, selected surface and 3px inset accent bar | `border-width`, `line`, `hover`, `selected`, `cue-width`, `accent`; first-cell shadow |
+| Secondary cell line: muted, 11px | `td small`, `muted`, `text-micro` |
+| Inline sorting with faint arrow, stronger on hover/active | `.armature-sort`, `sort-opacity`, `opacity-full`, active heading rule |
+| Toolbar: 8px × 16px, bottom divider, actions at end | `space-2`, `space-4`, `border-width`, `line`; action auto margin |
+| Search: 240px, decorative leading icon, named clear action inside | `search-width`; search layout and Clear search button |
+| Pagination: 10px × 16px, top divider, 12px muted tabular range, compact buttons | `space-detail`, `space-4`, `border-width`, `line`, `text-small`, `muted`, `control-height-compact` |
+| Composition/panels: paper, 1px line border, 6px radius | `paper`, `border-width`, `line`, `radius-panel` |
+| Inspector: about 290px, canvas, left divider, 20px padding | `inspector-width`, `canvas`, `border-width`, `line`, `space-panel`; stacks in a narrow container |
+| Record header: 20px padding, bottom divider, 12px muted context | `space-panel`, `border-width`, `line`, `text-small`, `muted` |
+| Facts: 12px muted labels, tabular values/600, 10px pair gap | `text-small`, `muted`, `weight-emphasis`, `space-detail` |
+| Focus: 3px outline and 3px offset; headings never obscure it | `focus-width`, `focus-offset`, `focus`; headings become static during keyboard interaction |
+| Targets: at least 24px; coarse/narrow at least 44px | `target-size` media override and minimum dimensions, in both densities |
+| Reflow at 400% zoom; navigation above content; tables scroll locally | Wrapping catalogue columns, zero content minimum width, overflow table region, container stacking |

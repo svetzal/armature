@@ -148,7 +148,8 @@ defmodule Armature.TokensTest do
   test "base and component rules use declared variables for dimensions and motion", %{css: css} do
     [_, base] = String.split(css, "@layer armature.base {")
     refute Regex.match?(~r/--[\w-]+\s*:/, base)
-    refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s|%)\b/, base)
+    declarations = Regex.replace(~r/@(?:media|container)[^{]+\{/, base, "")
+    refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s|%)\b/, declarations)
     assert base =~ ".armature-sr-only"
     assert base =~ "clip-path: inset(var(--armature-hidden-inset))"
     assert base =~ ":focus-visible"
@@ -169,7 +170,9 @@ defmodule Armature.TokensTest do
     [_, components] = String.split(css, "@layer armature.components {")
     refute colour_literal?(components)
     refute Regex.match?(~r/--[\w-]+\s*:/, components)
-    refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s)\b/, components)
+    # Breakpoints cannot consume CSS custom properties; declarations still must.
+    declarations = Regex.replace(~r/@(?:media|container)[^{]+\{/, components, "")
+    refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s)\b/, declarations)
 
     assert components =~
              "min-height: max(var(--armature-control-height), var(--armature-target-size))"
@@ -241,6 +244,10 @@ defmodule Armature.TokensTest do
     end
 
     assert Map.new(rule!(rules, ".armature-table-scroll"))["overflow"] == "auto"
+
+    assert Map.new(rule!(rules, ".armature-catalogue a"))["min-width"] ==
+             "var(--armature-target-size)"
+
     assert Map.new(rule!(rules, ".armature-table th"))["position"] == "sticky"
     assert Map.new(rule!(rules, ".armature-table-scroll:focus-within th"))["position"] == "static"
     assert Map.new(rule!(rules, ".armature-table .armature-numeric"))["text-align"] == "end"
@@ -250,7 +257,7 @@ defmodule Armature.TokensTest do
 
     for {selector, token} <- [
           {".armature-table-striped tbody tr:nth-child(even)", "stripe"},
-          {".armature-table tbody tr:hover", "hover"},
+          {".armature-table tbody tr:hover, .armature-table tbody tr:focus-within", "hover"},
           {".armature-table tbody tr.armature-row-selected", "selected"}
         ] do
       assert Map.new(rule!(rules, selector))["background"] == "var(--armature-#{token})"
@@ -258,8 +265,7 @@ defmodule Armature.TokensTest do
 
     control = Map.new(rule!(rules, ".armature-sort, .armature-row-select"))
 
-    assert control["min-height"] ==
-             "max(var(--armature-control-height), var(--armature-target-size))"
+    assert control["min-height"] == "var(--armature-target-size)"
 
     assert control["min-width"] == "var(--armature-target-size)"
     selected = Map.new(rule!(rules, ".armature-row-selected .armature-row-select"))
@@ -274,7 +280,8 @@ defmodule Armature.TokensTest do
 
   test "forced colours keep focus, selection and focused selection visually distinct",
        %{css: css} do
-    [_, base] = String.split(css, "@layer armature.base {")
+    [_, base_and_components] = String.split(css, "@layer armature.base {")
+    [base, _] = String.split(base_and_components, "@layer armature.components {")
     [_, forced] = String.split(base, "@media (forced-colors: active) {")
 
     # Focus and the selection cue are both Highlight in forced colours, so
@@ -342,6 +349,69 @@ defmodule Armature.TokensTest do
     [_, generated] = String.split(guide, "<!-- tokens:start -->\n")
     [table, _] = String.split(generated, "<!-- tokens:end -->")
     assert table == Tokens.markdown_table()
+  end
+
+  test "refined type, geometry and density match the reference", %{rules: rules, css: css} do
+    values = rules |> rule!(":root") |> Map.new()
+
+    for {name, value} <- [
+          {"text-base", "0.875rem"},
+          {"text-control", "0.8125rem"},
+          {"text-small", "0.75rem"},
+          {"text-micro", "0.6875rem"},
+          {"text-heading", "1.25rem"},
+          {"line-height", "1.5"},
+          {"weight-emphasis", "600"},
+          {"control-height", "36px"},
+          {"control-height-compact", "32px"},
+          {"radius-base", "0.3125rem"},
+          {"radius-panel", "0.375rem"},
+          {"radius-small", "0.25rem"},
+          {"focus-width", "3px"},
+          {"focus-offset", "3px"},
+          {"table-cell-padding", "0.75rem 1rem"},
+          {"table-cell-padding-compact", "0.375rem 1rem"},
+          {"table-row-height", "44px"},
+          {"table-row-height-compact", "34px"},
+          {"search-width", "15rem"},
+          {"inspector-width", "18.125rem"}
+        ] do
+      assert values["--armature-" <> name] == value
+    end
+
+    assert values["--armature-font-sans"] == ~s("Barlow", system-ui, sans-serif)
+
+    for rule <- [
+          "padding: var(--armature-table-cell-padding)",
+          "padding: var(--armature-table-cell-padding-compact)",
+          "box-shadow: inset var(--armature-cue-width)",
+          "border-inline-start: var(--armature-cue-width) solid var(--armature-accent)",
+          ".armature-table tbody tr:focus-within",
+          ".armature-facts dt",
+          "white-space: nowrap",
+          "appearance: none",
+          "appearance: auto",
+          "background-image: none",
+          "flex: 4 1 calc(var(--armature-layout-min-width) * 3)"
+        ],
+        do: assert(css =~ rule)
+  end
+
+  test "optional Barlow stylesheet ships both weights and their licence" do
+    css = File.read!(Path.expand("../priv/static/armature-fonts.css", __DIR__))
+
+    for weight <- [400, 600] do
+      assert css =~ "font-weight: #{weight}"
+      assert css =~ "fonts/barlow-#{weight}.woff2"
+
+      assert File.read!(Path.expand("../priv/static/fonts/barlow-#{weight}.woff2", __DIR__))
+             |> binary_part(0, 4) == "wOF2"
+    end
+
+    assert length(Regex.scan(~r/font-display: swap/, css)) == 2
+
+    assert File.read!(Path.expand("../priv/static/fonts/OFL.txt", __DIR__)) =~
+             "SIL OPEN FONT LICENSE Version 1.1"
   end
 
   defp theme_selectors do
