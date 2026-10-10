@@ -543,13 +543,28 @@ defmodule Armature.ComponentsTest do
 
     for {container, selector, child} <- [
           {"armature-shell", "#responsive-shell", ".armature-app-shell-grid"},
-          {"armature-navigation", "#responsive-nav", ".armature-grouped-nav-picker"},
           {"armature-grid", "#responsive-panels", ".armature-grid-items"}
         ] do
       assert present?(doc, selector <> " > " <> child)
       assert text(doc, "style") =~ "container: #{container} / inline-size"
       assert text(doc, "style") =~ "@container #{container} (width <"
     end
+
+    # A grouped list collapses against the layout around it, never its own
+    # width: inside an app shell that is the content area.
+    assert present?(doc, "#responsive-shell .armature-app-shell-content #responsive-nav")
+    assert present?(doc, "#responsive-nav > .armature-grouped-nav-picker")
+    assert text(doc, "style") =~ "container: armature-content armature-nav-layout / inline-size"
+
+    [_, collapse] =
+      Regex.run(
+        ~r/@container armature-nav-layout \(width < 760px\) \{([^@]+)\}/,
+        text(doc, "style")
+      )
+
+    assert collapse =~ ".armature-grouped-nav-links { display: none; }"
+    assert collapse =~ ".armature-grouped-nav-picker { display: grid;"
+    refute text(doc, "style") =~ "armature-navigation"
 
     assert present?(doc, "#responsive-panels > .armature-grid-items > #first-panel")
     assert doc |> LazyHTML.query("main") |> Enum.count() == 1

@@ -308,7 +308,7 @@ defmodule Armature.Catalogue.BaselineExamples do
           inspector_id="example-details"
         >
           <:col :let={row} label="Name" sort_key="name" row_label>
-            {row.name}<small>{row.group}</small>
+            {row.name}{" "}<small>{row.group}</small>
           </:col>
           <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
         </A.data_table>
@@ -325,7 +325,7 @@ defmodule Armature.Catalogue.BaselineExamples do
           caption="Default density records"
         >
           <:col :let={row} label="Identifier">{row.id}</:col>
-          <:col :let={row} label="Name" row_label>{row.name}<small>{row.group}</small></:col>
+          <:col :let={row} label="Name" row_label>{row.name}{" "}<small>{row.group}</small></:col>
           <:col :let={row} label="Score" numeric>{row.score}</:col>
         </A.data_table>
       <% :table_toolbar -> %>
@@ -387,7 +387,7 @@ defmodule Armature.Catalogue.BaselineExamples do
         >
           <:col :let={row} label="Identifier">{row.id}</:col>
           <:col :let={row} label="Name" sort_key="name" row_label>
-            {row.name}<small>{row.group}</small>
+            {row.name}{" "}<small>{row.group}</small>
           </:col>
           <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
           <:details><.details state={@state} /></:details>

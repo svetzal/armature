@@ -211,13 +211,51 @@ defmodule Armature.Catalogue.CatalogueLive do
     content = example.render.(%{state: state, __changed__: nil})
     html = Phoenix.HTML.Safe.to_iodata(content) |> IO.iodata_to_binary()
 
-    isolated? =
-      Regex.match?(
-        ~r/<main\b|^\s*<(?:header|footer)\b|role=["'](?:main|banner|contentinfo)["']/i,
-        html
-      )
+    isolated? = page_landmark?(html)
 
     Map.merge(example, %{content: content, html: html, isolated?: isolated?})
+  end
+
+  @sectioning ~w(article aside main nav section)
+  @void ~w(area base br col embed hr img input link meta param source track wbr)
+
+  # True when the example would add a page-level landmark to the catalogue's
+  # own document: a main element, an explicit main, banner or contentinfo
+  # role, or a header or footer that no sectioning element contains. Such
+  # examples render in their own document. A header inside an aside is not a
+  # page landmark, so interactive compositions stay inline and keep working.
+  defp page_landmark?(html) do
+    if Regex.match?(~r/<main\b|role=["'](?:main|banner|contentinfo)["']/i, html) do
+      true
+    else
+      ~r/<(\/?)([a-zA-Z][\w-]*)\b[^>]*?(\/?)>/
+      |> Regex.scan(html)
+      |> Enum.reduce_while([], fn [_, closing, name, self_closing], stack ->
+        name = String.downcase(name)
+
+        cond do
+          closing == "/" ->
+            {:cont, drop_to(stack, name)}
+
+          name in ~w(header footer) and not Enum.any?(stack, &(&1 in @sectioning)) ->
+            {:halt, :landmark}
+
+          self_closing == "/" or name in @void ->
+            {:cont, stack}
+
+          true ->
+            {:cont, [name | stack]}
+        end
+      end)
+      |> Kernel.==(:landmark)
+    end
+  end
+
+  defp drop_to(stack, name) do
+    case Enum.split_while(stack, &(&1 != name)) do
+      {_inner, [^name | rest]} -> rest
+      {_inner, []} -> stack
+    end
   end
 
   defp example_preview(assigns) do

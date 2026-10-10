@@ -27,6 +27,13 @@ Until 1.0.0, a minor version can change the public surface.
   documents, with native width presets and announced choices.
 - Reflow shells, grouped navigation and panel tiling by their own inline size
   through container queries, including embedded and narrow previews.
+- A grouped list collapses to its select against the layout around it, the
+  `armature-nav-layout` container, which the app shell's content area provides;
+  its own width cannot tell a side column from a narrow stacked page.
+- Isolate an example only when it would add a page-level landmark: a `main`, an
+  explicit main, banner or contentinfo role, or a `header` or `footer` outside
+  any sectioning element. Interactive compositions with a header inside an
+  aside stay inline and interactive.
 
 ### Changed
 

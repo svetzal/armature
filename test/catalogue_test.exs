@@ -76,6 +76,32 @@ defmodule Armature.CatalogueTest do
     assert doc |> LazyHTML.query("main") |> Enum.count() == 1
   end
 
+  test "examples with wrapped headers or footers render in an isolated document" do
+    {:ok, _view, html} = live(build_conn(), "/nested/ui?node=masthead")
+    doc = LazyHTML.from_fragment(html)
+
+    # The wrapped header and footer must not join the catalogue's own page.
+    assert doc |> LazyHTML.query("main") |> Enum.count() == 1
+    assert doc |> LazyHTML.query("main header, main footer") |> Enum.count() == 0
+
+    [frame] = doc |> LazyHTML.query("iframe") |> LazyHTML.to_tree()
+    {"iframe", attributes, _children} = frame
+    framed = attributes |> List.keyfind("srcdoc", 0) |> elem(1) |> LazyHTML.from_document()
+    assert framed |> LazyHTML.query(".example-frame > header") |> Enum.count() == 1
+    assert framed |> LazyHTML.query(".example-frame > footer") |> Enum.count() == 1
+  end
+
+  test "grouped navigation sits inside the layout it collapses against" do
+    {:ok, _view, html} = live(build_conn(), "/ui?node=button")
+    doc = LazyHTML.from_fragment(html)
+
+    assert doc
+           |> LazyHTML.query(
+             ".armature-app-shell-content .armature-grouped-nav > .armature-grouped-nav-picker"
+           )
+           |> Enum.count() == 1
+  end
+
   test "consumer title is configurable and shell examples announce choices" do
     {:ok, view, _} = live(build_conn(), "/nested/ui?node=theme_switch")
     assert has_element?(view, ".armature-side-nav-brand", "Example library")

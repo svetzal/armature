@@ -558,7 +558,7 @@
   .armature-panel { color: var(--armature-ink); font-family: var(--armature-font-sans); font-size: var(--armature-text-base); line-height: var(--armature-line-height); background: var(--armature-paper); border: var(--armature-border-width) solid var(--armature-line); border-radius: var(--armature-radius-panel); padding: var(--armature-space-panel-content); }
   .armature-panel h2 { font-size: var(--armature-text-heading); margin: var(--armature-space-zero); }
   .armature-panel > .armature-cluster { margin-bottom: var(--armature-space-4); }
-  .armature-grouped-nav { container: armature-navigation / inline-size; color: var(--armature-ink); font-family: var(--armature-font-sans); font-size: var(--armature-text-base); line-height: var(--armature-line-height); }
+  .armature-grouped-nav { color: var(--armature-ink); font-family: var(--armature-font-sans); font-size: var(--armature-text-base); line-height: var(--armature-line-height); }
   .armature-grouped-nav-links { border-inline-end: var(--armature-border-width) solid var(--armature-line); padding-inline-end: var(--armature-space-text); }
   .armature-grouped-nav-links section + section { margin-top: var(--armature-space-4); }
   .armature-grouped-nav-links .armature-eyebrow { font-size: var(--armature-text-micro); letter-spacing: var(--armature-tracking-brand); }
@@ -568,7 +568,11 @@
   .armature-grouped-nav-links a:active { transform: translateY(var(--armature-press-offset)); }
   .armature-grouped-nav-picker { display: none; }
   .armature-grouped-nav-picker p { margin: var(--armature-space-zero); color: var(--armature-muted); font-size: var(--armature-text-micro); }
-  .armature-app-shell-content { container: armature-content / inline-size; }
+  /* The content area is also the layout a grouped list collapses against: a
+     list cannot tell from its own width whether it sits in a side column or
+     is stacked across a narrow page. Consumers without an app shell can name
+     an ancestor armature-nav-layout themselves. */
+  .armature-app-shell-content { container: armature-content armature-nav-layout / inline-size; }
   .armature-catalogue-explorer { display: grid; grid-template-columns: var(--armature-nav-width) minmax(0, 1fr); gap: var(--armature-space-6); }
   .armature-catalogue-detail { min-width: var(--armature-space-zero); }
   .armature-catalogue-panels { container: armature-panels / inline-size; }
@@ -576,7 +580,7 @@
   @container armature-shell (width < 800px) {
     .armature-app-shell-grid { grid-template-columns: var(--armature-rail-width-narrow) minmax(0, 1fr); }
   }
-  @container armature-navigation (width < 180px) {
+  @container armature-nav-layout (width < 760px) {
     .armature-grouped-nav-links { display: none; }
     .armature-grouped-nav-picker { display: grid; gap: var(--armature-space-2); }
   }

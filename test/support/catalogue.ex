@@ -15,6 +15,21 @@ defmodule Example.Catalogue.Components do
     <span id="example-extension">{@label}</span>
     """
   end
+
+  @doc "A synthetic page frame whose header and footer sit inside a wrapper."
+  def masthead(assigns) do
+    ~H"""
+    <div class="example-frame">
+      <header>
+        <p>Example heading area</p>
+      </header>
+      <p>Example body</p>
+      <footer>
+        <p>Example footer</p>
+      </footer>
+    </div>
+    """
+  end
 end
 
 defmodule Example.Catalogue.Registry do
@@ -31,6 +46,13 @@ defmodule Example.Catalogue.Registry do
           module: Example.Catalogue.Components,
           function: :marker,
           purpose: "A synthetic extension."
+        },
+        %Armature.Registry.Node{
+          id: :masthead,
+          level: :template,
+          module: Example.Catalogue.Components,
+          function: :masthead,
+          purpose: "A synthetic page frame with wrapped landmarks."
         }
       ]
   end
@@ -45,6 +67,15 @@ defmodule Example.Catalogue.Examples do
         title: "Extension",
         description: "Consumer-supplied example.",
         render: &Example.Catalogue.Components.marker/1
+      }
+    ]
+
+  def examples(:masthead),
+    do: [
+      %{
+        title: "Wrapped page frame",
+        description: "Header and footer inside a wrapper element.",
+        render: &Example.Catalogue.Components.masthead/1
       }
     ]
 
