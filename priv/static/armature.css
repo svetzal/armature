@@ -721,14 +721,32 @@
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
+  /* A normalized select with a drawn chevron: two border strokes of a small
+     rotated square on the wrapper, in token colours, never covering the control. */
+  .armature-select-wrap { position: relative; display: inline-flex; max-width: 100%; }
+  .armature-field .armature-select-wrap { display: flex; }
+  .armature-field .armature-select-wrap .armature-select { flex: 1; }
   .armature-select {
-    appearance: auto;
+    appearance: none;
     padding-inline-end: var(--armature-control-height-compact);
-    background-image: none;
-    background-position: calc(100% - var(--armature-space-4)) var(--armature-chevron-stop), calc(100% - var(--armature-space-4) + var(--armature-chevron-size)) var(--armature-chevron-stop);
-    background-size: var(--armature-chevron-size) var(--armature-chevron-size);
-    background-repeat: no-repeat;
   }
+  .armature-select-wrap::after {
+    content: "";
+    position: absolute;
+    inset-inline-end: var(--armature-space-4);
+    top: var(--armature-chevron-stop);
+    width: var(--armature-chevron-size);
+    height: var(--armature-chevron-size);
+    margin-top: calc(var(--armature-chevron-size) * -0.75);
+    border-style: solid;
+    border-color: var(--armature-muted);
+    border-width: var(--armature-space-zero) var(--armature-border-width) var(--armature-border-width) var(--armature-space-zero);
+    transform: rotate(var(--armature-chevron-angle));
+    pointer-events: none;
+  }
+  /* A multiple select is a list box: native appearance, no chevron. */
+  .armature-select[multiple] { appearance: auto; padding-inline-end: var(--armature-space-detail); }
+  .armature-select-wrap:has(> .armature-select[multiple])::after { content: none; }
   .armature-input:hover, .armature-select:hover, .armature-textarea:hover { border-color: var(--armature-accent); }
   .armature-table td { height: var(--armature-table-row-height); box-sizing: border-box; font-size: var(--armature-text-control); }
   .armature-table[data-density="compact"] td { padding: var(--armature-table-cell-padding-compact); height: var(--armature-table-row-height-compact); }
@@ -774,14 +792,15 @@
   .armature-catalogue h3 { font-size: var(--armature-text-base); font-weight: var(--armature-weight-emphasis); }
   .armature-catalogue p { overflow-wrap: anywhere; }
 
-}
 
-@media (forced-colors: active) {
-  .armature-select { appearance: auto; background-image: none; }
-}
+  @media (forced-colors: active) {
+    .armature-select { appearance: auto; }
+    .armature-select-wrap::after { content: none; }
+  }
 
-/* A narrow composition stacks even inside a wide consumer viewport. */
-@container (max-width: 44rem) {
-  .armature-table-inspector > .armature-split > div:last-child { flex-basis: 100%; }
-  .armature-table-inspector .armature-inspector { border-inline-start: none; border-top: var(--armature-border-width) solid var(--armature-line); }
+  /* A narrow composition stacks even inside a wide consumer viewport. */
+  @container (max-width: 44rem) {
+    .armature-table-inspector > .armature-split > div:last-child { flex-basis: 100%; }
+    .armature-table-inspector .armature-inspector { border-inline-start: none; border-top: var(--armature-border-width) solid var(--armature-line); }
+  }
 }

@@ -14,6 +14,10 @@ Until 1.0.0, a minor version can change the public surface.
   Font License; documented static serving and imports.
 - Registered `facts` description-list molecule and compact table density,
   including rendered and token-contract regression tests.
+- A drawn select chevron in token colours on a thin wrapper around the native
+  select; list boxes and forced colours keep the native control. Every
+  stylesheet rule now sits inside an Armature cascade layer, so consumer
+  overrides always win.
 
 - Mountable development catalogue through `Armature.Catalogue.Router`, with
   consumer registries, independent examples modules and LiveView-local state.

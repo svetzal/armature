@@ -101,10 +101,13 @@ defmodule Armature.Components do
 
   def select(assigns) do
     ~H"""
-    <select id={@id} name={@name} multiple={@multiple} class={["armature-select"]} {@rest}>
-      <option :if={@prompt} value="">{@prompt}</option>
-      {Phoenix.HTML.Form.options_for_select(@options, @value)}
-    </select>
+    <%!-- The wrapper draws the chevron; a select cannot hold generated content. --%>
+    <span class={["armature-select-wrap"]}>
+      <select id={@id} name={@name} multiple={@multiple} class={["armature-select"]} {@rest}>
+        <option :if={@prompt} value="">{@prompt}</option>
+        {Phoenix.HTML.Form.options_for_select(@options, @value)}
+      </select>
+    </span>
     """
   end
 

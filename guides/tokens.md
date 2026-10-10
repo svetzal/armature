@@ -62,7 +62,7 @@ parallel palette lives in Elixir or the tests.
 | `--armature-cue-width` | shape | Width of notice rules and selected row bars. |  |
 | `--armature-chevron-size` | shape | Size of each select chevron stroke. |  |
 | `--armature-chevron-angle` | shape | Angle of the drawn select chevron. |  |
-| `--armature-chevron-stop` | shape | Gradient stop and vertical position of the select chevron. |  |
+| `--armature-chevron-stop` | shape | Vertical position of the drawn select chevron. |  |
 | `--armature-sort-opacity` | shape | Opacity of an inactive sort arrow. |  |
 | `--armature-opacity-full` | shape | Opacity of an active affordance. |  |
 | `--armature-press-offset` | shape | Displacement of a pressed action. |  |

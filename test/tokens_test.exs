@@ -389,12 +389,41 @@ defmodule Armature.TokensTest do
           ".armature-table tbody tr:focus-within",
           ".armature-facts dt",
           "white-space: nowrap",
-          "appearance: none",
-          "appearance: auto",
-          "background-image: none",
           "flex: 4 1 calc(var(--armature-layout-min-width) * 3)"
         ],
         do: assert(css =~ rule)
+
+    # The select itself is normalized and its wrapper draws the chevron.
+    [_, select] = Regex.run(~r/\n\s*\.armature-select\s*\{([^}]+)\}/, css)
+    assert select =~ "appearance: none"
+
+    [_, chevron] = Regex.run(~r/\.armature-select-wrap::after\s*\{([^}]+)\}/, css)
+    assert chevron =~ ~s(content: "")
+    assert chevron =~ "border-color: var(--armature-muted)"
+    assert chevron =~ "transform: rotate(var(--armature-chevron-angle))"
+    assert chevron =~ "pointer-events: none"
+
+    # List boxes and forced colours keep the native control and no chevron.
+    assert css =~ ".armature-select[multiple] { appearance: auto;"
+
+    [_, forced] =
+      Regex.run(
+        ~r/@media \(forced-colors: active\) \{\s*\.armature-select \{[^}]+\}([^}]+)\}/,
+        css
+      )
+
+    assert forced =~ "content: none"
+  end
+
+  test "every rule sits inside an Armature cascade layer", %{css: css} do
+    # Unlayered library rules would compete with a consumer's unlayered
+    # overrides on file order instead of always losing to them.
+    top_level =
+      css
+      |> String.replace(~r{/\*.*?\*/}s, "")
+      |> top_level_blocks()
+
+    assert Enum.all?(top_level, &String.starts_with?(&1, "@layer")), inspect(top_level)
   end
 
   test "optional Barlow stylesheet ships both weights and their licence" do
@@ -412,6 +441,23 @@ defmodule Armature.TokensTest do
 
     assert File.read!(Path.expand("../priv/static/fonts/OFL.txt", __DIR__)) =~
              "SIL OPEN FONT LICENSE Version 1.1"
+  end
+
+  # The prelude of each top-level statement or block, found by tracking brace depth.
+  defp top_level_blocks(css) do
+    {blocks, _depth, _current} =
+      css
+      |> String.graphemes()
+      |> Enum.reduce({[], 0, ""}, fn
+        "{", {blocks, 0, current} -> {[String.trim(current) | blocks], 1, ""}
+        "{", {blocks, depth, current} -> {blocks, depth + 1, current}
+        "}", {blocks, depth, current} -> {blocks, depth - 1, current}
+        ";", {blocks, 0, current} -> {[String.trim(current) | blocks], 0, ""}
+        char, {blocks, 0, current} -> {blocks, 0, current <> char}
+        _char, acc -> acc
+      end)
+
+    blocks |> Enum.reverse() |> Enum.reject(&(&1 == ""))
   end
 
   defp theme_selectors do

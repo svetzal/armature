@@ -93,7 +93,7 @@ defmodule Armature.Tokens do
     %{
       name: "--armature-chevron-stop",
       group: :shape,
-      role: "Gradient stop and vertical position of the select chevron."
+      role: "Vertical position of the drawn select chevron."
     },
     %{name: "--armature-sort-opacity", group: :shape, role: "Opacity of an inactive sort arrow."},
     %{name: "--armature-opacity-full", group: :shape, role: "Opacity of an active affordance."},
