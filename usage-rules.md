@@ -48,6 +48,10 @@ and register what you add. Full guides: `deps/armature/README.md` and
   Omit `data-armature-theme` for automatic theming; there is no `"auto"` value.
 - Write your own component styles with Armature tokens, not literal colours,
   sizes or fonts.
+- Never declare a broad `:focus-visible` or `outline` rule (for example on a
+  page wrapper). Armature gives each surface its own focus ring, such as the
+  rail's, and your unlayered rule would override it and can drop below 3:1
+  contrast. Scope any focus style to your own component.
 - Keep contrast enforced: add a test that calls
   `Armature.Tokens.Values.check!(["assets/css/your-tokens.css"])` for the files
   that override tokens. It fails when an override breaks a required pair.
