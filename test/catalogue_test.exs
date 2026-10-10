@@ -396,9 +396,12 @@ defmodule Armature.CatalogueTest do
   # Each themed panel must show its tokens at work, not only label a group:
   # removing a demonstration fails here.
   defp assert_token_demonstrations(view) do
-    tokens = Armature.Tokens.all()
-    named = fn prefix -> Enum.filter(tokens, &String.starts_with?(&1.name, prefix)) end
+    assert_colour_demonstrations(view)
+    assert_type_and_space_demonstrations(view)
+    assert_shape_density_and_motion_demonstrations(view)
+  end
 
+  defp assert_colour_demonstrations(view) do
     for surface <- ~w(paper canvas stripe hover selected) do
       assert has_element?(
                view,
@@ -426,8 +429,13 @@ defmodule Armature.CatalogueTest do
     end
 
     assert has_element?(view, "#catalogue-token-rail .armature-grouped-nav")
+  end
 
-    for token <- named.("--armature-text-"), weight <- ~w(normal emphasis) do
+  defp assert_type_and_space_demonstrations(view) do
+    tokens = Armature.Tokens.all()
+    text_tokens = Enum.filter(tokens, &String.starts_with?(&1.name, "--armature-text-"))
+
+    for token <- text_tokens, weight <- ~w(normal emphasis) do
       assert has_element?(
                view,
                "#catalogue-token-typography [style*='font-size: var(#{token.name})'][style*='--armature-weight-#{weight}']"
@@ -451,7 +459,9 @@ defmodule Armature.CatalogueTest do
            |> LazyHTML.from_fragment()
            |> LazyHTML.query("#catalogue-token-wrap .armature-token-surface")
            |> Enum.count() == 3
+  end
 
+  defp assert_shape_density_and_motion_demonstrations(view) do
     assert has_element?(view, "#catalogue-token-shape #catalogue-token-pressed")
     assert has_element?(view, "#catalogue-token-shape #catalogue-token-hover")
     assert has_element?(view, "#catalogue-token-shape .armature-sr-only#catalogue-token-hidden")
