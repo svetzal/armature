@@ -570,6 +570,62 @@ defmodule Armature.ComponentsTest do
     assert doc |> LazyHTML.query("main") |> Enum.count() == 1
   end
 
+  test "tables without selection render rows that have no identifier" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.data_table
+          id="totals"
+          rows={[%{name: "First", total: 3}, %{name: "Second", total: 5}, [name: "Third", total: 8]]}
+          caption="Totals"
+        >
+          <:col :let={row} label="Name">{row[:name]}</:col>
+          <:col :let={row} label="Total" numeric>{row[:total]}</:col>
+        </C.data_table>
+        """
+      end)
+
+    assert text(doc, "#totals-row-0 td:first-child") == "First"
+    assert text(doc, "#totals-row-2 td:first-child") == "Third"
+    assert doc |> LazyHTML.query("tbody tr") |> Enum.count() == 3
+    refute present?(doc, "tr[phx-click], [phx-value-id]")
+  end
+
+  test "tables without selection keep row ids from the rows or from row_id" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.data_table id="by-id" rows={[%{id: "R-1"}]} caption="Records">
+          <:col :let={row} label="Identifier">{row.id}</:col>
+        </C.data_table>
+        <C.data_table id="by-key" rows={[%{key: "K-1"}]} row_id={& &1.key} caption="Records">
+          <:col :let={row} label="Key">{row.key}</:col>
+        </C.data_table>
+        """
+      end)
+
+    assert present?(doc, "tr#by-id-R-1")
+    assert present?(doc, "tr#by-key-K-1")
+  end
+
+  test "selectable tables need a row identifier" do
+    assert_raise ArgumentError, ~r/selectable tables need a row identifier/, fn ->
+      document(fn assigns ->
+        ~H"""
+        <C.data_table
+          id="unidentified"
+          rows={[%{name: "First"}]}
+          caption="Records"
+          select_event="choose"
+          inspector_id="details"
+        >
+          <:col :let={row} label="Name" row_label>{row.name}</:col>
+        </C.data_table>
+        """
+      end)
+    end
+  end
+
   test "selection requires an inspector destination" do
     assert_raise ArgumentError, "selection requires an existing inspector_id", fn ->
       document(&C.data_table/1, %{

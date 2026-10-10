@@ -18,6 +18,10 @@ Until 1.0.0, a minor version can change the public surface.
   that relied on the old defaults keeps working but shows no "Armature" brand,
   "Component catalogue" subtitle or "Library" caption; pass `title`,
   `subtitle`, `nav_label` and `section_label` to set your own.
+- `data_table` no longer requires a row identifier when rows are not
+  selectable. Rows without an `:id` and without `row_id` take DOM ids from
+  their position in the render. A selectable table still needs one and raises
+  an `ArgumentError` that says so, instead of a `KeyError`.
 
 ## [0.2.1] - 2026-10-10
 

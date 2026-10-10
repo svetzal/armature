@@ -197,6 +197,9 @@ the entire row also responds to pointer clicks. Focus within outlines the row;
 selection retains its surface and inset accent bar without moving focus.
 The default `row_id` reads `row.id`; override it with a function returning a
 unique, DOM-safe identifier. Match `selected_id` to that function's return type.
+A selectable table whose rows have no `:id` and no `row_id` raises a clear
+error. A table without selection needs no identifier at all: rows without
+one take their DOM ids from their position, such as `records-row-0`.
 
 A selectable row contains **exactly one interactive element**, its row-label
 button. All column content must be non-interactive, including the row label.

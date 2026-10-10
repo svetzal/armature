@@ -592,7 +592,10 @@ defmodule Armature.Components do
   Columns render each row through `:let`; `sort_key` buttons send `key` to
   `sort_event`. Mark exactly one column `row_label` to render its visible content
   as the selection button, sending `id` to `select_event`. Supply an existing
-  `inspector_id` when enabling selection. Row identifiers must be unique and DOM-safe.
+  `inspector_id` when enabling selection. `row_id` returns a row's identifier;
+  without it, rows that all have an `:id` use it. Selection requires one or the
+  other and raises an error otherwise. A table without selection needs neither:
+  its rows then take DOM ids from their position. Identifiers must be unique and DOM-safe.
   A selectable row contains exactly one interactive element: its row-label button.
   Other column content must be non-interactive; declared `interactive` columns
   raise an error. For additional actions use a non-selectable table with explicit
@@ -629,7 +632,7 @@ defmodule Armature.Components do
     end
 
     validate_selectable_columns!(assigns)
-    assigns = assign(assigns, :row_id, assigns.row_id || (&Map.fetch!(&1, :id)))
+    assigns = assign_row_identity(assigns)
 
     ~H"""
     <div
@@ -683,8 +686,8 @@ defmodule Armature.Components do
         </thead>
         <tbody>
           <tr
-            :for={row <- @rows}
-            id={@id <> "-" <> to_string(@row_id.(row))}
+            :for={{row, index} <- Enum.with_index(@rows)}
+            id={@id <> "-" <> to_string(@row_key.(row, index))}
             class={[
               @select_event && "armature-clickable-row",
               @select_event && @selected_id == @row_id.(row) && "armature-row-selected"
@@ -955,6 +958,25 @@ defmodule Armature.Components do
       </.split>
     </div>
     """
+  end
+
+  # Selection needs an identifier per row; plain tables only need distinct DOM
+  # ids, so rows without one fall back to their position in this render.
+  defp assign_row_identity(%{row_id: row_id} = assigns) when is_function(row_id, 1),
+    do: assign(assigns, row_key: fn row, _index -> row_id.(row) end)
+
+  defp assign_row_identity(assigns) do
+    cond do
+      Enum.all?(assigns.rows, &(is_map(&1) and Map.has_key?(&1, :id))) ->
+        assign(assigns, row_id: & &1.id, row_key: fn row, _index -> row.id end)
+
+      assigns.select_event ->
+        raise ArgumentError,
+              "selectable tables need a row identifier: pass row_id, or give every row an :id"
+
+      true ->
+        assign(assigns, row_key: fn _row, index -> "row-#{index}" end)
+    end
   end
 
   defp validate_selectable_columns!(%{select_event: nil}), do: :ok
