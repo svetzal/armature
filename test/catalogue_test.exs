@@ -115,29 +115,111 @@ defmodule Armature.CatalogueTest do
 
   test "configured consumer stylesheet changes server contrast results" do
     {:ok, view, _html} = live(build_conn(), "/overrides?section=tokens")
-    assert has_element?(view, "#token-armature-ink tr[data-theme='light'] td", "1.00:1")
-    assert has_element?(view, "#token-armature-ink tr[data-theme='light'] td", "Fail")
-    assert has_element?(view, "#token-armature-ink tr[data-theme='explicit_light'] td", "Fail")
-    assert has_element?(view, "#token-armature-ink tr[data-theme='dark'] td", "Pass")
+
+    assert has_element?(
+             view,
+             "#catalogue-token-contrast tr[data-foreground='--armature-ink'] td[data-theme='light']",
+             "1.00:1"
+           )
+
+    assert has_element?(
+             view,
+             "#catalogue-token-contrast tr[data-foreground='--armature-ink'] td[data-theme='light']",
+             "Fail"
+           )
+
+    assert has_element?(
+             view,
+             "#catalogue-token-contrast tr[data-foreground='--armature-ink'] td[data-theme='explicit_light']",
+             "Fail"
+           )
+
+    assert has_element?(
+             view,
+             "#catalogue-token-contrast tr[data-foreground='--armature-ink'] td[data-theme='dark']",
+             "Pass"
+           )
   end
 
   test "tokens precede atoms and show contract samples and both theme results" do
     {:ok, view, _html} = live(build_conn(), "/ui?section=tokens")
     assert has_element?(view, "nav > a:first-child#catalogue-tokens[aria-current='page']")
     assert has_element?(view, "#armature-catalogue-heading-tokens", "Tokens")
-    assert has_element?(view, "#token-armature-ink .armature-token-swatch")
-    assert has_element?(view, "#token-armature-ink tr[data-theme='light']", "Pass")
-    assert has_element?(view, "#token-armature-ink tr[data-theme='dark']", "Pass")
-    assert has_element?(view, "#token-armature-text-base .armature-token-type")
-    assert has_element?(view, "#token-armature-space-4 .armature-token-space")
-    assert has_element?(view, "#token-armature-radius-base .armature-token-radius")
-    assert has_element?(view, "#token-armature-control-height-compact .armature-token-height")
-    assert has_element?(view, "#catalogue-focus-sample")
-    assert has_element?(view, "#catalogue-tabular-sample")
+
+    assert has_element?(
+             view,
+             "#catalogue-token-statement",
+             "Tokens give every component a shared language."
+           )
+
+    for {id, heading} <- [
+          {"surfaces", "Surfaces and text"},
+          {"accents", "Accents, focus and selection"},
+          {"status", "Status tones"},
+          {"rail", "Rail"},
+          {"typography", "Typography"},
+          {"space", "Space and rhythm"},
+          {"shape", "Shape"},
+          {"density", "Density and targets"},
+          {"motion", "Motion"},
+          {"contrast", "Contrast"}
+        ] do
+      assert has_element?(view, "#catalogue-token-#{id}.armature-panel h2", heading)
+    end
+
+    for group <- Enum.uniq(Enum.map(Armature.Tokens.all(), & &1.group)) do
+      assert has_element?(view, "[data-token-group='#{group}']")
+    end
+
+    values = Armature.Tokens.Values.read([])
 
     for token <- Armature.Tokens.all() do
-      assert has_element?(view, "#token-#{String.trim_leading(token.name, "--")}")
+      selector = "#token-#{String.trim_leading(token.name, "--")}"
+      assert has_element?(view, "#catalogue-token-reference #{selector} th", token.name)
+      assert has_element?(view, "#{selector} td", token.role)
+
+      for {context, _label} <- Armature.Tokens.Values.contexts() do
+        assert has_element?(
+                 view,
+                 "#{selector} td[data-context='#{context}']",
+                 values[context].values[token.name]
+               )
+      end
     end
+
+    for {context, _label} <- Armature.Tokens.Values.contexts(), pair <- values[context].pairs do
+      selector =
+        "#catalogue-token-contrast tr" <>
+          "[data-foreground='#{pair.foreground}'][data-background='#{pair.background}']"
+
+      assert has_element?(view, selector <> " td", "#{pair.minimum}:1")
+      expected_ratio = :erlang.float_to_binary(pair.ratio, decimals: 2) <> ":1"
+      assert has_element?(view, selector <> " td[data-theme='#{context}']", expected_ratio)
+
+      assert has_element?(
+               view,
+               selector <> " td[data-theme='#{context}']",
+               if(pair.pass?, do: "Pass", else: "Fail")
+             )
+    end
+
+    doc = LazyHTML.from_fragment(render(view))
+
+    assert Enum.count(LazyHTML.query(doc, "#catalogue-token-reference tbody tr")) ==
+             length(Armature.Tokens.all())
+
+    assert Enum.count(LazyHTML.query(doc, "#catalogue-token-contrast table")) == 1
+
+    assert Enum.count(LazyHTML.query(doc, "#catalogue-token-contrast tbody tr")) ==
+             length(values.light.pairs)
+
+    assert has_element?(view, "#catalogue-token-selection button[aria-pressed=true]")
+    assert has_element?(view, "#catalogue-focus-sample")
+    assert has_element?(view, "#catalogue-tabular-sample")
+    assert has_element?(view, "#catalogue-density-compact[data-density=compact]")
+    assert has_element?(view, "#catalogue-token-select.armature-select")
+    assert has_element?(view, "#catalogue-token-search-search[type=search]")
+    assert has_element?(view, "#catalogue-motion-demo .armature-token-motion-fast")
 
     view |> form("#catalogue-theme", %{theme: "dark"}) |> render_change()
     assert has_element?(view, "#armature-catalogue[data-armature-theme='dark']")

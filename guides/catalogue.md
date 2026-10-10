@@ -98,6 +98,20 @@ each token, independent of the currently selected visual theme.
 See [the token guide](tokens.md#checking-consumer-overrides) for the supported
 stylesheet syntax and the one-call consumer test.
 
+The Tokens page opens with a short statement and ten themed panels: surfaces,
+accents and focus, status, rail, typography, rhythm, shape, density, motion and
+contrast. Panels use the catalogue's container grid: two columns when its own
+width is at least 760px, one below that. Specimens use baseline components and
+visible captions, including forced focus, hover and pressed states. Focus or
+hover the motion sample to run its fast and base transitions; reduced motion
+stops displacement.
+
+A compact reference below the panels is generated from `Armature.Tokens.all/0`
+and lists every token's group, role and values in all six contexts. The Contrast
+panel collects all required pairs in one scrollable table with minimum, ratio
+and Pass or Fail in words. Both tables use the configured consumer stylesheets;
+switching the visual theme does not hide other contexts.
+
 ## Supplying examples
 
 Implement `Armature.Catalogue.Examples`. Each node id maps to a list of maps

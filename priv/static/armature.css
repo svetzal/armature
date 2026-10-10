@@ -951,20 +951,42 @@
     .armature-table-inspector .armature-inspector { border-inline-start: none; border-top: var(--armature-border-width) solid var(--armature-line); }
   }
 
-  .armature-token-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, calc(var(--armature-layout-min-width) * 2)), 1fr)); gap: var(--armature-space-4); }
-  .armature-token-card { min-width: var(--armature-space-zero); padding: var(--armature-space-4); border: var(--armature-border-width) solid var(--armature-line); border-radius: var(--armature-radius-panel); background: var(--armature-paper); }
-  .armature-token-card h3, .armature-token-card dd { overflow-wrap: anywhere; }
-  .armature-token-card dl { font-size: var(--armature-text-small); }
-  .armature-token-card dd { margin-inline-start: var(--armature-space-zero); font-family: var(--armature-font-mono); }
-  .armature-token-card dt { font-weight: var(--armature-weight-emphasis); }
-  .armature-token-swatch { height: var(--armature-control-height); border: var(--armature-border-width) solid var(--armature-control-border); border-radius: var(--armature-radius-small); }
+  .armature-token-statement { font-size: var(--armature-text-large); font-weight: var(--armature-weight-emphasis); }
+  #catalogue-token-contract > .armature-panel { margin-block-start: var(--armature-space-4); }
+  .armature-token-surface { padding: var(--armature-space-4); border: var(--armature-border-width) solid var(--armature-line); border-radius: var(--armature-radius-panel); background: var(--armature-paper); color: var(--armature-ink); }
+  .armature-token-muted { color: var(--armature-muted); }
+  .armature-token-image { background: var(--armature-image-backdrop); color: var(--armature-muted); padding: var(--armature-space-6); text-align: center; }
   .armature-token-space { height: var(--armature-space-4); max-width: 100%; background: var(--armature-accent); }
-  .armature-token-radius { width: var(--armature-control-height); height: var(--armature-control-height); border: var(--armature-border-width) solid var(--armature-control-border); background: var(--armature-selected); }
-  .armature-token-height { border: var(--armature-border-width) solid var(--armature-control-border); background: var(--armature-canvas); }
-  .armature-token-cue { height: var(--armature-control-height); border-inline-start: var(--armature-cue-width) solid var(--armature-selected-cue); }
-  .armature-token-type { font-family: var(--armature-font-sans); }
-  .armature-token-label { font-size: var(--armature-text-small); font-weight: var(--armature-weight-normal); }
+  .armature-token-type { font-family: var(--armature-font-sans); line-height: var(--armature-line-height); margin-block: var(--armature-space-2); overflow-wrap: anywhere; }
+  .armature-token-label { font-size: var(--armature-text-small); font-weight: var(--armature-weight-normal); overflow-wrap: anywhere; }
+  .armature-token-code { font-family: var(--armature-font-mono); }
   .armature-token-tabular { font-family: var(--armature-font-sans); font-variant-numeric: tabular-nums; }
-  .armature-token-focus { margin: var(--armature-space-2); outline: var(--armature-focus-width) solid var(--armature-focus); outline-offset: var(--armature-focus-offset); }
-  .armature-token-pairs caption { text-align: start; font-weight: var(--armature-weight-emphasis); }
+  #catalogue-focus-sample { margin: var(--armature-space-2); outline: var(--armature-focus-width) solid var(--armature-focus); outline-offset: var(--armature-focus-offset); }
+  .armature-token-rail { max-width: 100%; }
+  .armature-token-rail-wide { width: var(--armature-rail-width); }
+  .armature-token-rail-narrow { width: var(--armature-rail-width-narrow); }
+  .armature-token-secondary-nav { width: var(--armature-nav-width); max-width: 100%; padding: var(--armature-space-nav); border: var(--armature-border-width) solid var(--armature-line); }
+  #catalogue-token-pressed { transform: translateY(var(--armature-press-offset)); }
+  #catalogue-token-hover { background: color-mix(in srgb, var(--armature-accent), var(--armature-ink) var(--armature-hover-mix)); }
+  #catalogue-token-target { min-width: var(--armature-target-enhanced); min-height: var(--armature-target-enhanced); }
+  #catalogue-token-control-default { min-height: var(--armature-control-height); }
+  .armature-token-inspector { width: var(--armature-inspector-width); max-width: 100%; }
+  .armature-token-reference, .armature-token-pairs { font-size: var(--armature-text-small); }
+  .armature-token-reference tbody th, .armature-token-pairs tbody th { position: static; min-width: var(--armature-layout-min-width); max-width: var(--armature-layout-min-width); white-space: normal; }
+  .armature-token-reference td, .armature-token-pairs td { font-size: var(--armature-text-small); padding: var(--armature-table-cell-padding-compact); }
+  .armature-token-reference td:nth-child(3) { max-width: var(--armature-inspector-width); white-space: normal; }
+  .armature-token-pairs { min-width: calc(var(--armature-layout-min-width) * 5); }
+  .armature-token-reference th, .armature-token-reference td, .armature-token-pairs th, .armature-token-pairs td { overflow-wrap: anywhere; }
+  .armature-token-reference caption, .armature-token-pairs caption { text-align: start; font-weight: var(--armature-weight-emphasis); }
+  .armature-token-motion-track { padding: var(--armature-space-4); overflow: hidden; }
+  .armature-token-motion-track span { display: inline-block; padding: var(--armature-space-2); background: var(--armature-selected); border-inline-start: var(--armature-cue-width) solid var(--armature-selected-cue); }
+  .armature-token-motion-fast { transition: transform var(--armature-duration-fast) var(--armature-easing); }
+  .armature-token-motion-base { transition: transform var(--armature-duration-base) var(--armature-easing); }
+  #catalogue-motion-demo:is(:hover, :focus-within) .armature-token-motion-track span { transform: translateX(var(--armature-space-8)); animation: armature-token-feedback var(--armature-duration-base) var(--armature-easing) 1; }
+  #catalogue-motion-demo:is(:hover, :focus-within) .armature-token-motion-fast { animation-duration: var(--armature-duration-fast); }
+  @keyframes armature-token-feedback { from { opacity: var(--armature-sort-opacity); } to { opacity: var(--armature-opacity-full); } }
+  @media (prefers-reduced-motion: reduce) {
+    #catalogue-motion-demo .armature-token-motion-track span,
+    #catalogue-motion-demo:is(:hover, :focus-within) .armature-token-motion-track span { transform: none; transition-duration: var(--armature-duration-reduced); animation-duration: var(--armature-duration-reduced); animation-iteration-count: var(--armature-iterations-reduced); }
+  }
 }

@@ -23,6 +23,10 @@ Until 1.0.0, a minor version can change the public surface.
 
 ### Fixed
 
+- Redesign catalogue Tokens as container-responsive demonstration panels, with
+  component specimens for every token group, a complete generated six-context
+  reference and a single consumer-aware contrast results table.
+
 - Isolate landmark-rendering catalogue examples in titled stylesheet-equipped
   documents, with native width presets and announced choices.
 - Reflow shells, grouped navigation and panel tiling by their own inline size
