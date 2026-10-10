@@ -90,7 +90,11 @@ Then add these stylesheet links in your root layout:
 <link rel="stylesheet" href="/armature/armature-fonts.css" />
 ```
 
-The font stylesheet uses relative font URLs and `font-display: swap`. All
+The font stylesheet uses relative font URLs and `font-display: swap`. If your
+application sends a content security policy, it needs `font-src 'self'` to
+load the bundled fonts; a policy such as `default-src 'none'` without it makes
+the browser refuse them. Alternatively, leave out `armature-fonts.css`: the
+sans token then falls back to the system font. All
 static assets, including both fonts and their licence, are included in the
 Hex package through its `priv` file entry. Consumer token overrides belong
 after the library stylesheet. See the [token guide](guides/tokens.md) and

@@ -8,6 +8,14 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Changed
+
+- Documentation: the app shell's skip link is a plain fragment link that moves
+  focus to the `tabindex="-1"` heading without JavaScript, and its LiveView
+  `JS.focus` command is an enhancement. The README says that a content
+  security policy needs `font-src 'self'` for the bundled Barlow fonts, or the
+  application can omit `armature-fonts.css` and use the system font.
+
 ### Added
 
 - `priv/static/armature-theme.js`, a progressive enhancement that makes

@@ -63,7 +63,9 @@ Tables are checked against `Armature.UI.Registry` by the test suite.
 
 `app_shell` composes `side_nav`, `top_bar` and `page_heading`. Its first link
 skips to the unique, focusable `heading_id`; the main landmark is named by that
-heading. Set `title` and `subtitle` for your application's brand, `nav_label`
+heading. The skip link is a plain `href` fragment and the h1 has
+`tabindex="-1"`, so it moves focus without JavaScript; its LiveView
+`JS.focus` command is an enhancement. Set `title` and `subtitle` for your application's brand, `nav_label`
 to name the rail's navigation (default "Main") and `section_label` for an
 optional caption above its links. The brand and caption render only when you
 give them. Navigation items have

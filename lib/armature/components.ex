@@ -245,7 +245,11 @@ defmodule Armature.Components do
   belong to the consumer. `title`, `subtitle`, `nav_label` and `section_label`
   pass to `side_nav/1`, which renders a brand and caption only when given.
   The rail narrows below 800px and stacks below 520px of the shell's own inline size.
-  `heading_rest` forwards LiveView focus commands to the h1 after patch navigation.
+
+  The skip link is an ordinary `href` fragment to the h1, which has
+  `tabindex="-1"`, so it moves focus on pages without LiveView. Its
+  `JS.focus/1` command is an enhancement for LiveView pages. `heading_rest`
+  forwards LiveView focus commands to the h1 after patch navigation.
   """
   attr(:id, :string, required: true)
   attr(:title, :string, default: nil)
