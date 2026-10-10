@@ -8,6 +8,7 @@ and override its tokens in your own CSS. Components share light and dark token v
 
 | Component | Uses | Purpose |
 | --- | --- | --- |
+| `eyebrow` | — | A contextual uppercase label. |
 | `button` | — | A named native action. |
 | `link` | — | A named navigation link. |
 | `icon` | — | Decorative consumer SVG. |
@@ -29,6 +30,8 @@ and override its tokens in your own CSS. Components share light and dark token v
 
 | Component | Uses | Purpose |
 | --- | --- | --- |
+| `theme_switch` | `select` | A labelled native light, dark or auto choice. |
+| `page_heading` | `eyebrow`, `cluster` | A page heading with context and actions. |
 | `field` | `input`, `select`, `textarea` | A labelled control with hint and validation. |
 | `facts` | — | Labelled values in a description list. |
 | `notice` | — | Static guidance or reported results with actions. |
@@ -40,6 +43,10 @@ and override its tokens in your own CSS. Components share light and dark token v
 
 | Component | Uses | Purpose |
 | --- | --- | --- |
+| `panel` | `cluster` | A named content panel with heading and actions. |
+| `grouped_nav` | `eyebrow`, `link` | Grouped navigation with a labelled narrow-screen picker. |
+| `top_bar` | `cluster` | A context band with actions. |
+| `side_nav` | `eyebrow`, `link` | Named section navigation with a brand and footnote. |
 | `data_table` | — | A sortable native table with named record selection. |
 | `inspector` | — | A named complementary details landmark. |
 
@@ -47,9 +54,63 @@ and override its tokens in your own CSS. Components share light and dark token v
 
 | Component | Uses | Purpose |
 | --- | --- | --- |
+| `app_shell` | `link`, `side_nav`, `top_bar`, `page_heading` | An application shell with skip navigation and a page heading. |
 | `table_inspector` | `link`, `split`, `table_toolbar`, `data_table`, `pagination`, `inspector` | A complete table and supporting details workflow. |
 
 Tables are checked against `Armature.UI.Registry` by the test suite.
+
+## Application shell
+
+`app_shell` composes `side_nav`, `top_bar` and `page_heading`. Its first link
+skips to the unique, focusable `heading_id`; the main landmark is named by that
+heading. Set `title` and `subtitle` for your application. Navigation items have
+`:label`, one of `:href`, `:patch` or `:navigate`, and optional `:id` and `:current`.
+Set `home_patch` to make the wordmark a patch link back to your index.
+Current links announce `aria-current="page"` and use weight as well as colour.
+The caller owns URLs, selection and events. `heading_rest` forwards focus
+commands to the h1. Optional `footnote`, `top_actions` and `heading_actions`
+slots supply supporting content and named controls.
+
+```heex
+<.app_shell id="library" title="Library" context="Library / Overview"
+  heading="Overview" heading_id="overview" eyebrow="Library / Overview"
+  items={[%{label: "Overview", patch: "/overview", current: true}]}>
+  <:top_actions><.theme_switch id="theme" value={@theme} event="theme" /></:top_actions>
+  <:footnote>Example content</:footnote>
+  <.grid>
+    <.panel id="summary" heading="Summary"><p>Content</p></.panel>
+    <.panel id="details" heading="Details"><p>Supporting content</p></.panel>
+  </.grid>
+</.app_shell>
+```
+
+`side_nav` names its navigation with `label` (default "Library sections").
+`top_bar` carries a visible `context` and optional `actions`. `page_heading`
+uses an h1 and optional `eyebrow` and `actions`; `eyebrow` alone adds context,
+not a heading. `panel` names a region with its h2 and optional `actions`.
+Express empty, loading, error and invalid content through notices or status
+text in the content slot. Arrange panels with `grid`; they stack as space runs out.
+
+`grouped_nav` takes `groups` of `%{label: text, items: items}` using the same
+item contract. Its `label` names both the wide navigation and the narrow native
+select. Its description warns that choosing an option opens its page. The select emits `destination` on `event`. Validate it against the
+supplied destinations before calling `push_patch` or `push_navigate`. Its optional
+content slot can supply guidance. Keep current selection in caller state.
+
+`theme_switch` is a labelled native select; `value` is `"light"`, `"dark"` or
+`"auto"`. It emits `theme` on the required `event`; the caller applies it.
+Auto removes the theme attribute, inheriting consumer tokens. Its optional
+content slot can explain the choice. Native selection announces the current
+value and supports keyboard operation; it is not a binary toggle.
+
+The rail is 210px wide, 155px below 800px, and becomes wrapping links below
+520px, hiding its subtitle, label and footnote. These thresholds measure the
+shell's own inline size. Grouped links become a labelled select when their own
+container is below 180px. Panel grids measure their own container too. All visual
+measurements and colours are tokens; container queries describe structural transitions. Navigation targets are at
+least 44px high, including on wide screens. Rail focus and pale-pill inset
+focus have separate contrast contracts. Forced colours retain native controls
+and visible current-page outlines; reduced motion uses the base-layer policy.
 
 ## Controls and validation
 
@@ -124,12 +185,21 @@ has `aria-sort`; the caller sorts the rows and supplies `sort_by` and
 while the scroll region contains focus, so they cannot cover a keyboard target.
 
 Supply `select_event` and the id of an existing inspector to enable selection.
-Each button sends `%{"id" => row_id}` and includes that identifier in its name;
-`aria-pressed` and the visible word "Selected" identify the selected record.
+Mark exactly one `col` slot `row_label`. Its visible content becomes a native
+button whose accessible name is the row label, with `aria-pressed` and
+`aria-controls` pointing to the inspector. It sends `%{"id" => row_id}`;
+the entire row also responds to pointer clicks. Focus within outlines the row;
+selection retains its surface and inset accent bar without moving focus.
 The default `row_id` reads `row.id`; override it with a function returning a
 unique, DOM-safe identifier. Match `selected_id` to that function's return type.
-Selection does not move focus. Column content may contain other native controls;
-the table does not attach click handlers to entire rows.
+
+A selectable row contains **exactly one interactive element**, its row-label
+button. All column content must be non-interactive, including the row label.
+Declare action columns `interactive`; supplying one to a selectable table
+raises a clear error. Rows needing further actions must use a non-selectable
+table with explicit links or a details pattern instead. Row-label buttons
+inherit cell typography with emphasis weight, no border or fill, and a minimum
+24px target (44px on coarse pointers).
 
 `table_toolbar` renders a labelled search form sending `%{"query" => query}`
 to `search_event` on change or submit, an atomic polite result count from `total`,
@@ -149,7 +219,7 @@ provides an h2, optional `context`, optional status in words and `actions`.
 workflow rather than one semantic unit. It uses `split` to place the inspector
 beside the table when there is room, then below it as the regions wrap. It
 forwards the `col` slots, renders `actions` in the toolbar and `details` inside
-the inspector. IDs derive from the template id, keeping the selection buttons'
+the inspector. IDs derive from the template id, keeping the row-label buttons'
 `aria-controls` and skip link connected to the actual landmark. Update
 `selection_label` when selection changes; only this short status is announced,
 without moving focus or announcing all details. Keep selection outside the
@@ -163,7 +233,7 @@ filtered and paged collection so it survives those operations.
   selection_label={@selection_label} inspector_title="Record details"
   page={@page} pages={@pages} first={@first} last={@last} page_event="page"
   page_sizes={[10, 25, 50]} page_size={@page_size} size_event="size">
-  <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+  <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
   <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
   <:details>
     <%= if @selected do %>
@@ -238,4 +308,4 @@ control sizes are minimums, allowing text to grow.
 | Facts: 12px muted labels, tabular values/600, 10px pair gap | `text-small`, `muted`, `weight-emphasis`, `space-detail` |
 | Focus: 3px outline and 3px offset; headings never obscure it | `focus-width`, `focus-offset`, `focus`; headings become static during keyboard interaction |
 | Targets: at least 24px; coarse/narrow at least 44px | `target-size` media override and minimum dimensions, in both densities |
-| Reflow at 400% zoom; navigation above content; tables scroll locally | Wrapping catalogue columns, zero content minimum width, overflow table region, container stacking |
+| Reflow at 400% zoom; navigation above content; tables scroll locally | Responsive shell and grouped navigation, zero content minimum width, overflow table region, container stacking |

@@ -21,6 +21,94 @@ defmodule Armature.Tokens do
   @cue_contrast Enum.map(@content_surfaces, &%{background: &1, ratio: 3})
 
   @tokens [
+    %{
+      name: "--armature-rail-surface",
+      group: :colour,
+      role: "Deep green navigation surface.",
+      contrast: []
+    },
+    %{
+      name: "--armature-rail-text",
+      group: :colour,
+      role: "Primary navigation text.",
+      contrast: [%{background: "--armature-rail-surface", ratio: 4.5}]
+    },
+    %{
+      name: "--armature-rail-muted",
+      group: :colour,
+      role: "Secondary navigation text.",
+      contrast: [%{background: "--armature-rail-surface", ratio: 4.5}]
+    },
+    %{
+      name: "--armature-rail-divider",
+      group: :colour,
+      role: "Decorative rail divider.",
+      contrast: []
+    },
+    %{
+      name: "--armature-rail-current-surface",
+      group: :colour,
+      role: "Current navigation pill surface.",
+      contrast: []
+    },
+    %{
+      name: "--armature-rail-current-text",
+      group: :colour,
+      role: "Current navigation pill text.",
+      contrast: [%{background: "--armature-rail-current-surface", ratio: 4.5}]
+    },
+    %{
+      name: "--armature-rail-focus",
+      group: :colour,
+      role: "Focus ring against the navigation rail.",
+      contrast: [%{background: "--armature-rail-surface", ratio: 3}]
+    },
+    %{
+      name: "--armature-rail-current-focus",
+      group: :colour,
+      role: "Inset focus ring against the pale current pill.",
+      contrast: [%{background: "--armature-rail-current-surface", ratio: 3}]
+    },
+    %{name: "--armature-rail-width", group: :space, role: "Wide shell rail width."},
+    %{
+      name: "--armature-rail-width-narrow",
+      group: :space,
+      role: "Intermediate shell rail width."
+    },
+    %{name: "--armature-nav-width", group: :space, role: "Secondary navigation column width."},
+    %{name: "--armature-space-shell", group: :space, role: "Shell content horizontal inset."},
+    %{name: "--armature-space-top-bar", group: :space, role: "Top bar vertical inset."},
+    %{
+      name: "--armature-space-nav",
+      group: :space,
+      role: "Rail link vertical and secondary link horizontal inset."
+    },
+    %{name: "--armature-space-rail-gap", group: :space, role: "Gap between rail links."},
+    %{name: "--armature-space-panel-content", group: :space, role: "Comfortable panel inset."},
+    %{name: "--armature-text-brand", group: :typography, role: "Rail wordmark size."},
+    %{name: "--armature-weight-brand", group: :typography, role: "Rail wordmark weight."},
+    %{
+      name: "--armature-tracking-brand",
+      group: :typography,
+      role: "Wordmark and secondary group letter spacing."
+    },
+    %{name: "--armature-text-eyebrow", group: :typography, role: "Contextual eyebrow size."},
+    %{
+      name: "--armature-tracking-eyebrow",
+      group: :typography,
+      role: "Contextual eyebrow letter spacing."
+    },
+    %{
+      name: "--armature-text-page-heading",
+      group: :typography,
+      role: "Application page heading size."
+    },
+    %{name: "--armature-shell-height", group: :space, role: "Minimum full-page shell height."},
+    %{
+      name: "--armature-target-enhanced",
+      group: :control,
+      role: "Enhanced navigation target size."
+    },
     %{name: "--armature-hover-mix", group: :shape, role: "Subtle ink blend on hovered buttons."},
     %{
       name: "--armature-text-micro",

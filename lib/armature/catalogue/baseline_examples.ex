@@ -35,11 +35,19 @@ defmodule Armature.Catalogue.BaselineExamples do
       selection_label: "Selected #{selected.id}, #{selected.name}.",
       form: to_form(%{"name" => "", "accepted" => false}, as: :sample),
       saved: false,
+      theme: "auto",
+      destination: "",
       count: 0
     })
   end
 
   @impl true
+  def handle_event("example:theme", %{"theme" => theme}, state) when theme in ~w(auto light dark),
+    do: %{state | theme: theme}
+
+  def handle_event("example:choose", %{"destination" => destination}, state),
+    do: %{state | destination: destination}
+
   def handle_event("example:action", _params, state), do: %{state | count: state.count + 1}
 
   def handle_event(event, %{"sample" => params}, state)
@@ -94,6 +102,13 @@ defmodule Armature.Catalogue.BaselineExamples do
     Map.merge(state, %{records: records, page: records.page})
   end
 
+  defp example_nav do
+    [
+      %{label: "Overview", href: "#catalogue-usage", current: true},
+      %{label: "Guidance", href: "#catalogue-used-by", current: false}
+    ]
+  end
+
   defp description(:button),
     do: "Primary, secondary and disabled actions; activation updates a local count."
 
@@ -121,6 +136,60 @@ defmodule Armature.Catalogue.BaselineExamples do
   defp demo(assigns) do
     ~H"""
     <%= case @node do %>
+      <% :eyebrow -> %>
+        <A.eyebrow>Library / Examples</A.eyebrow>
+      <% :page_heading -> %>
+        <A.page_heading id="example-page-heading" title="Example page" eyebrow="Library / Examples">
+          <:actions><A.status label="Ready" /></:actions>
+        </A.page_heading>
+      <% :theme_switch -> %>
+        <A.theme_switch id="example-theme" value={@state.theme} event="example:theme" />
+        <p role="status">Selected theme: {@state.theme}</p>
+      <% :side_nav -> %>
+        <A.side_nav id="example-rail" title="Library" items={example_nav()}>
+          <:footnote>Synthetic content</:footnote>
+        </A.side_nav>
+      <% :top_bar -> %>
+        <A.top_bar context="Library / Examples">
+          <:actions><A.button phx-click="example:action">Activate</A.button></:actions>
+        </A.top_bar>
+        <p role="status">Activated {@state.count} times.</p>
+      <% :grouped_nav -> %>
+        <A.grouped_nav
+          id="example-grouped"
+          label="Example components"
+          event="example:choose"
+          groups={[%{label: "Examples", items: example_nav()}]}
+        />
+        <p role="status">Selected destination: {@state.destination}</p>
+      <% :panel -> %>
+        <A.grid>
+          <A.panel id="example-panel" heading="Example panel">
+            <:actions><A.button phx-click="example:action">Activate</A.button></:actions>
+            <p role="status">Activated {@state.count} times.</p>
+          </A.panel>
+          <A.panel id="example-empty-panel" heading="Empty panel">
+            <A.notice id="example-empty-notice" title="No items">Add an item to begin.</A.notice>
+          </A.panel>
+        </A.grid>
+      <% :app_shell -> %>
+        <A.app_shell
+          id="example-shell"
+          title="Library"
+          heading="Example page"
+          heading_id="example-shell-heading"
+          eyebrow="Library / Examples"
+          context="Library / Examples"
+          items={example_nav()}
+        >
+          <:footnote>Synthetic content</:footnote>
+          <:top_actions>
+            <A.theme_switch id="example-shell-theme" value={@state.theme} event="example:theme" />
+          </:top_actions>
+          <A.panel id="example-shell-panel" heading="Content">
+            <p>A recomposable application shell.</p>
+          </A.panel>
+        </A.app_shell>
       <% :button -> %>
         <A.cluster>
           <A.button id="example-action" phx-click="example:action">Activate</A.button>
@@ -238,7 +307,9 @@ defmodule Armature.Catalogue.BaselineExamples do
           selected_id={@state.selected_id}
           inspector_id="example-details"
         >
-          <:col :let={row} label="Name" sort_key="name">{row.name}<small>{row.group}</small></:col>
+          <:col :let={row} label="Name" sort_key="name" row_label>
+            {row.name}<small>{row.group}</small>
+          </:col>
           <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
         </A.data_table>
         <A.inspector id="example-details" title="Selected record">
@@ -254,7 +325,7 @@ defmodule Armature.Catalogue.BaselineExamples do
           caption="Default density records"
         >
           <:col :let={row} label="Identifier">{row.id}</:col>
-          <:col :let={row} label="Name">{row.name}<small>{row.group}</small></:col>
+          <:col :let={row} label="Name" row_label>{row.name}<small>{row.group}</small></:col>
           <:col :let={row} label="Score" numeric>{row.score}</:col>
         </A.data_table>
       <% :table_toolbar -> %>
@@ -315,7 +386,9 @@ defmodule Armature.Catalogue.BaselineExamples do
           size_event="record_size"
         >
           <:col :let={row} label="Identifier">{row.id}</:col>
-          <:col :let={row} label="Name" sort_key="name">{row.name}<small>{row.group}</small></:col>
+          <:col :let={row} label="Name" sort_key="name" row_label>
+            {row.name}<small>{row.group}</small>
+          </:col>
           <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
           <:details><.details state={@state} /></:details>
         </A.table_inspector>

@@ -94,6 +94,7 @@ defmodule Armature.CatalogueTest.Router do
     armature_catalogue("/ui",
       registry: Example.Catalogue.Registry,
       examples: Example.Catalogue.Examples,
+      title: "Example library",
       live_session_name: :extension_catalogue
     )
   end

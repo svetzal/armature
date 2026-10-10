@@ -1,6 +1,6 @@
 defmodule Armature.Components do
   @moduledoc """
-  Accessible baseline atoms, layouts, molecules and data compositions.
+  Accessible baseline atoms, layouts, molecules, application and data compositions.
 
   Import this module in consumer HTML helpers. Styling comes from
   `priv/static/armature.css` and the consumer's token values. Give standalone
@@ -9,6 +9,277 @@ defmodule Armature.Components do
   """
   use Phoenix.Component
   import Phoenix.Component, except: [link: 1]
+
+  @doc "An uppercase contextual label. It supplements a heading, rather than replacing it."
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
+
+  def eyebrow(assigns) do
+    ~H"""
+    <p class={["armature-eyebrow"]} {@rest}>{render_slot(@inner_block)}</p>
+    """
+  end
+
+  @doc """
+  A named navigation landmark with a brand, section links and optional footnote.
+
+  Each item has `:label` and one of `:href`, `:patch` or `:navigate`, with optional
+  `:id` and `:current`. Optional `home_patch` links the wordmark to an index.
+  The caller owns the current page. The rail becomes a
+  wrapping row on small screens; its subtitle, label and footnote then hide.
+  """
+  attr(:id, :string, required: true)
+  attr(:title, :string, default: "Armature")
+  attr(:subtitle, :string, default: "Component catalogue")
+  attr(:label, :string, default: "Library sections")
+  attr(:section_label, :string, default: "Library")
+  attr(:home_patch, :string, default: nil)
+  attr(:items, :list, required: true)
+  slot(:footnote)
+
+  def side_nav(assigns) do
+    ~H"""
+    <div id={@id} class={["armature-side-nav"]}>
+      <div class={["armature-side-nav-brand"]}>
+        <.link :if={@home_patch} patch={@home_patch} aria-label={@title <> " home"}>{@title}</.link>
+        <span :if={!@home_patch}>{@title}</span>
+        <small>{@subtitle}</small>
+      </div>
+      <.eyebrow>{@section_label}</.eyebrow>
+      <nav aria-label={@label}>
+        <.link
+          :for={item <- @items}
+          id={Map.get(item, :id)}
+          href={Map.get(item, :href)}
+          patch={Map.get(item, :patch)}
+          navigate={Map.get(item, :navigate)}
+          aria-current={if Map.get(item, :current), do: "page"}
+        >
+          {item.label}
+        </.link>
+      </nav>
+      <div :if={@footnote != []} class={["armature-side-nav-footnote"]}>{render_slot(@footnote)}</div>
+    </div>
+    """
+  end
+
+  @doc "A context band with an optional actions slot. The context is a visible brand path."
+  attr(:context, :string, required: true)
+  slot(:actions)
+
+  def top_bar(assigns) do
+    ~H"""
+    <header class={["armature-top-bar"]} aria-label={@context}>
+      <.cluster>
+        <span>{@context}</span><div>{render_slot(@actions)}</div>
+      </.cluster>
+    </header>
+    """
+  end
+
+  @doc """
+  A page's h1 with an optional contextual eyebrow and actions or status.
+  Supply a unique `id` as the skip-link target. `rest` forwards focus commands
+  to the focusable heading, so consumers can recover focus after navigation.
+  """
+  attr(:id, :string, required: true)
+  attr(:title, :string, required: true)
+  attr(:eyebrow, :string, default: nil)
+  attr(:rest, :global)
+  slot(:actions)
+
+  def page_heading(assigns) do
+    ~H"""
+    <div class={["armature-page-heading"]}>
+      <.cluster>
+        <div>
+          <.eyebrow :if={@eyebrow}>{@eyebrow}</.eyebrow>
+          <h1 id={@id} tabindex="-1" {@rest}>{@title}</h1>
+        </div>
+        <div :if={@actions != []}>{render_slot(@actions)}</div>
+      </.cluster>
+    </div>
+    """
+  end
+
+  @doc """
+  Grouped navigation links with a labelled native select on narrow screens.
+
+  Groups contain `:label` and `:items`; items follow `side_nav/1`'s contract.
+  The select submits `destination` to the caller's `event` on change. Validate
+  that destination against the supplied items before navigating. The caller
+  owns selection and navigation; the component retains no state.
+  """
+  attr(:id, :string, required: true)
+  attr(:label, :string, required: true)
+  attr(:groups, :list, required: true)
+  attr(:event, :string, required: true)
+
+  slot(:inner_block)
+
+  def grouped_nav(assigns) do
+    ~H"""
+    <div id={@id} class={["armature-grouped-nav"]}>
+      <nav aria-label={@label} class={["armature-grouped-nav-links"]}>
+        <section :for={group <- @groups} data-level={Map.get(group, :level)}>
+          <.eyebrow>{group.label}</.eyebrow>
+          <.link
+            :for={item <- group.items}
+            id={Map.get(item, :id)}
+            href={Map.get(item, :href)}
+            patch={Map.get(item, :patch)}
+            navigate={Map.get(item, :navigate)}
+            aria-current={if Map.get(item, :current), do: "page"}
+          >
+            {item.label}
+          </.link>
+        </section>
+      </nav>
+      <form
+        id={@id <> "-form"}
+        class={["armature-grouped-nav-picker"]}
+        phx-change={@event}
+        phx-submit={@event}
+      >
+        <label for={@id <> "-choice"}>{@label}</label>
+        <select
+          id={@id <> "-choice"}
+          name="destination"
+          aria-describedby={@id <> "-hint"}
+          class={["armature-select"]}
+        >
+          <option
+            value=""
+            selected={
+              !Enum.any?(@groups, fn group -> Enum.any?(group.items, &Map.get(&1, :current)) end)
+            }
+          >
+            Choose a component
+          </option>
+          <optgroup :for={group <- @groups} label={group.label}>
+            <option
+              :for={item <- group.items}
+              value={Map.get(item, :patch) || Map.get(item, :navigate) || Map.get(item, :href)}
+              selected={Map.get(item, :current, false)}
+            >
+              {item.label}
+            </option>
+          </optgroup>
+        </select>
+        <p id={@id <> "-hint"}>Choosing an option opens its page.</p>
+      </form>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc """
+  A labelled native Light/Dark/Auto choice that announces the current selection.
+  `event` receives `theme`; the consumer applies its chosen theme. Auto must
+  remove the theme attribute to inherit consumer tokens without overwriting them.
+  """
+  attr(:id, :string, required: true)
+  attr(:value, :string, default: "auto", values: ~w(auto light dark))
+  attr(:label, :string, default: "Theme")
+  attr(:event, :string, required: true)
+  slot(:inner_block)
+
+  def theme_switch(assigns) do
+    ~H"""
+    <form id={@id} class={["armature-theme-switch"]} phx-change={@event} phx-submit={@event}>
+      <label for={@id <> "-choice"}>{@label}</label>
+      <.select
+        id={@id <> "-choice"}
+        name="theme"
+        value={@value}
+        options={[{"Auto", "auto"}, {"Light", "light"}, {"Dark", "dark"}]}
+      />
+      {render_slot(@inner_block)}
+    </form>
+    """
+  end
+
+  @doc """
+  A named paper-surface region with an h2, optional actions and caller-owned content.
+  Place panels in `grid/1` for responsive tiling. Use notices and status labels in
+  the content to express loading, empty, invalid or error states in words.
+  """
+  attr(:id, :string, required: true)
+  attr(:heading, :string, required: true)
+  attr(:rest, :global)
+  slot(:actions)
+  slot(:inner_block, required: true)
+
+  def panel(assigns) do
+    ~H"""
+    <section id={@id} class={["armature-panel"]} aria-labelledby={@id <> "-heading"} {@rest}>
+      <.cluster>
+        <h2 id={@id <> "-heading"}>{@heading}</h2>
+        <div :if={@actions != []}>{render_slot(@actions)}</div>
+      </.cluster>
+      {render_slot(@inner_block)}
+    </section>
+    """
+  end
+
+  @doc """
+  An application shell with a skip link, side navigation, context bar and page heading.
+  Supply globally unique `id` and `heading_id`. Item navigation and theme state
+  belong to the consumer. The rail narrows below 800px and stacks below 520px
+  of the shell's own inline size.
+  `heading_rest` forwards LiveView focus commands to the h1 after patch navigation.
+  """
+  attr(:id, :string, required: true)
+  attr(:title, :string, default: "Armature")
+  attr(:subtitle, :string, default: "Component catalogue")
+  attr(:nav_label, :string, default: "Library sections")
+  attr(:items, :list, required: true)
+  attr(:context, :string, required: true)
+  attr(:heading, :string, required: true)
+  attr(:heading_id, :string, required: true)
+  attr(:heading_rest, :map, default: %{})
+  attr(:home_patch, :string, default: nil)
+  attr(:eyebrow, :string, default: nil)
+  attr(:rest, :global)
+  slot(:footnote)
+  slot(:top_actions)
+  slot(:heading_actions)
+  slot(:inner_block, required: true)
+
+  def app_shell(assigns) do
+    ~H"""
+    <div id={@id} class={["armature-app-shell"]} {@rest}>
+      <.link
+        href={"#" <> @heading_id}
+        class={["armature-skip-link"]}
+        phx-click={Phoenix.LiveView.JS.focus(to: "#" <> @heading_id)}
+      >Skip to main content</.link>
+      <div class={["armature-app-shell-grid"]}>
+        <.side_nav
+          id={@id <> "-rail"}
+          title={@title}
+          subtitle={@subtitle}
+          label={@nav_label}
+          home_patch={@home_patch}
+          items={@items}
+        >
+          <:footnote :if={@footnote != []}>{render_slot(@footnote)}</:footnote>
+        </.side_nav>
+        <div class={["armature-app-shell-main"]}>
+          <.top_bar context={@context}>
+            <:actions>{render_slot(@top_actions)}</:actions>
+          </.top_bar>
+          <main aria-labelledby={@heading_id}>
+            <.page_heading id={@heading_id} title={@heading} eyebrow={@eyebrow} {@heading_rest}>
+              <:actions>{render_slot(@heading_actions)}</:actions>
+            </.page_heading>
+            <div class={["armature-app-shell-content"]}>{render_slot(@inner_block)}</div>
+          </main>
+        </div>
+      </div>
+    </div>
+    """
+  end
 
   @doc "A native button with a primary or secondary treatment and a visible name."
   attr(:type, :string, default: "button", values: ~w(button submit reset))
@@ -34,6 +305,7 @@ defmodule Armature.Components do
   attr(:navigate, :string, default: nil)
   attr(:patch, :string, default: nil)
   attr(:href, :any, default: nil)
+  attr(:class, :any, default: nil)
   attr(:replace, :boolean, default: false)
   attr(:method, :string, default: "get")
   attr(:rest, :global, include: ~w(download hreflang referrerpolicy rel target type))
@@ -47,7 +319,7 @@ defmodule Armature.Components do
       href={@href}
       replace={@replace}
       method={@method}
-      class={["armature-link"]}
+      class={["armature-link", @class]}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -270,7 +542,9 @@ defmodule Armature.Components do
 
   def grid(assigns) do
     ~H"""
-    <div class={["armature-grid"]} {@rest}>{render_slot(@inner_block)}</div>
+    <div class={["armature-grid"]} {@rest}>
+      <div class={["armature-grid-items"]}>{render_slot(@inner_block)}</div>
+    </div>
     """
   end
 
@@ -308,8 +582,13 @@ defmodule Armature.Components do
   A native table with scoped headings and caller-owned ordering and selection.
 
   Columns render each row through `:let`; `sort_key` buttons send `key` to
-  `sort_event`. Selection buttons send `id` to `select_event`. Supply an existing
+  `sort_event`. Mark exactly one column `row_label` to render its visible content
+  as the selection button, sending `id` to `select_event`. Supply an existing
   `inspector_id` when enabling selection. Row identifiers must be unique and DOM-safe.
+  A selectable row contains exactly one interactive element: its row-label button.
+  Other column content must be non-interactive; declared `interactive` columns
+  raise an error. For additional actions use a non-selectable table with explicit
+  links or a details pattern. Selection also works by clicking anywhere on the row.
   `density="compact"` reduces cell padding and row height on fine pointers.
   `caption_hidden` hides only the caption visually. Empty results use words.
   """
@@ -332,6 +611,8 @@ defmodule Armature.Components do
     attr(:label, :string, required: true)
     attr(:numeric, :boolean)
     attr(:sort_key, :string)
+    attr(:row_label, :boolean)
+    attr(:interactive, :boolean)
   end
 
   def data_table(assigns) do
@@ -339,6 +620,7 @@ defmodule Armature.Components do
       raise ArgumentError, "selection requires an existing inspector_id"
     end
 
+    validate_selectable_columns!(assigns)
     assigns = assign(assigns, :row_id, assigns.row_id || (&Map.fetch!(&1, :id)))
 
     ~H"""
@@ -359,7 +641,6 @@ defmodule Armature.Components do
         <caption class={[@caption_hidden && "armature-sr-only"]}>{@caption}</caption>
         <thead>
           <tr>
-            <th :if={@select_event} scope="col">Selection</th>
             <th
               :for={col <- @col}
               scope="col"
@@ -396,23 +677,28 @@ defmodule Armature.Components do
           <tr
             :for={row <- @rows}
             id={@id <> "-" <> to_string(@row_id.(row))}
-            class={[@select_event && @selected_id == @row_id.(row) && "armature-row-selected"]}
+            class={[
+              @select_event && "armature-clickable-row",
+              @select_event && @selected_id == @row_id.(row) && "armature-row-selected"
+            ]}
+            phx-click={@select_event}
+            phx-value-id={@select_event && @row_id.(row)}
           >
-            <td :if={@select_event}>
-              <button
-                type="button"
-                class={["armature-row-select"]}
-                phx-click={@select_event}
-                phx-value-id={@row_id.(row)}
-                aria-label={"Select #{@row_id.(row)}"}
-                aria-pressed={to_string(@selected_id == @row_id.(row))}
-                aria-controls={@inspector_id}
-              >
-                {if(@selected_id == @row_id.(row), do: "Selected", else: "Select")}
-              </button>
-            </td>
             <td :for={col <- @col} class={[col[:numeric] && "armature-numeric"]}>
-              {render_slot(col, row)}
+              <%= if @select_event && col[:row_label] do %>
+                <button
+                  type="button"
+                  class={["armature-row-select"]}
+                  phx-click={@select_event}
+                  phx-value-id={@row_id.(row)}
+                  aria-pressed={to_string(@selected_id == @row_id.(row))}
+                  aria-controls={@inspector_id}
+                >
+                  {render_slot(col, row)}
+                </button>
+              <% else %>
+                {render_slot(col, row)}
+              <% end %>
             </td>
           </tr>
         </tbody>
@@ -553,7 +839,9 @@ defmodule Armature.Components do
   A table-and-details template composing the complete data browsing workflow.
 
   The caller owns filtering, ordering, paging and persistent selection. Columns
-  receive each row; `details` holds the selected record's content. Update
+  receive each row; mark exactly one `row_label` and keep all cell content
+  non-interactive (the row-label button is the row's only action). `details` holds
+  the selected record's content. Update
   `selection_label` on selection changes to announce them without moving focus.
   The skip link targets the inspector; narrow layouts place it below the table.
   """
@@ -585,6 +873,8 @@ defmodule Armature.Components do
     attr(:label, :string, required: true)
     attr(:numeric, :boolean)
     attr(:sort_key, :string)
+    attr(:row_label, :boolean)
+    attr(:interactive, :boolean)
   end
 
   slot(:actions)
@@ -631,6 +921,8 @@ defmodule Armature.Components do
             label={col.label}
             numeric={col[:numeric] || false}
             sort_key={col[:sort_key]}
+            row_label={col[:row_label] || false}
+            interactive={col[:interactive] || false}
           >
             {render_slot(col, row)}
           </:col>
@@ -655,6 +947,19 @@ defmodule Armature.Components do
       </.split>
     </div>
     """
+  end
+
+  defp validate_selectable_columns!(%{select_event: nil}), do: :ok
+
+  defp validate_selectable_columns!(assigns) do
+    if Enum.count(assigns.col, & &1[:row_label]) != 1 do
+      raise ArgumentError, "selectable tables require exactly one row_label column"
+    end
+
+    if Enum.any?(assigns.col, & &1[:interactive]) do
+      raise ArgumentError,
+            "selectable rows allow only the row-label button; use a non-selectable table for actions"
+    end
   end
 
   defp prepare_field(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do

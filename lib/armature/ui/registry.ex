@@ -10,6 +10,70 @@ defmodule Armature.UI.Registry do
   def nodes do
     [
       %Node{
+        id: :eyebrow,
+        level: :atom,
+        module: Armature.Components,
+        function: :eyebrow,
+        purpose: "A contextual uppercase label.",
+        uses: []
+      },
+      %Node{
+        id: :page_heading,
+        level: :molecule,
+        module: Armature.Components,
+        function: :page_heading,
+        purpose: "A page heading with context and actions.",
+        uses: [:eyebrow, :cluster]
+      },
+      %Node{
+        id: :theme_switch,
+        level: :molecule,
+        module: Armature.Components,
+        function: :theme_switch,
+        purpose: "A labelled native light, dark or auto choice.",
+        uses: [:select]
+      },
+      %Node{
+        id: :side_nav,
+        level: :organism,
+        module: Armature.Components,
+        function: :side_nav,
+        purpose: "Named section navigation with a brand and footnote.",
+        uses: [:eyebrow, :link]
+      },
+      %Node{
+        id: :top_bar,
+        level: :organism,
+        module: Armature.Components,
+        function: :top_bar,
+        purpose: "A context band with actions.",
+        uses: [:cluster]
+      },
+      %Node{
+        id: :grouped_nav,
+        level: :organism,
+        module: Armature.Components,
+        function: :grouped_nav,
+        purpose: "Grouped navigation with a labelled narrow-screen picker.",
+        uses: [:eyebrow, :link]
+      },
+      %Node{
+        id: :panel,
+        level: :organism,
+        module: Armature.Components,
+        function: :panel,
+        purpose: "A named content panel with heading and actions.",
+        uses: [:cluster]
+      },
+      %Node{
+        id: :app_shell,
+        level: :template,
+        module: Armature.Components,
+        function: :app_shell,
+        purpose: "An application shell with skip navigation and a page heading.",
+        uses: [:link, :side_nav, :top_bar, :page_heading]
+      },
+      %Node{
         id: :button,
         level: :atom,
         module: Armature.Components,

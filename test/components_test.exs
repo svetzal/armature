@@ -417,7 +417,7 @@ defmodule Armature.ComponentsTest do
               selected_id="R-1"
               inspector_id="details"
             >
-              <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+              <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
               <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
             </C.data_table>
             <C.inspector id="details" title="Record details">Supporting information</C.inspector>
@@ -448,7 +448,7 @@ defmodule Armature.ComponentsTest do
                "#records-scroll[tabindex='0'][role=region][aria-label='Example records']"
              )
 
-      assert length(LazyHTML.to_tree(LazyHTML.query(doc, "th[scope=col]"))) == 3
+      assert length(LazyHTML.to_tree(LazyHTML.query(doc, "th[scope=col]"))) == 2
       assert length(LazyHTML.to_tree(LazyHTML.query(doc, "th[aria-sort]"))) == 1
 
       assert attribute(doc, "th[aria-sort]", "aria-sort") ==
@@ -464,15 +464,95 @@ defmodule Armature.ComponentsTest do
 
       assert present?(
                doc,
-               "button[phx-click=choose][phx-value-id=R-1][aria-label='Select R-1'][aria-pressed=true][aria-controls=details]"
+               "button[phx-click=choose][phx-value-id=R-1][aria-pressed=true][aria-controls=details]"
              )
 
       assert present?(doc, "button[phx-value-id=R-2][aria-pressed=false]")
-      assert text(doc, "#records-R-1 .armature-row-select") == "Selected"
+      assert text(doc, "#records-R-1 .armature-row-select") == "Example"
+      refute present?(doc, "tbody button[aria-label]")
+      assert doc |> LazyHTML.query("thead th") |> Enum.count() == 2
+      assert doc |> LazyHTML.query("#records-R-1 td") |> Enum.count() == 2
+      assert doc |> LazyHTML.query("#records-R-1 button") |> Enum.count() == 1
+      assert present?(doc, "#records-R-1.armature-clickable-row[phx-click=choose]")
       assert present?(doc, "aside#details[aria-labelledby=details-heading]")
       assert text(doc, "#details-heading") == "Record details"
       refute present?(doc, "aside[aria-live], aside[role=status]")
     end
+  end
+
+  test "selectable tables reject missing or multiple row labels and declared action columns" do
+    for columns <- [[], [%{row_label: true}, %{row_label: true}]] do
+      assert_raise ArgumentError, "selectable tables require exactly one row_label column", fn ->
+        document(&C.data_table/1, %{
+          id: "invalid",
+          rows: [],
+          caption: "Records",
+          select_event: "choose",
+          inspector_id: "details",
+          col: columns
+        })
+      end
+    end
+
+    assert_raise ArgumentError, ~r/selectable rows allow only the row-label button/, fn ->
+      document(fn assigns ->
+        ~H"""
+        <C.data_table
+          id="actions"
+          rows={[%{id: "R-1"}]}
+          caption="Records"
+          select_event="choose"
+          inspector_id="details"
+        >
+          <:col :let={row} label="Identifier" row_label>{row.id}</:col>
+          <:col label="Actions" interactive><C.link href="/record">Open</C.link></:col>
+        </C.data_table>
+        """
+      end)
+    end
+  end
+
+  test "responsive components render containers and children targeted by their container rules" do
+    css = File.read!(Path.expand("../priv/static/armature.css", __DIR__))
+
+    doc =
+      document(
+        fn assigns ->
+          ~H"""
+          <style phx-no-curly-interpolation>
+            <%= Phoenix.HTML.raw(@css) %>
+          </style>
+          <C.app_shell
+            id="responsive-shell"
+            title="Library"
+            heading="Overview"
+            heading_id="responsive-heading"
+            context="Library"
+            items={[]}
+          >
+            <C.grouped_nav id="responsive-nav" label="Components" event="choose" groups={[]} />
+            <C.grid id="responsive-panels">
+              <C.panel id="first-panel" heading="First">Content</C.panel>
+              <C.panel id="second-panel" heading="Second">Content</C.panel>
+            </C.grid>
+          </C.app_shell>
+          """
+        end,
+        %{css: css}
+      )
+
+    for {container, selector, child} <- [
+          {"armature-shell", "#responsive-shell", ".armature-app-shell-grid"},
+          {"armature-navigation", "#responsive-nav", ".armature-grouped-nav-picker"},
+          {"armature-grid", "#responsive-panels", ".armature-grid-items"}
+        ] do
+      assert present?(doc, selector <> " > " <> child)
+      assert text(doc, "style") =~ "container: #{container} / inline-size"
+      assert text(doc, "style") =~ "@container #{container} (width <"
+    end
+
+    assert present?(doc, "#responsive-panels > .armature-grid-items > #first-panel")
+    assert doc |> LazyHTML.query("main") |> Enum.count() == 1
   end
 
   test "selection requires an inspector destination" do
@@ -493,7 +573,7 @@ defmodule Armature.ComponentsTest do
           fn assigns ->
             ~H"""
             <C.data_table id="plain" rows={@rows} caption="Records" caption_hidden>
-              <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+              <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
             </C.data_table>
             """
           end,
@@ -647,7 +727,7 @@ defmodule Armature.ComponentsTest do
           page_sizes={[10, 25, 50]}
           page_size={25}
         >
-          <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+          <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
           <:actions><C.button>Export</C.button></:actions>
           <:details><C.record_header id="selected" title="Record R-1" /></:details>
         </C.table_inspector>
@@ -726,6 +806,103 @@ defmodule Armature.ComponentsTest do
       assert present?(doc, "table#density[data-density=#{density}]")
       assert text(doc, "#density td") == "R-001"
     end
+  end
+
+  test "shell landmarks, skip target, current navigation and action slots have names" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.app_shell
+          id="shell"
+          home_patch="/index"
+          title="Library"
+          heading="Overview"
+          heading_id="overview"
+          eyebrow="Library / Overview"
+          context="Library / Catalogue"
+          items={[%{id: "overview-link", label: "Overview", href: "/", current: true}]}
+        >
+          <:footnote>Synthetic examples</:footnote>
+          <:top_actions><C.theme_switch id="theme" value="dark" event="theme" /></:top_actions>
+          <:heading_actions><C.status label="Ready" /></:heading_actions>
+          <C.panel id="summary" heading="Summary">
+            Content
+            <:actions><C.button>Refresh</C.button></:actions>
+          </C.panel>
+        </C.app_shell>
+        <C.side_nav
+          id="separate-nav"
+          title="Examples"
+          label="Example sections"
+          items={[%{label: "First", patch: "/first", current: false}]}
+        />
+        <C.top_bar context="Examples">
+          <:actions><C.button>Action</C.button></:actions>
+        </C.top_bar>
+        <C.page_heading id="separate-heading" title="Examples" eyebrow="Library" />
+        <C.eyebrow>Section</C.eyebrow>
+        """
+      end)
+
+    assert text(doc, "#shell > a:first-child[href='#overview']") == "Skip to main content"
+
+    assert present?(
+             doc,
+             ".armature-side-nav-brand a[href='/index'][data-phx-link=patch][aria-label='Library home']"
+           )
+
+    assert present?(doc, "main[aria-labelledby=overview] h1#overview[tabindex='-1']")
+    assert present?(doc, "nav[aria-label='Library sections'] #overview-link[aria-current=page]")
+
+    assert present?(
+             doc,
+             "#separate-nav nav[aria-label='Example sections'] a[data-phx-link=patch]:not([aria-current])"
+           )
+
+    assert present?(doc, "header[aria-label='Library / Catalogue']")
+    assert text(doc, "#summary[aria-labelledby=summary-heading] h2") == "Summary"
+    assert present?(doc, "#summary button")
+    assert present?(doc, "label[for=theme-choice]")
+    assert present?(doc, "#theme-choice option[value=dark][selected]")
+    assert text(doc, ".armature-side-nav-footnote") == "Synthetic examples"
+  end
+
+  test "grouped navigation provides matching links and a labelled native picker" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.grouped_nav
+          id="components"
+          label="Components"
+          event="choose"
+          groups={[
+            %{
+              label: "Atoms",
+              items: [
+                %{id: "button-link", label: "Button", patch: "/?node=button", current: true},
+                %{id: "link-link", label: "Link", href: "/?node=link", current: false}
+              ]
+            }
+          ]}
+        />
+        """
+      end)
+
+    assert present?(doc, "nav[aria-label=Components] #button-link[aria-current=page]")
+    refute present?(doc, "#link-link[aria-current]")
+    assert text(doc, "label[for=components-choice]") == "Components"
+
+    assert present?(
+             doc,
+             "#components-choice optgroup[label=Atoms] option[value='/?node=button'][selected]"
+           )
+
+    assert present?(
+             doc,
+             "form[phx-change=choose] select[name=destination][aria-describedby=components-hint]"
+           )
+
+    assert text(doc, "#components-hint") == "Choosing an option opens its page."
   end
 
   defp document(component, assigns \\ %{}) do

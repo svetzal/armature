@@ -366,3 +366,9 @@ with named selection buttons, a skip link and polite selection announcements.
 Consumers own searching, sorting, paging and selection. Run `elixir examples/preview.exs`
 to explore 200 synthetic records in both themes; see the component guide for event
 payloads and composition examples.
+
+Application components include `app_shell`, `side_nav`, `top_bar`, `page_heading`,
+`grouped_nav`, `theme_switch` and `panel`, with the `eyebrow` atom for contextual
+labels. They provide named landmarks, skip navigation, responsive component
+navigation and a native Light/Dark/Auto choice. Consumers own URLs, selection
+and theme state; see [the component guide](guides/components.md#application-shell).

@@ -223,7 +223,7 @@ defmodule Armature.TokensTest do
 
     assert Map.new(rule!(rules, ".armature-table-scroll"))["overflow"] == "auto"
 
-    assert Map.new(rule!(rules, ".armature-catalogue a"))["min-width"] ==
+    assert Map.new(rule!(rules, ".armature-catalogue-detail ul a"))["min-width"] ==
              "var(--armature-target-size)"
 
     assert Map.new(rule!(rules, ".armature-table th"))["position"] == "sticky"
@@ -246,10 +246,20 @@ defmodule Armature.TokensTest do
     assert control["min-height"] == "var(--armature-target-size)"
 
     assert control["min-width"] == "var(--armature-target-size)"
-    selected = Map.new(rule!(rules, ".armature-row-selected .armature-row-select"))
+    focus = Map.new(rule!(rules, ".armature-clickable-row:focus-within"))
+    assert focus["outline"] == "var(--armature-focus-width) solid var(--armature-focus)"
 
-    assert selected["outline"] ==
-             "var(--armature-border-width) dashed var(--armature-selected-cue)"
+    row_label =
+      rules
+      |> Enum.find(fn {selector, declarations} ->
+        selector == ".armature-row-select" && List.keymember?(declarations, "border", 0)
+      end)
+      |> elem(1)
+      |> Map.new()
+
+    assert row_label["border"] == "none"
+    assert row_label["background"] == "none"
+    assert row_label["font-weight"] == "var(--armature-weight-emphasis)"
 
     assert Map.new(rule!(rules, ".armature-table-inspector > .armature-split > div"))[
              "flex-basis"
@@ -309,17 +319,44 @@ defmodule Armature.TokensTest do
   end
 
   test "catalogue styling uses the same theme and accessibility contract", %{css: css} do
-    assert css =~ ".armature-catalogue {"
-    assert css =~ ".armature-catalogue [aria-current=\"page\"]"
+    assert css =~ ".armature-app-shell {"
+    assert css =~ ".armature-side-nav nav > a[aria-current=\"page\"]"
 
     assert css =~
-             "border-inline-start: var(--armature-border-width) solid var(--armature-selected-cue)"
+             "box-shadow: inset var(--armature-cue-width) 0 var(--armature-selected-cue)"
 
     assert css =~ ".armature-catalogue-notes"
     assert css =~ "white-space: pre-wrap"
     # "Auto" follows the page. A token rule on any auto container would sit on
     # a descendant and hide the consumer's :root overrides inside it.
     refute css =~ ~s([data-armature-theme="auto"])
+  end
+
+  test "shell rail contrast and geometry hold in all six evaluated contexts", %{css: css} do
+    contexts = Values.read()
+    assert map_size(contexts) == 6
+
+    for {_context, result} <- contexts do
+      assert result.values["--armature-rail-surface"] == "#173c32"
+
+      rail_pairs =
+        Enum.filter(result.pairs, &String.starts_with?(&1.foreground, "--armature-rail-"))
+
+      assert length(rail_pairs) == 5
+      assert Enum.all?(rail_pairs, & &1.pass?)
+      assert result.values["--armature-rail-width"] == "210px"
+      assert result.values["--armature-rail-width-narrow"] == "155px"
+      assert result.values["--armature-nav-width"] == "190px"
+    end
+
+    for breakpoint <- [800, 520],
+        do: assert(css =~ "@container armature-shell (width < #{breakpoint}px)")
+
+    assert css =~ ".armature-grouped-nav-picker { display: none; }"
+    assert css =~ ".armature-grouped-nav-links { display: none; }"
+    assert css =~ "outline-color: var(--armature-rail-focus)"
+    assert css =~ "outline-color: var(--armature-rail-current-focus)"
+    assert css =~ "min-height: max(var(--armature-target-enhanced), var(--armature-target-size))"
   end
 
   test "guide table is generated from the contract" do
@@ -367,7 +404,7 @@ defmodule Armature.TokensTest do
           ".armature-table tbody tr:focus-within",
           ".armature-facts dt",
           "white-space: nowrap",
-          "flex: 4 1 calc(var(--armature-layout-min-width) * 3)"
+          "grid-template-columns: var(--armature-nav-width) minmax(0, 1fr)"
         ],
         do: assert(css =~ rule)
 

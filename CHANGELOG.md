@@ -8,6 +8,34 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Added
+
+- Application-shell template, side and grouped navigation, top bar, page heading,
+  native Light/Dark/Auto theme switch, content panel and contextual eyebrow atom,
+  with registered compositions, accessible names and live examples.
+- Rail palette and shell measurement tokens, with text and focus contrast
+  contracts verified in all six theme contexts and forced-colour support.
+- Optional catalogue `:title` and level query navigation; the catalogue now uses
+  the application shell, narrow-screen component picker and responsive panels.
+  Component URLs, relationship links, history and inherited Auto tokens remain.
+- Optional additive `class` on the link atom, preserving its baseline class so
+  the shell can expose its skip link on focus.
+
+### Fixed
+
+- Isolate landmark-rendering catalogue examples in titled stylesheet-equipped
+  documents, with native width presets and announced choices.
+- Reflow shells, grouped navigation and panel tiling by their own inline size
+  through container queries, including embedded and narrow previews.
+
+### Changed
+
+- Selectable tables now use exactly one `row_label` column button instead of a
+  separate selection column. Mark a column `row_label` when migrating, including
+  in `table_inspector`; keep every cell's content non-interactive. Declared
+  `interactive` columns require a non-selectable table or details pattern.
+  Row clicks, focus outlines, selection announcements and persistence remain.
+
 ## [0.1.0] - 2026-10-10
 
 First release. The public surface can change in minor versions until 1.0.0.

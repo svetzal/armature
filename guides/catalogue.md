@@ -20,6 +20,7 @@ if Application.compile_env(:example, :dev_routes) do
     armature_catalogue "/dev/ui",
       registry: Example.UI.Registry,
       examples: Example.UI.Examples,
+      title: "Armature",
       token_stylesheets: ["assets/css/tokens.css"]
   end
 end
@@ -46,6 +47,25 @@ application. Light and Dark set `data-armature-theme` on the catalogue
 container, which declares the full light or dark token set there. They show
 your look only if your overrides also match `[data-armature-theme="light"]`
 and `[data-armature-theme="dark"]`; see the README token stylesheet example.
+
+## Application shell
+
+The catalogue uses the baseline application components. Its configurable `:title`
+(default "Armature") appears in the wordmark and top-bar path; the subtitle is
+"Component catalogue". The rail lists Tokens, then Atoms through Templates.
+The wordmark links back to the catalogue index with a LiveView patch.
+Each level link uses `?level=atom` (or the corresponding level) and opens that
+level's first component. The secondary list contains only the selected level;
+the index shows all groups. Existing `?node=component` URLs and both relationship
+directions continue to work, including browser Back and Forward.
+
+Every page has a contextual eyebrow, a focusable heading and a skip link targeting
+that heading. At 1280px and 800px the shell keeps its 210px rail. Below 800px it
+narrows to 155px; at 520px the rail is still beside the content, while at 375px
+it becomes a wrapping row. Below 760px the secondary component list becomes a
+labelled native select that patches to the chosen component. Example panels tile
+in two columns and stack below 760px. The top bar contains the labelled native
+Light/Dark/Auto select, whose selected option announces the current choice.
 
 ## Tokens
 
@@ -136,3 +156,13 @@ For Armature alone, use `Armature.UI.Registry` and
 control and feedback states, all layouts and 200 generated records with
 complete-set search, sorting, 10/25/50-row pages and retained selection. Run
 `OPEN=0 PORT=4021 elixir examples/preview.exs` to serve the same catalogue at `/`.
+
+Examples that render main, header or footer landmarks are isolated in a titled
+iframe. Its `srcdoc` includes the rendered example and Armature stylesheet, so
+the catalogue keeps exactly one main landmark. Native preview controls offer
+Wide, 800px, 520px and 375px widths and announce the current choice. The frame
+inherits the selected example theme; Auto follows the browser's colour scheme.
+Isolated examples are static previews; use inline demonstrations for LiveView
+events. Shell, grouped navigation and panel grids reflow by their own size,
+including inside the preview. Selectable table examples use a single row-label
+button per row; additional actions belong in non-selectable tables or details.

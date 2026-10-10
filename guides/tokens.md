@@ -86,6 +86,30 @@ uses the contract directly, and its samples follow the catalogue theme control.
 <!-- tokens:start -->
 | Token | Group | Role | Required contrast |
 | --- | --- | --- | --- |
+| `--armature-rail-surface` | colour | Deep green navigation surface. |  |
+| `--armature-rail-text` | colour | Primary navigation text. | `--armature-rail-surface` 4.5:1 |
+| `--armature-rail-muted` | colour | Secondary navigation text. | `--armature-rail-surface` 4.5:1 |
+| `--armature-rail-divider` | colour | Decorative rail divider. |  |
+| `--armature-rail-current-surface` | colour | Current navigation pill surface. |  |
+| `--armature-rail-current-text` | colour | Current navigation pill text. | `--armature-rail-current-surface` 4.5:1 |
+| `--armature-rail-focus` | colour | Focus ring against the navigation rail. | `--armature-rail-surface` 3:1 |
+| `--armature-rail-current-focus` | colour | Inset focus ring against the pale current pill. | `--armature-rail-current-surface` 3:1 |
+| `--armature-rail-width` | space | Wide shell rail width. |  |
+| `--armature-rail-width-narrow` | space | Intermediate shell rail width. |  |
+| `--armature-nav-width` | space | Secondary navigation column width. |  |
+| `--armature-space-shell` | space | Shell content horizontal inset. |  |
+| `--armature-space-top-bar` | space | Top bar vertical inset. |  |
+| `--armature-space-nav` | space | Rail link vertical and secondary link horizontal inset. |  |
+| `--armature-space-rail-gap` | space | Gap between rail links. |  |
+| `--armature-space-panel-content` | space | Comfortable panel inset. |  |
+| `--armature-text-brand` | typography | Rail wordmark size. |  |
+| `--armature-weight-brand` | typography | Rail wordmark weight. |  |
+| `--armature-tracking-brand` | typography | Wordmark and secondary group letter spacing. |  |
+| `--armature-text-eyebrow` | typography | Contextual eyebrow size. |  |
+| `--armature-tracking-eyebrow` | typography | Contextual eyebrow letter spacing. |  |
+| `--armature-text-page-heading` | typography | Application page heading size. |  |
+| `--armature-shell-height` | space | Minimum full-page shell height. |  |
+| `--armature-target-enhanced` | control | Enhanced navigation target size. |  |
 | `--armature-hover-mix` | shape | Subtle ink blend on hovered buttons. |  |
 | `--armature-text-micro` | typography | Size of table headings, cell metadata and status chips. |  |
 | `--armature-text-control` | typography | Size of controls, table cells and notices. |  |
