@@ -1,7 +1,7 @@
 defmodule Armature.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.2.0"
   @source_url "https://github.com/svetzal/armature"
 
   def project do
@@ -51,7 +51,8 @@ defmodule Armature.MixProject do
       maintainers: ["Stacey Vetzal"],
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url},
-      files: ~w(lib priv guides .formatter.exs mix.exs README.md CHANGELOG.md LICENSE.md)
+      files:
+        ~w(lib priv guides usage-rules.md .formatter.exs mix.exs README.md CHANGELOG.md LICENSE.md)
     ]
   end
 

@@ -7,7 +7,7 @@ for Phoenix component libraries. It gives you the levels, the composition
 rules, the token contract and a set of accessible baseline components. Your
 application supplies the look and the components that are its own.
 
-> **Status:** 0.1.0, early. The public surface can change between minor
+> **Status:** 0.2.0, early. The public surface can change between minor
 > versions until 1.0.0. See [CHARTER.md](CHARTER.md) for scope.
 
 ## The level model
@@ -35,6 +35,38 @@ Armature checks these rules in your test suite, not only in documentation.
    itself.
 3. Declare your own components in your registry, next to the baseline ones.
 4. Run the registry checks in your tests.
+
+## Guidance for coding agents
+
+Armature ships `usage-rules.md`: short, imperative rules for building with it.
+Agents working in your application follow it when it is in your `AGENTS.md`.
+Pull it in with [usage_rules](https://hex.pm/packages/usage_rules):
+
+```elixir
+# mix.exs
+def project do
+  [
+    # ...
+    usage_rules: [file: "AGENTS.md", usage_rules: [:armature]]
+  ]
+end
+
+defp deps do
+  [
+    # ...
+    {:usage_rules, "~> 1.2", only: :dev}
+  ]
+end
+```
+
+```bash
+mix usage_rules.sync
+```
+
+The sync keeps only the packages you list, so list every package whose rules
+your `AGENTS.md` already carries (for example `"phoenix:html"`). Where an
+older rule tells agents to use Phoenix's generated core components, say in
+your own `AGENTS.md` that Armature's rules take precedence.
 
 ## Styles and optional Barlow fonts
 

@@ -8,8 +8,14 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-10
+
 ### Added
 
+- `usage-rules.md`, shipped in the package: short, imperative rules for agents
+  building with Armature, synced into a consuming application's `AGENTS.md` with
+  `usage_rules`. A test keeps every module, function, component, attribute and
+  slot it names in step with the code.
 - Application-shell template, side and grouped navigation, top bar, page heading,
   native Light/Dark/Auto theme switch, content panel and contextual eyebrow atom,
   with registered compositions, accessible names and live examples.
@@ -41,7 +47,7 @@ Until 1.0.0, a minor version can change the public surface.
 
 ### Changed
 
-- Selectable tables now use exactly one `row_label` column button instead of a
+- **Breaking:** selectable tables now use exactly one `row_label` column button instead of a
   separate selection column. Mark a column `row_label` when migrating, including
   in `table_inspector`; keep every cell's content non-interactive. Declared
   `interactive` columns require a non-selectable table or details pattern.
@@ -139,5 +145,6 @@ First release. The public surface can change in minor versions until 1.0.0.
   organisms, never themselves. Layouts use atoms only. Tokens are CSS custom
   properties, not registry nodes.
 
-[Unreleased]: https://github.com/svetzal/armature/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/svetzal/armature/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/svetzal/armature/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/svetzal/armature/releases/tag/v0.1.0
