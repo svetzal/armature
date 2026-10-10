@@ -254,6 +254,70 @@ defmodule Armature.ComponentsTest do
     assert present?(doc, "select#multi[multiple][name='sample[name][]']")
   end
 
+  test "checkbox fields reflect boolean FormField values and submit false when unchecked" do
+    for {value, checked?} <- [
+          {true, true},
+          {"true", true},
+          {false, false},
+          {"false", false},
+          {nil, false}
+        ] do
+      doc =
+        document(
+          fn assigns ->
+            ~H"""
+            <C.field field={@form[:accepted]} type="checkbox" label="Accept the terms" />
+            """
+          end,
+          %{form: to_form(%{"accepted" => value}, as: :sample)}
+        )
+
+      assert present?(doc, "input#sample_accepted[type=checkbox][value=true]")
+      assert present?(doc, "input#sample_accepted[checked]") == checked?
+      assert present?(doc, "label[for=sample_accepted]")
+
+      # The hidden fallback precedes the box, so a ticked box's later value wins.
+      [hidden, box] =
+        doc |> LazyHTML.query("input[name='sample[accepted]']") |> LazyHTML.to_tree()
+
+      assert {"type", "hidden"} in elem(hidden, 1) and {"value", "false"} in elem(hidden, 1)
+      assert {"type", "checkbox"} in elem(box, 1)
+    end
+
+    # What a browser sends for an unticked and a ticked box, through Plug's decoder.
+    assert Plug.Conn.Query.decode("sample[accepted]=false") == %{
+             "sample" => %{"accepted" => "false"}
+           }
+
+    assert Plug.Conn.Query.decode("sample[accepted]=false&sample[accepted]=true") ==
+             %{"sample" => %{"accepted" => "true"}}
+  end
+
+  test "disabled checkbox fields submit nothing and an explicit checked wins" do
+    form = to_form(%{"accepted" => false}, as: :sample)
+
+    doc =
+      document(
+        fn assigns ->
+          ~H"""
+          <C.field field={@form[:accepted]} type="checkbox" label="Locked" disabled />
+          <C.field
+            field={@form[:accepted]}
+            id="forced"
+            type="checkbox"
+            label="Forced"
+            checked
+          />
+          """
+        end,
+        %{form: form}
+      )
+
+    assert present?(doc, "input[type=hidden][name='sample[accepted]'][disabled]")
+    assert present?(doc, "input#sample_accepted[type=checkbox][disabled]")
+    assert present?(doc, "input#forced[type=checkbox][checked]")
+  end
+
   test "plain fields require a stable id" do
     assert_raise ArgumentError, ~r/requires an id/, fn ->
       render_component(&C.field/1, label: "Name", name: "name")

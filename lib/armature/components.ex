@@ -181,6 +181,23 @@ defmodule Armature.Components do
           />
         <% "textarea" -> %>
           <.textarea id={@id} name={@name} value={@value} {@control_rest} />
+        <% "checkbox" -> %>
+          <%!-- An unchecked box submits nothing; the hidden input sends "false" instead. --%>
+          <input
+            type="hidden"
+            name={@name}
+            value="false"
+            disabled={@control_rest[:disabled]}
+            form={@control_rest[:form]}
+          />
+          <.input
+            id={@id}
+            name={@name}
+            value="true"
+            type="checkbox"
+            checked={@checked}
+            {@control_rest}
+          />
         <% _ -> %>
           <.input id={@id} name={@name} value={@value} type={@type} {@control_rest} />
       <% end %>
@@ -298,9 +315,16 @@ defmodule Armature.Components do
     rest =
       assigns.rest
       |> Map.delete(:"aria-invalid")
+      |> Map.delete(:checked)
       |> Map.put(:"aria-describedby", if(descriptions == "", do: nil, else: descriptions))
       |> Map.put(:"aria-invalid", if(assigns.errors != [], do: "true", else: nil))
 
-    assign(assigns, :control_rest, rest)
+    # A caller's explicit `checked` wins; otherwise the bound value decides.
+    checked =
+      Map.get_lazy(assigns.rest, :checked, fn ->
+        Phoenix.HTML.Form.normalize_value("checkbox", assigns.value)
+      end)
+
+    assign(assigns, control_rest: rest, checked: checked)
   end
 end
