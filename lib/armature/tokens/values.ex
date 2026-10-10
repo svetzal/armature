@@ -4,8 +4,9 @@ defmodule Armature.Tokens.Values do
 
   `read/1` reads Armature's defaults followed by consumer stylesheet paths on
   every call. It evaluates `:root`, theme attribute selectors, cascade layers,
-  specificity, source order and `!important` for automatic light/dark roots
-  and explicit light/dark catalogue containers. Other media conditions are
+  specificity, source order and `!important` in six contexts: the system
+  colour preference (light or dark) crossed with the container's theme (none,
+  explicit light or explicit dark). See `contexts/0`. Other media conditions are
   excluded: these results describe the ordinary colour schemes, not forced
   colours, reduced motion or viewport-specific target sizes.
 
@@ -18,31 +19,54 @@ defmodule Armature.Tokens.Values do
 
   alias Armature.Tokens
 
-  @themes [:light, :dark, :explicit_light, :explicit_dark]
+  # The system colour preference and the container's explicit theme are
+  # independent: an explicit theme can be shown while the system prefers the
+  # other scheme, and preference media queries still apply inside it. Each
+  # context is {system preference, container theme}; :auto sets no attribute.
+  @contexts [
+    light: {:light, :auto},
+    dark: {:dark, :auto},
+    explicit_light: {:light, :light},
+    explicit_dark: {:dark, :dark},
+    explicit_light_on_dark_system: {:dark, :light},
+    explicit_dark_on_light_system: {:light, :dark}
+  ]
 
-  @doc "Reads stylesheet paths after the shipped defaults and returns values and pair results by theme."
+  @labels %{
+    light: "Light (Auto)",
+    dark: "Dark (Auto)",
+    explicit_light: "Light (explicit)",
+    explicit_dark: "Dark (explicit)",
+    explicit_light_on_dark_system: "Light (explicit, system dark)",
+    explicit_dark_on_light_system: "Dark (explicit, system light)"
+  }
+
+  @doc "Every evaluated context, in display order, with a readable label."
+  def contexts, do: Enum.map(@contexts, fn {name, _} -> {name, Map.fetch!(@labels, name)} end)
+
+  @doc "Reads stylesheet paths after the shipped defaults and returns values and pair results by context."
   def read(paths \\ []) do
     css = Enum.map_join([default_path() | paths], "\n", &File.read!/1)
     rules = parse(css)
     layers = layer_order(css)
 
-    Map.new(@themes, fn theme ->
-      root_theme = if theme in [:dark, :explicit_dark], do: :dark, else: :light
-      root = cascade(rules, layers, root_theme, :root, %{}) |> resolve_values()
+    Map.new(@contexts, fn {name, {system, choice}} ->
+      root = cascade(rules, layers, system, :auto, :root, %{}) |> resolve_values()
 
       values =
-        if theme in [:explicit_light, :explicit_dark],
-          do: cascade(rules, layers, root_theme, :container, root),
-          else: root
+        if choice == :auto,
+          do: root,
+          else: cascade(rules, layers, system, choice, :container, root)
 
       values = resolve_values(values)
-      {theme, %{values: values, pairs: pairs(values)}}
+      {name, %{values: values, pairs: pairs(values)}}
     end)
   end
 
   @doc """
-  Checks all required pairs in automatic and explicit themes, raising
-  `ArgumentError` with each failing theme and pair. Returns `:ok` on success.
+  Checks all required pairs in every context (automatic themes, explicit
+  themes, and explicit themes under the opposite system preference), raising
+  `ArgumentError` with each failing context and pair. Returns `:ok` on success.
 
       assert :ok = Armature.Tokens.Values.check!(["assets/css/tokens.css"])
   """
@@ -73,6 +97,9 @@ defmodule Armature.Tokens.Values do
 
   defp blocks(["}" | rest], [_ | context], rules), do: blocks(rest, context, rules)
 
+  # An empty rule body, such as `:root {}`, declares nothing.
+  defp blocks([_prelude, "{", "}" | rest], context, rules), do: blocks(rest, context, rules)
+
   defp blocks([prelude, "{" | rest], context, rules) do
     selector = prelude |> String.split(";") |> List.last() |> String.trim()
 
@@ -101,13 +128,13 @@ defmodule Armature.Tokens.Values do
     |> Enum.uniq()
   end
 
-  defp cascade(rules, layers, theme, target, inherited) do
+  defp cascade(rules, layers, system, choice, target, inherited) do
     rules
     |> Enum.with_index()
     |> Enum.reduce(%{}, fn {rule, index}, acc ->
-      specificity = specificity(rule.selector, theme, target)
+      specificity = specificity(rule.selector, system, choice, target)
 
-      if specificity && active?(rule.context, theme) do
+      if specificity && active?(rule.context, system) do
         Enum.reduce(Enum.with_index(rule.declarations), acc, fn {{name, raw}, declaration_index},
                                                                 values ->
           important? = String.ends_with?(raw, "!important")
@@ -140,35 +167,40 @@ defmodule Armature.Tokens.Values do
     if important?, do: -index, else: index
   end
 
-  defp active?(context, theme) do
+  defp active?(context, system) do
     Enum.all?(context, fn
       "@layer " <> _ ->
         true
 
       "@media " <> condition ->
-        String.trim(condition) == "(prefers-color-scheme: dark)" and theme == :dark
+        String.trim(condition) == "(prefers-color-scheme: dark)" and system == :dark
 
       _ ->
         false
     end)
   end
 
-  defp specificity(selectors, theme, target) do
+  defp specificity(selectors, system, choice, target) do
     selectors
     |> String.split(",")
-    |> Enum.map(&selector_specificity(String.trim(&1), theme, target))
+    |> Enum.map(&selector_specificity(String.trim(&1), system, choice, target))
     |> Enum.reject(&is_nil/1)
     |> Enum.max(fn -> nil end)
   end
 
-  defp selector_specificity(":root", _theme, :root), do: 1
+  defp selector_specificity(":root", _system, _choice, :root), do: 1
 
-  defp selector_specificity(":root:where(:not([data-armature-theme=\"light\"]))", :dark, :root),
-    do: 1
+  defp selector_specificity(
+         ":root:where(:not([data-armature-theme=\"light\"]))",
+         :dark,
+         _choice,
+         :root
+       ),
+       do: 1
 
-  defp selector_specificity("[data-armature-theme]", _theme, :container), do: 1
+  defp selector_specificity("[data-armature-theme]", _system, _choice, :container), do: 1
 
-  defp selector_specificity(selector, theme, :container) do
+  defp selector_specificity(selector, _system, theme, :container) do
     normalized =
       selector
       |> String.replace("'", "\"")
@@ -177,7 +209,7 @@ defmodule Armature.Tokens.Values do
     if normalized == ~s([data-armature-theme="#{theme}"]), do: 1
   end
 
-  defp selector_specificity(_selector, _theme, _target), do: nil
+  defp selector_specificity(_selector, _system, _choice, _target), do: nil
 
   defp resolve_values(values) do
     Map.new(values, fn {name, value} -> {name, resolve(value, values, [name])} end)

@@ -49,13 +49,18 @@ end
 ```
 
 `check!/1` reads Armature's defaults and then your files in order. It raises
-`ArgumentError` listing each failing theme, foreground, background, actual
+`ArgumentError` listing each failing context, foreground, background, actual
 ratio and required minimum. Unsupported or unresolved colours also fail.
-`Armature.Tokens.Values.read/1` returns a map keyed by `:light`, `:dark`,
-`:explicit_light` and `:explicit_dark`. Each contains `:values` (resolved CSS
-custom properties) and `:pairs` (foreground, background, ratio, minimum,
-`pass?` and error). The first two evaluate automatic roots; the latter two
-include declarations on explicit catalogue theme containers.
+`Armature.Tokens.Values.read/1` returns a map with one entry per context in
+`Armature.Tokens.Values.contexts/0`. The system colour preference and an
+explicit theme are independent, so there are six contexts: `:light` and
+`:dark` (automatic, following the system), `:explicit_light` and
+`:explicit_dark` (an explicit theme matching the system), and
+`:explicit_light_on_dark_system` and `:explicit_dark_on_light_system` (an
+explicit theme while the system prefers the other scheme, where preference
+media queries still apply). Each contains `:values` (resolved CSS custom
+properties) and `:pairs` (foreground, background, ratio, minimum, `pass?`
+and error).
 
 The evaluator supports token declarations on `:root`, the default automatic
 dark selector `:root:where(:not([data-armature-theme="light"]))`,

@@ -66,11 +66,13 @@ reads files for server calculations; it does not load CSS into the browser.
 Load those same files in your existing layout or asset bundle.
 
 Every required colour pair reports its server-calculated WCAG ratio, minimum
-and **Pass** or **Fail** for Light and Dark in both Auto and explicit modes.
+and **Pass** or **Fail** in every context: Light and Dark in Auto, each
+explicit theme under a matching system preference, and each explicit theme
+under the opposite system preference.
 Auto evaluates inherited `:root` tokens under each system preference.
 Explicit modes evaluate the theme container's own declarations over those
 inherited values. Thus a root-only override can change Auto while leaving an
-explicit theme unchanged. Values for all four modes are listed alongside
+explicit theme unchanged. Values for all six contexts are listed alongside
 each token, independent of the currently selected visual theme.
 
 See [the token guide](tokens.md#checking-consumer-overrides) for the supported

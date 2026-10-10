@@ -127,11 +127,8 @@ defmodule Armature.Catalogue.TokenPage do
     """
   end
 
-  defp themes, do: [:light, :dark, :explicit_light, :explicit_dark]
-  defp theme_name(:light), do: "Light (Auto)"
-  defp theme_name(:dark), do: "Dark (Auto)"
-  defp theme_name(:explicit_light), do: "Light (explicit)"
-  defp theme_name(:explicit_dark), do: "Dark (explicit)"
+  defp themes, do: Enum.map(Armature.Tokens.Values.contexts(), &elem(&1, 0))
+  defp theme_name(theme), do: Armature.Tokens.Values.contexts() |> Keyword.fetch!(theme)
 
   defp weight_value(values, "auto", weight) do
     name = "--armature-weight-#{weight}"

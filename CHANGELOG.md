@@ -16,6 +16,10 @@ Until 1.0.0, a minor version can change the public surface.
 - `Armature.Tokens.Values.read/1` and `check!/1` for shared stylesheet resolution
   and consumer contrast tests; optional catalogue `:token_stylesheets` paths
   read at request time. Document supported CSS and failure reporting.
+  Contrast is checked in six contexts, because the system colour preference and
+  an explicit theme are independent: an override that breaks contrast only when
+  an explicit theme meets the opposite system preference now fails the check.
+  Empty rules such as `:root {}` in a consumer stylesheet declare nothing.
 
 - Optional Barlow 400/600 font stylesheet, bundled font files and SIL Open
   Font License; documented static serving and imports.

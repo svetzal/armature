@@ -11,6 +11,40 @@ defmodule Armature.Tokens.ValuesTest do
     {:ok, stylesheet: Path.join(directory, "tokens.css")}
   end
 
+  test "an explicit theme is checked under the opposite system preference", %{stylesheet: path} do
+    # Only the combination "explicit Light while the system prefers dark"
+    # breaks contrast here; it must not pass unnoticed.
+    File.write!(path, """
+    @media (prefers-color-scheme: dark) {
+      [data-armature-theme="light"] { --armature-ink: #fffefb; }
+    }
+    """)
+
+    results = Values.read([path])
+    failing = &Enum.reject(results[&1].pairs, fn pair -> pair.pass? end)
+
+    assert failing.(:explicit_light_on_dark_system) != []
+    assert failing.(:explicit_light) == []
+    assert failing.(:light) == []
+    assert failing.(:dark) == []
+
+    error = assert_raise ArgumentError, fn -> Values.check!([path]) end
+    assert error.message =~ "explicit_light_on_dark_system: --armature-ink on --armature-paper"
+  end
+
+  test "every context is evaluated and labelled" do
+    assert Values.read() |> Map.keys() |> Enum.sort() ==
+             Values.contexts() |> Keyword.keys() |> Enum.sort()
+
+    assert Values.contexts()[:explicit_dark_on_light_system] == "Dark (explicit, system light)"
+  end
+
+  test "empty rules declare nothing and do not stop evaluation", %{stylesheet: path} do
+    File.write!(path, ":root {}\n@media (prefers-color-scheme: dark) { :root {} }\n")
+    assert Values.read([path]).light.values == Values.read().light.values
+    assert :ok = Values.check!([path])
+  end
+
   test "contrast uses WCAG relative luminance", %{stylesheet: path} do
     for {foreground, background, expected} <- [
           {"#000000", "#ffffff", 21.0},
