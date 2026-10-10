@@ -167,9 +167,7 @@ defmodule Armature.CatalogueTest do
       assert has_element?(view, "#catalogue-token-#{id}.armature-panel h2", heading)
     end
 
-    for group <- Enum.uniq(Enum.map(Armature.Tokens.all(), & &1.group)) do
-      assert has_element?(view, "[data-token-group='#{group}']")
-    end
+    assert_token_demonstrations(view)
 
     values = Armature.Tokens.Values.read([])
 
@@ -393,5 +391,84 @@ defmodule Armature.CatalogueTest do
     assert has_element?(view, "#catalogue-node-button[href='/nested/ui?node=button']")
     assert has_element?(view, "#example-extension", "Example extension")
     assert has_element?(view, "#catalogue-usage", "A synthetic extension with a visible name.")
+  end
+
+  # Each themed panel must show its tokens at work, not only label a group:
+  # removing a demonstration fails here.
+  defp assert_token_demonstrations(view) do
+    tokens = Armature.Tokens.all()
+    named = fn prefix -> Enum.filter(tokens, &String.starts_with?(&1.name, prefix)) end
+
+    for surface <- ~w(paper canvas stripe hover selected) do
+      assert has_element?(
+               view,
+               "#catalogue-token-surfaces .armature-token-surface[style*='var(--armature-#{surface})']"
+             )
+    end
+
+    assert has_element?(view, "#catalogue-token-surfaces [role=img][aria-label]")
+
+    assert has_element?(view, "#catalogue-token-accents #catalogue-focus-sample")
+    assert has_element?(view, "#catalogue-token-accents button[aria-pressed=true]")
+    assert has_element?(view, "#catalogue-token-accents .armature-notice")
+    assert has_element?(view, "#catalogue-token-accents .armature-select-wrap select")
+
+    for tone <- ~w(success warning error) do
+      assert has_element?(view, "#catalogue-token-status .armature-status.armature-tone-#{tone}")
+      assert has_element?(view, "#catalogue-token-status .armature-notice.armature-tone-#{tone}")
+    end
+
+    for width <- ~w(wide narrow) do
+      assert has_element?(
+               view,
+               "#catalogue-token-rail .armature-token-rail-#{width} [aria-current=page]"
+             )
+    end
+
+    assert has_element?(view, "#catalogue-token-rail .armature-grouped-nav")
+
+    for token <- named.("--armature-text-"), weight <- ~w(normal emphasis) do
+      assert has_element?(
+               view,
+               "#catalogue-token-typography [style*='font-size: var(#{token.name})'][style*='--armature-weight-#{weight}']"
+             )
+    end
+
+    assert has_element?(view, "#catalogue-token-typography #catalogue-tabular-sample")
+
+    for token <-
+          Enum.filter(tokens, &Regex.match?(~r/--armature-space-(zero|half|\d+)$/, &1.name)) do
+      assert has_element?(
+               view,
+               "#catalogue-token-space .armature-token-space[style*='var(#{token.name})']"
+             )
+    end
+
+    assert has_element?(view, "#catalogue-token-space .armature-stack .armature-cluster")
+
+    assert view
+           |> render()
+           |> LazyHTML.from_fragment()
+           |> LazyHTML.query("#catalogue-token-wrap .armature-token-surface")
+           |> Enum.count() == 3
+
+    assert has_element?(view, "#catalogue-token-shape #catalogue-token-pressed")
+    assert has_element?(view, "#catalogue-token-shape #catalogue-token-hover")
+    assert has_element?(view, "#catalogue-token-shape .armature-sr-only#catalogue-token-hidden")
+
+    for density <- ~w(default compact) do
+      assert has_element?(view, "#catalogue-density-#{density} th button")
+    end
+
+    assert has_element?(view, "#catalogue-token-density .armature-search input[type=search]")
+
+    assert has_element?(
+             view,
+             "#catalogue-token-density #catalogue-token-inspector .armature-facts"
+           )
+
+    for speed <- ~w(fast base) do
+      assert has_element?(view, "#catalogue-motion-demo .armature-token-motion-#{speed}")
+    end
   end
 end
