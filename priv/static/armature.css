@@ -445,4 +445,72 @@
 
   .armature-split { display: flex; flex-wrap: wrap; gap: var(--armature-space-4); }
   .armature-split > div { flex: 1 1 var(--armature-layout-min-width); min-width: var(--armature-space-zero); }
+  .armature-table-inspector, .armature-table-toolbar, .armature-pagination,
+  .armature-record-header, .armature-inspector, .armature-table-scroll {
+    color: var(--armature-ink);
+    font-family: var(--armature-font-sans);
+    font-size: var(--armature-text-base);
+    line-height: var(--armature-line-height);
+  }
+
+  .armature-table-scroll {
+    overflow: auto;
+    max-height: calc(var(--armature-control-height) * 12);
+    padding: var(--armature-focus-width);
+    scroll-padding: var(--armature-space-4);
+  }
+
+  .armature-table { width: 100%; border-collapse: separate; border-spacing: var(--armature-space-zero); }
+  .armature-table caption { text-align: start; padding: var(--armature-space-3); font-weight: var(--armature-weight-emphasis); }
+  .armature-table th, .armature-table td {
+    padding: var(--armature-space-3);
+    text-align: start;
+    border-bottom: var(--armature-border-width) solid var(--armature-line);
+  }
+  .armature-table th { position: sticky; top: var(--armature-space-zero); background: var(--armature-paper); }
+  /* During keyboard interaction, headings join the flow so they cannot obscure focus. */
+  .armature-table-scroll:focus-within th { position: static; }
+  .armature-table .armature-numeric { text-align: end; font-variant-numeric: tabular-nums; }
+  .armature-table-striped tbody tr:nth-child(even) { background: var(--armature-stripe); }
+  .armature-table tbody tr:hover { background: var(--armature-hover); }
+  .armature-table tbody tr.armature-row-selected { background: var(--armature-selected); }
+  .armature-row-selected .armature-row-select {
+    outline: var(--armature-border-width) dashed var(--armature-selected-cue);
+    outline-offset: calc(var(--armature-border-width) * -1);
+    font-weight: var(--armature-weight-emphasis);
+  }
+  .armature-row-selected .armature-row-select:focus-visible {
+    outline: var(--armature-focus-width) solid var(--armature-focus);
+    outline-offset: var(--armature-focus-offset);
+  }
+  .armature-sort, .armature-row-select {
+    min-height: max(var(--armature-control-height), var(--armature-target-size));
+    min-width: var(--armature-target-size);
+    padding: var(--armature-space-2) var(--armature-space-3);
+    border: var(--armature-border-width) solid var(--armature-control-border);
+    border-radius: var(--armature-radius-base);
+    font: inherit;
+    color: var(--armature-ink);
+    background: var(--armature-paper);
+    cursor: pointer;
+  }
+  .armature-sort:hover, .armature-row-select:hover { background: var(--armature-hover); }
+  .armature-table-toolbar, .armature-pagination, .armature-record-header,
+  .armature-toolbar-actions, .armature-record-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--armature-space-3);
+  }
+  .armature-table-toolbar, .armature-pagination, .armature-record-header { justify-content: space-between; padding: var(--armature-space-3); }
+  .armature-table-toolbar form, .armature-pagination form { display: flex; flex-wrap: wrap; align-items: center; gap: var(--armature-space-2); }
+  .armature-inspector { padding: var(--armature-space-4); background: var(--armature-paper); border: var(--armature-border-width) solid var(--armature-line); }
+  .armature-inspector:focus-visible { outline-offset: calc(var(--armature-focus-width) * -1); }
+  .armature-inspector h2, .armature-record-header h2 { font-size: var(--armature-text-heading); margin: var(--armature-space-zero); }
+  .armature-record-header p, .armature-table-empty { margin: var(--armature-space-zero); padding-block: var(--armature-space-3); }
+  .armature-table-inspector > .armature-link { display: inline-flex; align-items: center; min-height: var(--armature-target-size); }
+  .armature-table-inspector > .armature-split { margin-top: var(--armature-space-3); }
+  .armature-table-inspector > .armature-split > div {
+    flex-basis: calc(var(--armature-layout-min-width) * 2);
+  }
 }

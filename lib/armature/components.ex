@@ -1,6 +1,6 @@
 defmodule Armature.Components do
   @moduledoc """
-  Accessible baseline atoms, layouts and form molecules.
+  Accessible baseline atoms, layouts, molecules and data compositions.
 
   Import this module in consumer HTML helpers. Styling comes from
   `priv/static/armature.css` and the consumer's token values. Give standalone
@@ -8,6 +8,7 @@ defmodule Armature.Components do
   and validation relationships for form controls.
   """
   use Phoenix.Component
+  import Phoenix.Component, except: [link: 1]
 
   @doc "A native button with a primary or secondary treatment and a visible name."
   attr(:type, :string, default: "button", values: ~w(button submit reset))
@@ -284,6 +285,329 @@ defmodule Armature.Components do
     """
   end
 
+  @doc """
+  A native table with scoped headings and caller-owned ordering and selection.
+
+  Columns render each row through `:let`; `sort_key` buttons send `key` to
+  `sort_event`. Selection buttons send `id` to `select_event`. Supply an existing
+  `inspector_id` when enabling selection. Row identifiers must be unique and DOM-safe.
+  `caption_hidden` hides only the caption visually. Empty results use words.
+  """
+  attr(:id, :string, required: true)
+  attr(:rows, :list, required: true)
+  attr(:caption, :string, required: true)
+  attr(:caption_hidden, :boolean, default: false)
+  attr(:empty_label, :string, default: "No records to display.")
+  attr(:striped, :boolean, default: true)
+  attr(:sort_by, :string, default: nil)
+  attr(:sort_direction, :string, default: "asc", values: ~w(asc desc))
+  attr(:sort_event, :string, default: nil)
+  attr(:row_id, :any, default: nil)
+  attr(:select_event, :string, default: nil)
+  attr(:selected_id, :any, default: nil)
+  attr(:inspector_id, :string, default: nil)
+
+  slot :col, required: true do
+    attr(:label, :string, required: true)
+    attr(:numeric, :boolean)
+    attr(:sort_key, :string)
+  end
+
+  def data_table(assigns) do
+    if assigns.select_event && !assigns.inspector_id do
+      raise ArgumentError, "selection requires an existing inspector_id"
+    end
+
+    assigns = assign(assigns, :row_id, assigns.row_id || (&Map.fetch!(&1, :id)))
+
+    ~H"""
+    <div
+      id={@id <> "-scroll"}
+      class={["armature-table-scroll"]}
+      tabindex="0"
+      role="region"
+      aria-label={@caption}
+    >
+      <p :if={@rows == []} id={@id <> "-empty"} class={["armature-table-empty"]}>{@empty_label}</p>
+      <table
+        :if={@rows != []}
+        id={@id}
+        class={["armature-table", @striped && "armature-table-striped"]}
+      >
+        <caption class={[@caption_hidden && "armature-sr-only"]}>{@caption}</caption>
+        <thead>
+          <tr>
+            <th :if={@select_event} scope="col">Selection</th>
+            <th
+              :for={col <- @col}
+              scope="col"
+              class={[col[:numeric] && "armature-numeric"]}
+              aria-sort={
+                if(@sort_event && col[:sort_key] && @sort_by == col[:sort_key],
+                  do: sort_description(@sort_direction)
+                )
+              }
+            >
+              <button
+                :if={@sort_event && col[:sort_key]}
+                type="button"
+                class={["armature-sort"]}
+                phx-click={@sort_event}
+                phx-value-key={col.sort_key}
+                aria-label={"Sort by #{col.label}"}
+              >
+                {col.label}<span :if={@sort_by == col.sort_key} aria-hidden="true">{if(
+                  @sort_direction == "asc",
+                  do: " ↑",
+                  else: " ↓"
+                )}</span>
+              </button>
+              <span :if={!@sort_event || !col[:sort_key]}>{col.label}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            :for={row <- @rows}
+            id={@id <> "-" <> to_string(@row_id.(row))}
+            class={[@select_event && @selected_id == @row_id.(row) && "armature-row-selected"]}
+          >
+            <td :if={@select_event}>
+              <button
+                type="button"
+                class={["armature-row-select"]}
+                phx-click={@select_event}
+                phx-value-id={@row_id.(row)}
+                aria-label={"Select #{@row_id.(row)}"}
+                aria-pressed={to_string(@selected_id == @row_id.(row))}
+                aria-controls={@inspector_id}
+              >
+                {if(@selected_id == @row_id.(row), do: "Selected", else: "Select")}
+              </button>
+            </td>
+            <td :for={col <- @col} class={[col[:numeric] && "armature-numeric"]}>
+              {render_slot(col, row)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    """
+  end
+
+  @doc "A labelled search form, polite atomic result count and optional caller actions. Sends query."
+  attr(:id, :string, required: true)
+  attr(:search_label, :string, default: "Search records")
+  attr(:search_event, :string, required: true)
+  attr(:query, :string, default: "")
+  attr(:total, :integer, required: true)
+  slot(:actions)
+
+  def table_toolbar(assigns) do
+    ~H"""
+    <div id={@id} class={["armature-table-toolbar"]}>
+      <form id={@id <> "-search-form"} phx-change={@search_event} phx-submit={@search_event}>
+        <label for={@id <> "-search"}>{@search_label}</label>
+        <.input id={@id <> "-search"} type="search" name="query" value={@query} />
+      </form>
+      <span id={@id <> "-count"} role="status" aria-live="polite" aria-atomic="true">{format_count(
+        @total
+      )} results</span>
+      <div :if={@actions != []} class={["armature-toolbar-actions"]}>{render_slot(@actions)}</div>
+    </div>
+    """
+  end
+
+  @doc """
+  Named page controls and a polite atomic range announcement. The caller owns page state.
+
+  Send `page` to `page_event`. Use page 1 of 1 and range 0–0 for no results.
+  Supplying `page_sizes` and `size_event` adds a labelled select sending `page_size`.
+  """
+  attr(:id, :string, required: true)
+  attr(:page, :integer, required: true)
+  attr(:pages, :integer, required: true)
+  attr(:first, :integer, required: true)
+  attr(:last, :integer, required: true)
+  attr(:total, :integer, required: true)
+  attr(:page_event, :string, required: true)
+  attr(:page_size, :integer, default: 25)
+  attr(:page_sizes, :list, default: [])
+  attr(:size_event, :string, default: nil)
+
+  def pagination(assigns) do
+    ~H"""
+    <nav id={@id} class={["armature-pagination"]} aria-label="Table pages">
+      <span id={@id <> "-range"} role="status" aria-live="polite" aria-atomic="true">{format_count(
+        @first
+      )}–{format_count(@last)} of {format_count(@total)}</span>
+      <form
+        :if={@page_sizes != [] && @size_event}
+        id={@id <> "-size-form"}
+        phx-change={@size_event}
+        phx-submit={@size_event}
+      >
+        <label for={@id <> "-size"}>Records per page</label>
+        <.select id={@id <> "-size"} name="page_size" value={@page_size} options={@page_sizes} />
+      </form>
+      <.button
+        variant="secondary"
+        phx-click={@page_event}
+        phx-value-page={max(1, @page - 1)}
+        disabled={@page <= 1}
+        aria-label="Previous page"
+      >Previous</.button>
+      <.button
+        variant="secondary"
+        phx-click={@page_event}
+        phx-value-page={min(@pages, @page + 1)}
+        disabled={@page >= @pages}
+        aria-label="Next page"
+      >Next</.button>
+    </nav>
+    """
+  end
+
+  @doc "A complementary landmark named by its heading. Link to its id to skip to details; never a live region."
+  attr(:id, :string, required: true)
+  attr(:title, :string, required: true)
+  slot(:inner_block, required: true)
+
+  def inspector(assigns) do
+    ~H"""
+    <aside id={@id} class={["armature-inspector"]} aria-labelledby={@id <> "-heading"} tabindex="-1">
+      <h2 id={@id <> "-heading"}>{@title}</h2>
+      {render_slot(@inner_block)}
+    </aside>
+    """
+  end
+
+  @doc "A record heading, optional context and status in words, and caller actions."
+  attr(:id, :string, required: true)
+  attr(:title, :string, required: true)
+  attr(:context, :string, default: nil)
+  attr(:status, :string, default: nil)
+  slot(:actions)
+
+  def record_header(assigns) do
+    ~H"""
+    <header id={@id} class={["armature-record-header"]}>
+      <div>
+        <h2 id={@id <> "-heading"}>{@title}</h2>
+        <p :if={@context}>{@context}</p>
+        <.status :if={@status} label={@status} />
+      </div>
+      <div :if={@actions != []} class={["armature-record-actions"]}>{render_slot(@actions)}</div>
+    </header>
+    """
+  end
+
+  @doc """
+  A table-and-details template composing the complete data browsing workflow.
+
+  The caller owns filtering, ordering, paging and persistent selection. Columns
+  receive each row; `details` holds the selected record's content. Update
+  `selection_label` on selection changes to announce them without moving focus.
+  The skip link targets the inspector; narrow layouts place it below the table.
+  """
+  attr(:id, :string, required: true)
+  attr(:rows, :list, required: true)
+  attr(:caption, :string, required: true)
+  attr(:query, :string, default: "")
+  attr(:search_event, :string, required: true)
+  attr(:sort_event, :string, required: true)
+  attr(:sort_by, :string, default: nil)
+  attr(:sort_direction, :string, default: "asc", values: ~w(asc desc))
+  attr(:row_id, :any, default: nil)
+  attr(:select_event, :string, required: true)
+  attr(:selected_id, :any, default: nil)
+  attr(:selection_label, :string, default: "No record selected.")
+  attr(:inspector_title, :string, default: "Record details")
+  attr(:page, :integer, required: true)
+  attr(:pages, :integer, required: true)
+  attr(:first, :integer, required: true)
+  attr(:last, :integer, required: true)
+  attr(:total, :integer, required: true)
+  attr(:page_event, :string, required: true)
+  attr(:page_size, :integer, default: 25)
+  attr(:page_sizes, :list, default: [])
+  attr(:size_event, :string, default: nil)
+
+  slot :col, required: true do
+    attr(:label, :string, required: true)
+    attr(:numeric, :boolean)
+    attr(:sort_key, :string)
+  end
+
+  slot(:actions)
+  slot(:details, required: true)
+
+  def table_inspector(assigns) do
+    ~H"""
+    <div id={@id} class={["armature-table-inspector"]}>
+      <.link href={"##{@id}-inspector"}>Skip to {@inspector_title}</.link>
+      <p
+        id={@id <> "-selection"}
+        class={["armature-sr-only"]}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {@selection_label}
+      </p>
+      <.split>
+        <.table_toolbar
+          id={@id <> "-toolbar"}
+          search_event={@search_event}
+          query={@query}
+          total={@total}
+        >
+          <:actions>{render_slot(@actions)}</:actions>
+        </.table_toolbar>
+        <.data_table
+          id={@id <> "-table"}
+          rows={@rows}
+          caption={@caption}
+          sort_by={@sort_by}
+          sort_direction={@sort_direction}
+          sort_event={@sort_event}
+          row_id={@row_id}
+          select_event={@select_event}
+          selected_id={@selected_id}
+          inspector_id={@id <> "-inspector"}
+        >
+          <:col
+            :let={row}
+            :for={col <- @col}
+            label={col.label}
+            numeric={col[:numeric] || false}
+            sort_key={col[:sort_key]}
+          >
+            {render_slot(col, row)}
+          </:col>
+        </.data_table>
+        <.pagination
+          id={@id <> "-pagination"}
+          page={@page}
+          pages={@pages}
+          first={@first}
+          last={@last}
+          total={@total}
+          page_event={@page_event}
+          page_size={@page_size}
+          page_sizes={@page_sizes}
+          size_event={@size_event}
+        />
+        <:secondary>
+          <.inspector id={@id <> "-inspector"} title={@inspector_title}>
+            {render_slot(@details)}
+          </.inspector>
+        </:secondary>
+      </.split>
+    </div>
+    """
+  end
+
   defp prepare_field(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
     translator = assigns.translate_error || fn {message, _options} -> message end
     errors = if used_input?(field), do: Enum.map(field.errors, translator), else: []
@@ -330,5 +654,12 @@ defmodule Armature.Components do
       end)
 
     assign(assigns, control_rest: rest, checked: checked)
+  end
+
+  defp sort_description("asc"), do: "ascending"
+  defp sort_description("desc"), do: "descending"
+
+  defp format_count(count) do
+    count |> Integer.to_string() |> String.replace(~r/\B(?=(\d{3})+(?!\d))/, ",")
   end
 end

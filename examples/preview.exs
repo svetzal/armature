@@ -12,6 +12,8 @@ Mix.install([
   {:armature, path: Path.expand("..", __DIR__)}
 ])
 
+Code.require_file("records.exs", __DIR__)
+
 defmodule PreviewLive do
   use Phoenix.LiveView
 
@@ -42,11 +44,21 @@ defmodule PreviewLive do
        stylesheet: File.read!(@stylesheet),
        colours: for(t <- Armature.Tokens.all(), t.group == :colour, do: t.name),
        form: to_form(%{"name" => "", "accepted" => false}, as: :sample),
-       saved: nil
-     )}
+       saved: nil,
+       query: "",
+       sort_by: "name",
+       sort_direction: "asc",
+       page: 1,
+       page_size: 25,
+       selected_id: nil,
+       selected: nil,
+       selection_label: "No record selected."
+     )
+     |> refresh_records()}
   end
 
-  def handle_event("theme", %{"theme" => theme}, socket), do: {:noreply, assign(socket, theme: theme)}
+  def handle_event("theme", %{"theme" => theme}, socket),
+    do: {:noreply, assign(socket, theme: theme)}
 
   def handle_event("validate", %{"sample" => params}, socket) do
     {:noreply, assign(socket, form: form_for(params), saved: nil)}
@@ -62,15 +74,61 @@ defmodule PreviewLive do
     end
   end
 
+  def handle_event("record_search", %{"query" => query}, socket) do
+    {:noreply, socket |> assign(query: query, page: 1) |> refresh_records()}
+  end
+
+  def handle_event("record_sort", %{"key" => key}, socket) when key in ~w(name score) do
+    direction =
+      if socket.assigns.sort_by == key && socket.assigns.sort_direction == "asc",
+        do: "desc",
+        else: "asc"
+
+    {:noreply,
+     socket |> assign(sort_by: key, sort_direction: direction, page: 1) |> refresh_records()}
+  end
+
+  def handle_event("record_page", %{"page" => page}, socket) do
+    {:noreply, socket |> assign(page: String.to_integer(page)) |> refresh_records()}
+  end
+
+  def handle_event("record_size", %{"page_size" => size}, socket) when size in ~w(10 25 50) do
+    {:noreply, socket |> assign(page_size: String.to_integer(size), page: 1) |> refresh_records()}
+  end
+
+  def handle_event("record_select", %{"id" => id}, socket) do
+    case Enum.find(PreviewRecords.all(), &(&1.id == id)) do
+      nil ->
+        {:noreply, socket}
+
+      record ->
+        {:noreply,
+         assign(socket,
+           selected_id: id,
+           selected: record,
+           selection_label: "Selected #{id}, #{record.name}."
+         )}
+    end
+  end
+
+  defp refresh_records(socket) do
+    result = PreviewRecords.page(socket.assigns)
+    assign(socket, records: result, page: result.page)
+  end
+
   defp form_for(params) do
-    errors = if String.trim(params["name"] || "") == "", do: [name: {"Enter a name.", []}], else: []
+    errors =
+      if String.trim(params["name"] || "") == "", do: [name: {"Enter a name.", []}], else: []
+
     to_form(params, as: :sample, errors: errors)
   end
 
   def render(assigns) do
     ~H"""
     <%!-- HEEx does not interpolate {} inside <style>; EEx tags do. --%>
-    <style><%= Phoenix.HTML.raw(@stylesheet) %><%= Phoenix.HTML.raw(page_css()) %></style>
+    <style>
+      <%= Phoenix.HTML.raw(@stylesheet) %><%= Phoenix.HTML.raw(page_css()) %>
+    </style>
     <div class="preview" data-armature-theme={if @theme != "auto", do: @theme}>
       <div class="preview-inner">
         <A.stack>
@@ -79,8 +137,7 @@ defmodule PreviewLive do
             <A.status label={"Theme: #{@theme}"} />
           </A.cluster>
           <p class="muted">
-            Every component from step 3a, in its states. The theme buttons set
-            <code>data-armature-theme</code>; "auto" follows your system setting.
+            Baseline controls and data components, in their states. The theme buttons set <code>data-armature-theme</code>; "auto" follows your system setting.
           </p>
           <A.cluster>
             <A.button
@@ -126,7 +183,9 @@ defmodule PreviewLive do
         <section>
           <h2>Notices</h2>
           <A.stack>
-            <A.notice id="n-neutral" title="For information">Static guidance has no live-region role.</A.notice>
+            <A.notice id="n-neutral" title="For information">
+              Static guidance has no live-region role.
+            </A.notice>
             <A.notice id="n-success" tone="success" result title="Saved">
               A result: announced politely as a status.
             </A.notice>
@@ -188,16 +247,70 @@ defmodule PreviewLive do
             <A.cluster>
               <div :for={n <- 1..8} class="box">Item {n}</div>
             </A.cluster>
-            <p class="muted">Grid: columns from a minimum item width. Narrow the window to see it reflow.</p>
+            <p class="muted">
+              Grid: columns from a minimum item width. Narrow the window to see it reflow.
+            </p>
             <A.grid>
               <div :for={n <- 1..6} class="box">Cell {n}</div>
             </A.grid>
             <p class="muted">Split: two regions that stack when they no longer fit.</p>
             <A.split>
               <div class="box">Main region</div>
-              <:secondary><div class="box">Secondary region</div></:secondary>
+              <:secondary>
+                <div class="box">Secondary region</div>
+              </:secondary>
             </A.split>
           </A.stack>
+        </section>
+
+        <section>
+          <h2>Record browser</h2>
+          <p class="muted">
+            Search all 200 records, sort by name or score, and change pages. Selection stays available in the inspector.
+          </p>
+          <A.table_inspector
+            id="records"
+            rows={@records.rows}
+            caption="Synthetic example records"
+            query={@query}
+            search_event="record_search"
+            sort_event="record_sort"
+            sort_by={@sort_by}
+            sort_direction={@sort_direction}
+            select_event="record_select"
+            selected_id={@selected_id}
+            selection_label={@selection_label}
+            page={@page}
+            pages={@records.pages}
+            first={@records.first}
+            last={@records.last}
+            total={@records.total}
+            page_event="record_page"
+            page_size={@page_size}
+            page_sizes={[10, 25, 50]}
+            size_event="record_size"
+          >
+            <:col :let={row} label="Identifier">{row.id}</:col>
+            <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+            <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
+            <:details>
+              <%= if @selected do %>
+                <A.record_header
+                  id="selected-record"
+                  title={@selected.name}
+                  context={@selected.id}
+                  status="Available"
+                />
+                <p>{@selected.group}</p>
+                <p>Score: {@selected.score}</p>
+                <p :if={!Enum.any?(@records.rows, &(&1.id == @selected_id))}>
+                  The selected record is outside the current page or search results.
+                </p>
+              <% else %>
+                <p>Select a record to see its details.</p>
+              <% end %>
+            </:details>
+          </A.table_inspector>
         </section>
 
         <section>
@@ -218,4 +331,9 @@ defmodule PreviewLive do
 end
 
 port = String.to_integer(System.get_env("PORT", "4020"))
-PhoenixPlayground.start(live: PreviewLive, port: port, open_browser: System.get_env("OPEN", "1") == "1")
+
+PhoenixPlayground.start(
+  live: PreviewLive,
+  port: port,
+  open_browser: System.get_env("OPEN", "1") == "1"
+)

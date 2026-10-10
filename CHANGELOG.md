@@ -8,6 +8,16 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+- Add native data tables, labelled search toolbars, pagination, record headers and
+  complementary inspectors through `Armature.Components`, with caller-owned state.
+- Add `table_inspector` at the template level because it composes the complete
+  table-and-details workflow from organisms and molecules. No composition rules change.
+- Register every data component and document its actual dependencies. Add rendered
+  accessibility tests and token-only table styles, including focus-safe sticky headings,
+  non-colour selection cues and responsive targets in both themes.
+- Extend the preview with 200 neutral synthetic records, complete-set search, text
+  and numeric sorting, 10/25/50-row pages and persistent selection.
+
 ### Added
 
 - Baseline native atoms, arrangement layouts and labelled form/notice molecules

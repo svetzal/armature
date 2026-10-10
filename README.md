@@ -72,7 +72,7 @@ MIT. See [LICENSE.md](LICENSE.md).
 ## Declaring and checking a registry
 
 Armature provides registry governance, a token stylesheet and baseline components.
-Add your own components alongside `Armature.UI.Registry.nodes/0`.
+Add your own components alongside the baseline nodes from `Armature.UI.Registry`.
 Implement the behaviour with plain data:
 
 ```elixir
@@ -300,3 +300,10 @@ Then use:
 Create `@form` with `Phoenix.Component.to_form/2`. Import the stylesheet as
 shown in [the token guide](guides/tokens.md). See [the component guide](guides/components.md)
 for plain controls, translation, notices, layouts and accessibility responsibilities.
+
+Data components include `data_table`, `table_toolbar`, `pagination`, `inspector`
+and `record_header`. The `table_inspector` template composes the browsing workflow
+with named selection buttons, a skip link and polite selection announcements.
+Consumers own searching, sorting, paging and selection. Run `elixir examples/preview.exs`
+to explore 200 synthetic records in both themes; see the component guide for event
+payloads and composition examples.

@@ -222,6 +222,55 @@ defmodule Armature.TokensTest do
     assert check =~ "width: var(--armature-space-4)"
   end
 
+  test "data styles use theme tokens, safe sticky headings and target-sized controls", %{css: css} do
+    [_, components] = String.split(css, "@layer armature.components {")
+
+    rules =
+      Regex.scan(~r/([^{}]+)\{([^{}]*)\}/, Regex.replace(~r{/\*.*?\*/}s, components, ""))
+      |> Enum.map(fn [_, selector, body] ->
+        values =
+          Regex.scan(~r/([\w-]+)\s*:\s*([^;{}]+);/, body)
+          |> Enum.map(fn [_, name, value] -> {name, String.trim(value)} end)
+
+        {String.trim(selector), values}
+      end)
+
+    for name <- ~w(table-scroll table-toolbar pagination inspector record-header table-inspector) do
+      assert components =~ ".armature-#{name}"
+    end
+
+    assert Map.new(rule!(rules, ".armature-table-scroll"))["overflow"] == "auto"
+    assert Map.new(rule!(rules, ".armature-table th"))["position"] == "sticky"
+    assert Map.new(rule!(rules, ".armature-table-scroll:focus-within th"))["position"] == "static"
+    assert Map.new(rule!(rules, ".armature-table .armature-numeric"))["text-align"] == "end"
+
+    assert Map.new(rule!(rules, ".armature-table .armature-numeric"))["font-variant-numeric"] ==
+             "tabular-nums"
+
+    for {selector, token} <- [
+          {".armature-table-striped tbody tr:nth-child(even)", "stripe"},
+          {".armature-table tbody tr:hover", "hover"},
+          {".armature-table tbody tr.armature-row-selected", "selected"}
+        ] do
+      assert Map.new(rule!(rules, selector))["background"] == "var(--armature-#{token})"
+    end
+
+    control = Map.new(rule!(rules, ".armature-sort, .armature-row-select"))
+
+    assert control["min-height"] ==
+             "max(var(--armature-control-height), var(--armature-target-size))"
+
+    assert control["min-width"] == "var(--armature-target-size)"
+    selected = Map.new(rule!(rules, ".armature-row-selected .armature-row-select"))
+
+    assert selected["outline"] ==
+             "var(--armature-border-width) dashed var(--armature-selected-cue)"
+
+    assert Map.new(rule!(rules, ".armature-table-inspector > .armature-split > div"))[
+             "flex-basis"
+           ] == "calc(var(--armature-layout-min-width) * 2)"
+  end
+
   test "forced colours keep focus, selection and focused selection visually distinct",
        %{css: css} do
     [_, base] = String.split(css, "@layer armature.base {")

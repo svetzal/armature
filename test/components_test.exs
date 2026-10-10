@@ -400,6 +400,262 @@ defmodule Armature.ComponentsTest do
     refute present?(doc, "[role], aside, section, main")
   end
 
+  test "data tables expose scoped sortable headings and named record selection" do
+    for direction <- ~w(asc desc) do
+      doc =
+        document(
+          fn assigns ->
+            ~H"""
+            <C.data_table
+              id="records"
+              rows={[%{id: "R-1", name: "Example", score: 12}, %{id: "R-2", name: "Other", score: 3}]}
+              caption="Example records"
+              sort_by="score"
+              sort_direction={@direction}
+              sort_event="order"
+              select_event="choose"
+              selected_id="R-1"
+              inspector_id="details"
+            >
+              <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+              <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
+            </C.data_table>
+            <C.inspector id="details" title="Record details">Supporting information</C.inspector>
+            """
+          end,
+          %{direction: direction}
+        )
+
+      assert text(doc, "table caption") == "Example records"
+
+      assert present?(
+               doc,
+               "#records-scroll[tabindex='0'][role=region][aria-label='Example records']"
+             )
+
+      assert length(LazyHTML.to_tree(LazyHTML.query(doc, "th[scope=col]"))) == 3
+      assert length(LazyHTML.to_tree(LazyHTML.query(doc, "th[aria-sort]"))) == 1
+
+      assert attribute(doc, "th[aria-sort]", "aria-sort") ==
+               if(direction == "asc", do: "ascending", else: "descending")
+
+      assert present?(
+               doc,
+               "th button[type=button][phx-click=order][phx-value-key=name][aria-label='Sort by Name']"
+             )
+
+      assert present?(doc, "th.armature-numeric button[phx-value-key=score]")
+      assert present?(doc, "td.armature-numeric")
+
+      assert present?(
+               doc,
+               "button[phx-click=choose][phx-value-id=R-1][aria-label='Select R-1'][aria-pressed=true][aria-controls=details]"
+             )
+
+      assert present?(doc, "button[phx-value-id=R-2][aria-pressed=false]")
+      assert text(doc, "#records-R-1 .armature-row-select") == "Selected"
+      assert present?(doc, "aside#details[aria-labelledby=details-heading]")
+      assert text(doc, "#details-heading") == "Record details"
+      refute present?(doc, "aside[aria-live], aside[role=status]")
+    end
+  end
+
+  test "selection requires an inspector destination" do
+    assert_raise ArgumentError, "selection requires an existing inspector_id", fn ->
+      document(&C.data_table/1, %{
+        id: "records",
+        rows: [],
+        caption: "Records",
+        select_event: "select"
+      })
+    end
+  end
+
+  test "tables without selection or sorting remain native and empty results use words" do
+    for rows <- [[], [%{id: "R-1", name: "Example"}]] do
+      doc =
+        document(
+          fn assigns ->
+            ~H"""
+            <C.data_table id="plain" rows={@rows} caption="Records" caption_hidden>
+              <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+            </C.data_table>
+            """
+          end,
+          %{rows: rows}
+        )
+
+      refute present?(doc, "button, th[aria-sort]")
+
+      if rows == [] do
+        refute present?(doc, "table")
+        assert text(doc, "#plain-empty") == "No records to display."
+      else
+        assert present?(doc, "caption.armature-sr-only")
+        assert present?(doc, "th[scope=col]")
+      end
+    end
+  end
+
+  test "toolbar labels search and announces the count with caller actions" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.table_toolbar
+          id="tools"
+          search_label="Find records"
+          search_event="search"
+          query="Example"
+          total={200}
+        >
+          <:actions><C.button>Export</C.button></:actions>
+        </C.table_toolbar>
+        """
+      end)
+
+    assert text(doc, "label[for=tools-search]") == "Find records"
+
+    assert present?(
+             doc,
+             "form#tools-search-form[phx-change=search] input#tools-search[type=search][name=query][value=Example]"
+           )
+
+    assert text(doc, "#tools-count[role=status][aria-live=polite][aria-atomic=true]") ==
+             "200 results"
+
+    assert text(doc, ".armature-toolbar-actions button") == "Export"
+  end
+
+  test "pagination names controls, disables boundaries and announces ranges" do
+    for {page, pages, first, last, total} <- [
+          {1, 80, 1, 25, 2000},
+          {2, 80, 26, 50, 2000},
+          {80, 80, 1976, 2000, 2000},
+          {1, 1, 0, 0, 0}
+        ] do
+      doc =
+        document(&C.pagination/1, %{
+          id: "pages",
+          page: page,
+          pages: pages,
+          first: first,
+          last: last,
+          total: total,
+          page_event: "page",
+          page_size: 25,
+          page_sizes: [10, 25, 50],
+          size_event: "size"
+        })
+
+      assert present?(doc, "nav[aria-label='Table pages']")
+
+      assert present?(
+               doc,
+               "button[aria-label='Previous page'][phx-click=page][phx-value-page='#{max(1, page - 1)}']"
+             )
+
+      assert present?(
+               doc,
+               "button[aria-label='Next page'][phx-value-page='#{min(pages, page + 1)}']"
+             )
+
+      assert present?(doc, "button[aria-label='Previous page'][disabled]") == (page == 1)
+      assert present?(doc, "button[aria-label='Next page'][disabled]") == (page == pages)
+
+      expected =
+        "#{first |> Integer.to_string() |> String.replace(~r/\B(?=(\d{3})+(?!\d))/, ",")}–#{last |> Integer.to_string() |> String.replace(~r/\B(?=(\d{3})+(?!\d))/, ",")} of #{total |> Integer.to_string() |> String.replace(~r/\B(?=(\d{3})+(?!\d))/, ",")}"
+
+      assert text(doc, "#pages-range[role=status][aria-live=polite][aria-atomic=true]") ==
+               expected
+
+      assert text(doc, "label[for=pages-size]") == "Records per page"
+
+      assert present?(
+               doc,
+               "form[phx-change=size] select#pages-size[name=page_size] option[value='25'][selected]"
+             )
+    end
+
+    doc =
+      document(&C.pagination/1, %{
+        id: "one",
+        page: 1,
+        pages: 1,
+        first: 1,
+        last: 1,
+        total: 1,
+        page_event: "page"
+      })
+
+    refute present?(doc, "select")
+  end
+
+  test "record headers expose the heading, context, status and actions" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.record_header id="record" title="Record R-1" context="Example collection" status="Ready">
+          <:actions><C.button>Update</C.button></:actions>
+        </C.record_header>
+        """
+      end)
+
+    assert text(doc, "header#record h2#record-heading") == "Record R-1"
+    assert text(doc, "header p") == "Example collection"
+    assert text(doc, "header .armature-status") == "Ready"
+    assert text(doc, "header button") == "Update"
+    doc = document(&C.record_header/1, %{id: "minimal", title: "Record"})
+    refute present?(doc, "p, .armature-status, button")
+  end
+
+  test "table inspector composes the workflow and announces selection without focusing" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.table_inspector
+          id="browser"
+          rows={[%{id: "R-1", name: "Example"}]}
+          caption="Records"
+          total={1}
+          page={1}
+          pages={1}
+          first={1}
+          last={1}
+          search_event="search"
+          sort_event="sort"
+          page_event="page"
+          select_event="select"
+          selected_id="R-1"
+          selection_label="Selected R-1"
+          inspector_title="Selected record"
+          size_event="size"
+          page_sizes={[10, 25, 50]}
+          page_size={25}
+        >
+          <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+          <:actions><C.button>Export</C.button></:actions>
+          <:details><C.record_header id="selected" title="Record R-1" /></:details>
+        </C.table_inspector>
+        """
+      end)
+
+    assert present?(doc, "#browser .armature-split #browser-table")
+    assert present?(doc, "#browser-toolbar input[type=search]")
+    assert present?(doc, "#browser-pagination nav, nav#browser-pagination")
+    assert present?(doc, "button[aria-controls=browser-inspector][aria-pressed=true]")
+    assert present?(doc, "a[href='#browser-inspector']")
+
+    assert text(doc, "#browser-selection[role=status][aria-live=polite][aria-atomic=true]") ==
+             "Selected R-1"
+
+    assert present?(
+             doc,
+             "aside#browser-inspector[tabindex='-1'][aria-labelledby=browser-inspector-heading] h2"
+           )
+
+    refute present?(doc, "[autofocus], aside[aria-live]")
+  end
+
   defp document(component, assigns \\ %{}) do
     component |> render_component(assigns) |> LazyHTML.from_fragment()
   end

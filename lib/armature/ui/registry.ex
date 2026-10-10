@@ -112,6 +112,54 @@ defmodule Armature.UI.Registry do
         function: :notice,
         purpose: "Static guidance or reported results with actions.",
         uses: []
+      },
+      %Node{
+        id: :table_toolbar,
+        level: :molecule,
+        module: Armature.Components,
+        function: :table_toolbar,
+        purpose: "A labelled search and announced result count.",
+        uses: [:input]
+      },
+      %Node{
+        id: :pagination,
+        level: :molecule,
+        module: Armature.Components,
+        function: :pagination,
+        purpose: "Named paging controls and an announced range.",
+        uses: [:button, :select]
+      },
+      %Node{
+        id: :record_header,
+        level: :molecule,
+        module: Armature.Components,
+        function: :record_header,
+        purpose: "A record heading with context and actions.",
+        uses: [:status]
+      },
+      %Node{
+        id: :data_table,
+        level: :organism,
+        module: Armature.Components,
+        function: :data_table,
+        purpose: "A sortable native table with named record selection.",
+        uses: []
+      },
+      %Node{
+        id: :inspector,
+        level: :organism,
+        module: Armature.Components,
+        function: :inspector,
+        purpose: "A named complementary details landmark.",
+        uses: []
+      },
+      %Node{
+        id: :table_inspector,
+        level: :template,
+        module: Armature.Components,
+        function: :table_inspector,
+        purpose: "A complete table and supporting details workflow.",
+        uses: [:link, :split, :table_toolbar, :data_table, :pagination, :inspector]
       }
     ]
   end
