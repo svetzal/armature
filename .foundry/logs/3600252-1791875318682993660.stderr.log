@@ -1,0 +1,7 @@
+    warning: unused require Armature.RegistryCase
+    │
+ 29 │       require Armature.RegistryCase
+    │       ~
+    │
+    └─ test/tracer_test.exs:29:7
+
