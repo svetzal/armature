@@ -1,0 +1,665 @@
+Cover compiling modules ...
+Running ExUnit with seed: 602433, max_cases: 16
+
+................................................................................................................................................
+03:41:10.646 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:10.725 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"section" => "tokens"}
+  Session: %{}
+
+03:41:10.744 [debug] Replied in 19ms
+
+03:41:10.744 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"section" => "tokens"}
+
+03:41:10.744 [debug] Replied in 167µs
+
+03:41:11.195 [debug] HANDLE EVENT "catalogue:theme" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"theme" => "dark"}
+
+03:41:11.195 [debug] Replied in 105µs
+
+03:41:11.230 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"level" => "atom"}
+
+03:41:11.232 [debug] Replied in 1ms
+
+03:41:11.248 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+
+03:41:11.249 [debug] Replied in 1ms
+
+03:41:11.252 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"section" => "tokens"}
+
+03:41:11.252 [debug] Replied in 143µs
+.
+03:41:11.291 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:11.318 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"section" => "tokens"}
+  Session: %{}
+
+03:41:11.345 [debug] Replied in 27ms
+
+03:41:11.345 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"section" => "tokens"}
+
+03:41:11.345 [debug] Replied in 134µs
+.
+03:41:11.374 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:11.397 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "app_shell"}
+  Session: %{}
+
+03:41:11.422 [debug] Replied in 25ms
+
+03:41:11.422 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "app_shell"}
+
+03:41:11.423 [debug] Replied in 1ms
+
+03:41:11.432 [debug] HANDLE EVENT "catalogue:width" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"width" => "375"}
+
+03:41:11.432 [debug] Replied in 143µs
+.
+03:41:11.436 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:11.472 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+  Session: %{}
+
+03:41:11.496 [debug] Replied in 23ms
+
+03:41:11.496 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+
+03:41:11.496 [debug] Replied in 437µs
+.
+03:41:11.498 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:11.532 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "theme_switch"}
+  Session: %{}
+
+03:41:11.551 [debug] Replied in 19ms
+
+03:41:11.551 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "theme_switch"}
+
+03:41:11.552 [debug] Replied in 458µs
+
+03:41:11.554 [debug] HANDLE EVENT "example:theme" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"theme" => "dark"}
+
+03:41:11.554 [debug] Replied in 84µs
+
+03:41:11.556 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "grouped_nav"}
+
+03:41:11.557 [debug] Replied in 456µs
+
+03:41:11.559 [debug] HANDLE EVENT "example:choose" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"destination" => "#catalogue-used-by"}
+
+03:41:11.559 [debug] Replied in 77µs
+
+03:41:11.562 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+.
+03:41:11.593 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "field"}
+  Session: %{}
+
+03:41:11.616 [debug] Replied in 23ms
+
+03:41:11.616 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "field"}
+
+03:41:11.617 [debug] Replied in 449µs
+
+03:41:11.620 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "input"}
+
+03:41:11.620 [debug] Replied in 393µs
+
+03:41:11.622 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "field"}
+
+03:41:11.622 [debug] Replied in 392µs
+
+03:41:11.624 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "unknown"}
+
+03:41:11.624 [debug] Replied in 69µs
+.
+03:41:11.626 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:11.645 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{}
+  Session: %{}
+
+03:41:11.661 [debug] Replied in 15ms
+
+03:41:11.661 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{}
+
+03:41:11.661 [debug] Replied in 100µs
+
+03:41:11.663 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "eyebrow"}
+
+03:41:11.663 [debug] Replied in 452µs
+
+03:41:11.665 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "page_heading"}
+
+03:41:11.665 [debug] Replied in 415µs
+
+03:41:11.667 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "theme_switch"}
+
+03:41:11.667 [debug] Replied in 473µs
+
+03:41:11.669 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "side_nav"}
+
+03:41:11.670 [debug] Replied in 408µs
+
+03:41:11.671 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "top_bar"}
+
+03:41:11.672 [debug] Replied in 369µs
+
+03:41:11.674 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "grouped_nav"}
+
+03:41:11.675 [debug] Replied in 405µs
+
+03:41:11.677 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "panel"}
+
+03:41:11.678 [debug] Replied in 371µs
+
+03:41:11.679 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "app_shell"}
+
+03:41:11.679 [debug] Replied in 353µs
+
+03:41:11.682 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+
+03:41:11.683 [debug] Replied in 498µs
+
+03:41:11.685 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "link"}
+
+03:41:11.685 [debug] Replied in 338µs
+
+03:41:11.686 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "icon"}
+
+03:41:11.687 [debug] Replied in 298µs
+
+03:41:11.688 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "input"}
+
+03:41:11.689 [debug] Replied in 404µs
+
+03:41:11.690 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "select"}
+
+03:41:11.690 [debug] Replied in 380µs
+
+03:41:11.692 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "textarea"}
+
+03:41:11.692 [debug] Replied in 410µs
+
+03:41:11.694 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "status"}
+
+03:41:11.694 [debug] Replied in 421µs
+
+03:41:11.696 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "stack"}
+
+03:41:11.697 [debug] Replied in 489µs
+
+03:41:11.699 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "cluster"}
+
+03:41:11.699 [debug] Replied in 520µs
+
+03:41:11.701 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "grid"}
+
+03:41:11.701 [debug] Replied in 400µs
+
+03:41:11.703 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "split"}
+
+03:41:11.703 [debug] Replied in 375µs
+
+03:41:11.705 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "field"}
+
+03:41:11.705 [debug] Replied in 328µs
+
+03:41:11.708 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "facts"}
+
+03:41:11.708 [debug] Replied in 399µs
+
+03:41:11.710 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "notice"}
+
+03:41:11.710 [debug] Replied in 382µs
+
+03:41:11.712 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "table_toolbar"}
+
+03:41:11.712 [debug] Replied in 340µs
+
+03:41:11.714 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "pagination"}
+
+03:41:11.715 [debug] Replied in 407µs
+
+03:41:11.717 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "record_header"}
+
+03:41:11.717 [debug] Replied in 470µs
+
+03:41:11.720 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "data_table"}
+
+03:41:11.720 [debug] Replied in 450µs
+
+03:41:11.726 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "inspector"}
+
+03:41:11.726 [debug] Replied in 527µs
+
+03:41:11.728 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "table_inspector"}
+
+03:41:11.728 [debug] Replied in 422µs
+.
+03:41:11.733 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:11.757 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "masthead"}
+  Session: %{}
+
+03:41:11.787 [debug] Replied in 30ms
+
+03:41:11.787 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "masthead"}
+
+03:41:11.788 [debug] Replied in 307µs
+.
+03:41:11.791 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:11.814 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+  Session: %{}
+
+03:41:11.829 [debug] Replied in 14ms
+
+03:41:11.829 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+
+03:41:11.829 [debug] Replied in 471µs
+.
+03:41:11.833 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:11.859 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "marker"}
+  Session: %{}
+
+03:41:11.875 [debug] Replied in 16ms
+
+03:41:11.875 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "marker"}
+
+03:41:11.876 [debug] Replied in 289µs
+.
+03:41:11.878 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:11.897 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "table_inspector"}
+  Session: %{}
+
+03:41:11.914 [debug] Replied in 16ms
+
+03:41:11.914 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "table_inspector"}
+
+03:41:11.915 [debug] Replied in 424µs
+
+03:41:11.920 [debug] HANDLE EVENT "record_search" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"query" => "R-173"}
+
+03:41:11.920 [debug] Replied in 592µs
+
+03:41:11.922 [debug] HANDLE EVENT "record_select" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"id" => "R-173"}
+
+03:41:11.923 [debug] Replied in 258µs
+
+03:41:11.926 [debug] HANDLE EVENT "record_search" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"query" => ""}
+
+03:41:11.926 [debug] Replied in 747µs
+
+03:41:11.936 [debug] HANDLE EVENT "record_page" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"page" => "2"}
+
+03:41:11.936 [debug] Replied in 900µs
+.
+03:41:11.944 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:11.981 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+  Session: %{}
+
+03:41:12.005 [debug] Replied in 23ms
+
+03:41:12.005 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+
+03:41:12.006 [debug] Replied in 1ms
+
+03:41:12.013 [debug] HANDLE EVENT "example:action" in Armature.Catalogue.CatalogueLive
+  Parameters: %{}
+
+03:41:12.013 [debug] Replied in 91µs
+
+03:41:12.020 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "field"}
+
+03:41:12.020 [debug] Replied in 588µs
+
+03:41:12.035 [debug] HANDLE EVENT "example:save" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"sample" => %{"accepted" => "false", "name" => "", "notes" => "", "size" => ""}}
+
+03:41:12.035 [debug] Replied in 149µs
+
+03:41:12.055 [debug] HANDLE EVENT "example:validate" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"sample" => %{"accepted" => "false", "name" => "Sample", "notes" => "", "size" => ""}}
+
+03:41:12.055 [debug] Replied in 152µs
+
+03:41:12.069 [debug] HANDLE EVENT "example:save" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"sample" => %{"accepted" => "false", "name" => "Sample", "notes" => "", "size" => ""}}
+
+03:41:12.069 [debug] Replied in 1ms
+
+03:41:12.076 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+
+03:41:12.076 [debug] Replied in 513µs
+.
+03:41:12.086 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:12.133 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "table_inspector"}
+  Session: %{}
+
+03:41:12.168 [debug] Replied in 34ms
+
+03:41:12.168 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "table_inspector"}
+
+03:41:12.169 [debug] Replied in 1ms
+
+03:41:12.185 [debug] HANDLE EVENT "record_search" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"query" => "R-001"}
+
+03:41:12.186 [debug] Replied in 911µs
+
+03:41:12.189 [debug] HANDLE EVENT "record_search" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"query" => ""}
+
+03:41:12.190 [debug] Replied in 845µs
+.
+03:41:12.209 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:12.258 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+  Session: %{}
+
+03:41:12.281 [debug] Replied in 23ms
+
+03:41:12.281 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+
+03:41:12.282 [debug] Replied in 719µs
+
+03:41:12.286 [debug] HANDLE EVENT "catalogue:choose" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"destination" => "/ui?node=link"}
+
+03:41:12.286 [debug] Replied in 97µs
+
+03:41:12.286 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "link"}
+
+03:41:12.287 [debug] Replied in 673µs
+
+03:41:12.289 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "button"}
+
+03:41:12.290 [debug] Replied in 626µs
+
+03:41:12.293 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "link"}
+
+03:41:12.293 [debug] Replied in 585µs
+
+03:41:12.295 [debug] HANDLE EVENT "catalogue:choose" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"destination" => "https://example.invalid/"}
+
+03:41:12.296 [debug] Replied in 183µs
+
+03:41:12.296 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"level" => "organism"}
+
+03:41:12.297 [debug] Replied in 585µs
+
+03:41:12.299 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{}
+
+03:41:12.299 [debug] Replied in 102µs
+.
+03:41:12.302 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:12.333 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "table_inspector"}
+  Session: %{}
+
+03:41:12.356 [debug] Replied in 23ms
+
+03:41:12.356 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "table_inspector"}
+
+03:41:12.357 [debug] Replied in 698µs
+
+03:41:12.363 [debug] HANDLE EVENT "record_sort" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"key" => "score"}
+
+03:41:12.363 [debug] Replied in 672µs
+
+03:41:12.369 [debug] HANDLE EVENT "record_sort" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"key" => "score"}
+
+03:41:12.370 [debug] Replied in 1ms
+
+03:41:12.376 [debug] HANDLE EVENT "record_page" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"page" => "2"}
+
+03:41:12.377 [debug] Replied in 806µs
+
+03:41:12.386 [debug] HANDLE EVENT "record_size" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"page_size" => "10"}
+
+03:41:12.387 [debug] Replied in 2ms
+
+03:41:12.405 [debug] HANDLE EVENT "record_search" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"query" => "R-001"}
+
+03:41:12.406 [debug] Replied in 1ms
+
+03:41:12.410 [debug] HANDLE EVENT "record_select" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"id" => "R-001"}
+
+03:41:12.410 [debug] Replied in 279µs
+
+03:41:12.413 [debug] HANDLE EVENT "record_search" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"query" => "no match"}
+
+03:41:12.413 [debug] Replied in 452µs
+
+03:41:12.416 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{"node" => "data_table"}
+
+03:41:12.416 [debug] Replied in 448µs
+
+03:41:12.418 [debug] HANDLE EVENT "record_select" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"id" => "unknown"}
+
+03:41:12.419 [debug] Replied in 514µs
+.
+03:41:12.419 [debug] HANDLE EVENT "record_sort" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"key" => "unknown"}
+
+03:41:12.419 [debug] Replied in 49µs
+
+03:41:12.419 [debug] HANDLE EVENT "record_page" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"page" => "invalid"}
+
+03:41:12.419 [debug] Replied in 46µs
+
+03:41:12.420 [debug] HANDLE EVENT "record_size" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"page_size" => "0"}
+
+03:41:12.420 [debug] Replied in 39µs
+
+03:41:12.421 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:12.446 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{}
+  Session: %{}
+
+03:41:12.468 [debug] Replied in 21ms
+
+03:41:12.468 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{}
+
+03:41:12.468 [debug] Replied in 102µs
+.
+03:41:12.472 [debug] Processing with Armature.Catalogue.CatalogueLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+
+03:41:12.518 [debug] MOUNT Armature.Catalogue.CatalogueLive
+  Parameters: %{}
+  Session: %{}
+
+03:41:12.549 [debug] Replied in 31ms
+
+03:41:12.549 [debug] HANDLE PARAMS in Armature.Catalogue.CatalogueLive
+  Parameters: %{}
+
+03:41:12.549 [debug] Replied in 155µs
+
+03:41:12.567 [debug] HANDLE EVENT "catalogue:theme" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"theme" => "dark"}
+
+03:41:12.567 [debug] Replied in 162µs
+
+03:41:12.573 [debug] HANDLE EVENT "catalogue:theme" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"theme" => "light"}
+
+03:41:12.573 [debug] Replied in 104µs
+
+03:41:12.576 [debug] HANDLE EVENT "catalogue:theme" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"theme" => "auto"}
+
+03:41:12.576 [debug] Replied in 103µs
+
+03:41:12.578 [debug] HANDLE EVENT "catalogue:theme" in Armature.Catalogue.CatalogueLive
+  Parameters: %{"theme" => "unknown"}
+
+03:41:12.578 [debug] Replied in 105µs
+.
+Finished in 2.9 seconds (0.8s async, 2.0s sync)
+
+Result: 161 passed
+
+Generating cover results ...
+
+| Percentage | Module                                |
+|------------|---------------------------------------|
+|      0.00% | Armature.Catalogue.Router             |
+|      0.00% | Armature.CatalogueTest.Router.Helpers |
+|     83.33% | Armature.Fixtures.Elements            |
+|     94.44% | Armature.Registry                     |
+|     97.58% | Armature.Catalogue.CatalogueLive      |
+|     97.85% | Armature.Tokens.Values                |
+|     98.53% | Armature.Registry.Checks              |
+|     99.18% | Armature.Catalogue.TokenPage          |
+|    100.00% | Armature                              |
+|    100.00% | Armature.Catalogue.BaselineExamples   |
+|    100.00% | Armature.Catalogue.Examples           |
+|    100.00% | Armature.Catalogue.Records            |
+|    100.00% | Armature.CatalogueTest.EmptyExamples  |
+|    100.00% | Armature.CatalogueTest.Endpoint       |
+|    100.00% | Armature.CatalogueTest.Router         |
+|    100.00% | Armature.Components                   |
+|    100.00% | Armature.Fixtures.Compositions        |
+|    100.00% | Armature.Fixtures.Registry            |
+|    100.00% | Armature.Registry.CompiledCalls       |
+|    100.00% | Armature.Registry.Node                |
+|    100.00% | Armature.Registry.TestTracer          |
+|    100.00% | Armature.RegistryCase                 |
+|    100.00% | Armature.Tokens                       |
+|    100.00% | Armature.UI.Registry                  |
+|------------|---------------------------------------|
+|     98.49% | Total                                 |
+
+Generated HTML coverage results in "cover" directory
