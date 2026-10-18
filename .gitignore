@@ -22,3 +22,9 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 armature-*.tar
 
+
+# Browser tooling and generated evidence.
+/node_modules/
+/test-results/
+/playwright-report/
+/.foundry/

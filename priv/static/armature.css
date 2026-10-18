@@ -943,6 +943,17 @@
   @media (forced-colors: active) {
     .armature-select { appearance: auto; }
     .armature-select-wrap::after { content: none; }
+    /* Forced colours remove backgrounds and shadows. Keep selection visible
+       after focus leaves, with a distinct focused-selection shape. Both rings
+       sit inside the row so the scrolling region cannot clip them. */
+    .armature-row-selected {
+      outline: var(--armature-focus-width) solid var(--armature-selected-cue);
+      outline-offset: calc(var(--armature-focus-width) * -1);
+    }
+    .armature-row-selected:focus-within {
+      outline: calc(var(--armature-focus-width) * 2) double var(--armature-focus);
+      outline-offset: calc(var(--armature-focus-width) * -2);
+    }
   }
 
   /* A narrow composition stacks even inside a wide consumer viewport. */

@@ -8,6 +8,20 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Changed
+
+- Execute theme switching, responsive layout and accessibility behavior in a
+  required Playwright browser gate using real components and packaged assets.
+  Replace behavioral CSS/JavaScript source matching with computed appearance,
+  measured geometry and keyboard interactions; retain token, composition,
+  packaging and rendered semantics contracts in ExUnit.
+
+### Fixed
+
+- Keep selected table rows visible in forced-colour mode after focus leaves.
+  Selected rows use an inset outline; focused selected rows use a distinct
+  double outline that stays inside the scrolling region.
+
 ## [0.2.2] - 2026-10-10
 
 No change breaks the public surface: attributes only became optional, and

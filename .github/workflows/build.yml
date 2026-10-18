@@ -49,6 +49,30 @@ jobs:
       - name: Audit dependencies
         run: mix deps.audit
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install locked browser tooling
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify browser behavior
+        run: npm run test:browser
+
+      - name: Retain browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-failures
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
       - name: Build documentation
         run: mix docs
 

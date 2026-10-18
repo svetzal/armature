@@ -180,3 +180,50 @@ Isolated examples are static previews; use inline demonstrations for LiveView
 events. Shell, grouped navigation and panel grids reflow by their own size,
 including inside the preview. Selectable table examples use a single row-label
 button per row; additional actions belong in non-selectable tables or details.
+
+
+## Browser verification
+
+Use the pinned Elixir 1.18.5 and OTP 28.5.0.7 toolchain from CI, then run:
+
+```sh
+MIX_ENV=test mix deps.get
+npm ci
+npx playwright install --with-deps chromium
+npm run test:browser
+```
+
+Playwright starts and stops `test/browser/server.exs` on 127.0.0.1:4022. Keep
+that port free. The test-only Bandit endpoint hosts the existing catalogue at
+`/ui` and controller fixtures at `/fixtures`; both use real Armature components
+and packaged assets. Controller fixtures enforce an external-assets-only CSP.
+The catalogue retains its inline preview styles, as in the normal preview.
+Browser builds use `_build/browser` to avoid competing with ExUnit compilation.
+No separately managed server or JavaScript bundle is required.
+
+The three suites replace behavioral source assertions as follows:
+
+| Former source assertions | Executable browser replacement |
+| --- | --- |
+| Theme selectors, handlers, restoration and CSP compatibility | `theme.spec.js`: change and submit choices, computed themes, reload, server precedence, invalid/unavailable storage, synchronized switches, announcements and real LiveView events |
+| Shell 800/520, grouped navigation 760, grid 520 rules and container wiring | `responsive.spec.js`: independently resized containers, measured rail/panel bounds, native picker navigation and 320px overflow checks |
+| Focus outlines, disabled/invalid styling, selection cues, sticky headings, control targets and media overrides | `accessibility.spec.js`: keyboard traversal, unobscured focus while scrolling, computed states in both themes, target measurements, forced colours and reduced motion |
+
+ExUnit still verifies token names and documented values, token-only styling,
+composition restrictions, packaging, rendered semantics and pure contrast
+calculations. Browser assertions use conditions and browser events, without
+fixed sleeps. CI requires all three suites and uploads traces/screenshots on
+failure. Open a retained trace with `npx playwright show-trace <trace.zip>` or
+view the report with `npx playwright show-report`. Screenshots and reports are
+build artifacts and are ignored by git.
+
+When changing these tests, demonstrate sensitivity by temporarily disabling
+the theme change listener, the shell's 800px container rule, and the base focus
+outline, one at a time. The corresponding theme-change, shell-width and
+keyboard-focus tests must fail. Restore each mutation and rerun its test before
+running the full suite. Never commit the mutations.
+
+For a visual walkthrough, inspect the catalogue in Light and Dark, including a
+320px viewport. Exercise component navigation, the theme picker, keyboard focus
+and the table example after scrolling. Automated measurements complement this
+walkthrough; they do not replace the screen-reader review required before 1.0.

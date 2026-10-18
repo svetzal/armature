@@ -1,0 +1,6 @@
+/* Fixture constraints only: all component presentation comes from armature.css. */
+#shell-host, #nav-host, #grid-host { width: 100%; }
+#nav-host { container: armature-nav-layout / inline-size; }
+#records-scroll { max-height: 240px; }
+#enabled { animation: fixture-motion 1s infinite; }
+@keyframes fixture-motion { from { opacity: 0.99; } to { opacity: 1; } }
