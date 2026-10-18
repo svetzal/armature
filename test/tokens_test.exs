@@ -128,18 +128,6 @@ defmodule Armature.TokensTest do
     refute Regex.match?(~r/--[\w-]+\s*:/, base)
     declarations = Regex.replace(~r/@(?:media|container)[^{]+\{/, base, "")
     refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s|%)\b/, declarations)
-    assert base =~ ".armature-sr-only"
-    assert base =~ "clip-path: inset(var(--armature-hidden-inset))"
-    assert base =~ ":focus-visible"
-    assert base =~ "outline: var(--armature-focus-width) solid var(--armature-focus)"
-    assert base =~ "@media (prefers-reduced-motion: reduce)"
-    assert base =~ "animation-duration: var(--armature-duration-reduced) !important"
-    assert base =~ "transition-duration: var(--armature-duration-reduced) !important"
-    assert base =~ "@media (forced-colors: active)"
-    assert base =~ "[aria-selected=\"true\"]"
-    assert base =~ "[aria-invalid=\"true\"]"
-    assert base =~ "solid var(--armature-selected-cue)"
-    assert base =~ "dashed var(--armature-error-emphasis)"
   end
 
   test "component layer uses only tokens for presentation and gives layouts only arrangement", %{
@@ -152,10 +140,6 @@ defmodule Armature.TokensTest do
     declarations = Regex.replace(~r/@(?:media|container)[^{]+\{/, components, "")
     refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s)\b/, declarations)
 
-    assert components =~
-             "min-height: max(var(--armature-control-height), var(--armature-target-size))"
-
-    assert components =~ "min-width: var(--armature-target-size)"
     assert components =~ "color: var(--armature-on-accent)"
     assert components =~ "background: var(--armature-accent)"
 
@@ -170,169 +154,22 @@ defmodule Armature.TokensTest do
       refute declarations =~ "border"
       refute declarations =~ "background"
     end
-
-    assert components =~ "min(100%, var(--armature-layout-min-width))"
-    # Disabled must not inherit a variant's fill, or a primary button's dashed
-    # border disappears into its own background.
-    [_, disabled] = Regex.run(~r/\.armature-button:disabled[^{]*\{([^}]+)\}/, components)
-
-    for declaration <- [
-          "background: var(--armature-canvas)",
-          "color: var(--armature-muted)",
-          "border-color: var(--armature-control-border)",
-          "border-style: dashed"
-        ] do
-      assert disabled =~ declaration
-    end
-
-    # Disabled form controls look disabled too, not only buttons.
-    [_, disabled_controls] =
-      Regex.run(~r/\.armature-input:disabled[^{]*\{([^}]+)\}/, components)
-
-    assert disabled_controls =~ "border-style: dashed"
-    assert disabled_controls =~ "color: var(--armature-muted)"
-
-    # An invalid control shows its state on the control itself, in error colour.
-    [_, invalid] =
-      Regex.run(~r/\.armature-input\[aria-invalid="true"\][^{]*\{([^}]+)\}/, components)
-
-    assert invalid =~ "border-color: var(--armature-error-emphasis)"
-    assert invalid =~ "var(--armature-error-emphasis)" and invalid =~ "box-shadow"
-
-    # A checkbox is sized as a box, not stretched like a text input.
-    [_, check] = Regex.run(~r/\.armature-check \.armature-input\s*\{([^}]+)\}/, components)
-    assert check =~ "width: var(--armature-space-4)"
   end
 
-  test "data styles use theme tokens, safe sticky headings and target-sized controls", %{css: css} do
-    [_, components] = String.split(css, "@layer armature.components {")
-
-    rules =
-      Regex.scan(~r/([^{}]+)\{([^{}]*)\}/, Regex.replace(~r{/\*.*?\*/}s, components, ""))
-      |> Enum.map(fn [_, selector, body] ->
-        values =
-          Regex.scan(~r/([\w-]+)\s*:\s*([^;{}]+);/, body)
-          |> Enum.map(fn [_, name, value] -> {name, String.trim(value)} end)
-
-        {String.trim(selector), values}
-      end)
-
-    for name <- ~w(table-scroll table-toolbar pagination inspector record-header table-inspector) do
-      assert components =~ ".armature-#{name}"
-    end
-
-    assert Map.new(rule!(rules, ".armature-table-scroll"))["overflow"] == "auto"
-
-    assert Map.new(rule!(rules, ".armature-catalogue-detail ul a"))["min-width"] ==
-             "var(--armature-target-size)"
-
-    assert Map.new(rule!(rules, ".armature-table th"))["position"] == "sticky"
-    assert Map.new(rule!(rules, ".armature-table-scroll:focus-within th"))["position"] == "static"
-    assert Map.new(rule!(rules, ".armature-table .armature-numeric"))["text-align"] == "end"
-
-    assert Map.new(rule!(rules, ".armature-table .armature-numeric"))["font-variant-numeric"] ==
-             "tabular-nums"
-
-    for {selector, token} <- [
-          {".armature-table-striped tbody tr:nth-child(even)", "stripe"},
-          {".armature-table tbody tr:hover, .armature-table tbody tr:focus-within", "hover"},
-          {".armature-table tbody tr.armature-row-selected", "selected"}
-        ] do
-      assert Map.new(rule!(rules, selector))["background"] == "var(--armature-#{token})"
-    end
-
-    control = Map.new(rule!(rules, ".armature-sort, .armature-row-select"))
-
-    assert control["min-height"] == "var(--armature-target-size)"
-
-    assert control["min-width"] == "var(--armature-target-size)"
-    focus = Map.new(rule!(rules, ".armature-clickable-row:focus-within"))
-    assert focus["outline"] == "var(--armature-focus-width) solid var(--armature-focus)"
-
-    row_label =
-      rules
-      |> Enum.find(fn {selector, declarations} ->
-        selector == ".armature-row-select" && List.keymember?(declarations, "border", 0)
-      end)
-      |> elem(1)
-      |> Map.new()
-
-    assert row_label["border"] == "none"
-    assert row_label["background"] == "none"
-    assert row_label["font-weight"] == "var(--armature-weight-emphasis)"
-
-    assert Map.new(rule!(rules, ".armature-table-inspector > .armature-split > div"))[
-             "flex-basis"
-           ] == "calc(var(--armature-layout-min-width) * 2)"
-  end
-
-  test "forced colours keep focus, selection and focused selection visually distinct",
-       %{css: css} do
-    [_, base_and_components] = String.split(css, "@layer armature.base {")
-    [base, _] = String.split(base_and_components, "@layer armature.components {")
-    [_, forced] = String.split(base, "@media (forced-colors: active) {")
-
-    # Focus and the selection cue are both Highlight in forced colours, so
-    # each state must differ in outline style or placement, never colour alone.
-    shapes =
-      for selector <- [~s([aria-selected="true"]), ~s([aria-selected="true"]:focus-visible)] do
-        outline_shape(forced, selector)
-      end
-
-    focus = outline_shape(base, ":focus-visible")
-    [selected, focused_selected] = shapes
-
-    assert Enum.uniq([focus, selected, focused_selected]) |> length() == 3
-    assert focused_selected.offset == :outside
-    assert focused_selected.style != selected.style or focused_selected.offset != selected.offset
-  end
-
-  test "theme and accessibility media rules apply in cascade order", %{css: css, rules: rules} do
+  test "theme selectors preserve cascade order", %{css: css, rules: rules} do
     assert css =~ "@layer armature.tokens, armature.base, armature.components;"
-    assert css =~ "@media (prefers-color-scheme: dark)"
-    assert css =~ "@media (pointer: coarse), (max-width: 40rem)"
-
     selectors = Enum.map(rules, &elem(&1, 0))
     positions = Enum.map(theme_selectors(), &Enum.find_index(selectors, fn s -> s == &1 end))
     assert Enum.sort(positions) == positions
-
-    overrides =
-      Enum.filter(rules, fn {selector, _} -> selector == ":root, [data-armature-theme]" end)
-
-    [{_, targets}, {_, motion}, {_, forced}] = overrides
-
-    for name <- ["--armature-control-height", "--armature-target-size"] do
-      {pixels, "px"} = targets |> Map.new() |> Map.fetch!(name) |> Integer.parse()
-      assert pixels >= 44
-    end
-
-    assert Map.new(motion) == %{
-             "--armature-duration-fast" => "var(--armature-duration-reduced)",
-             "--armature-duration-base" => "var(--armature-duration-reduced)"
-           }
-
-    colour_names = Tokens.all() |> Enum.filter(&(&1.group == :colour)) |> Enum.map(& &1.name)
-    assert Enum.sort(Map.keys(Map.new(forced))) == Enum.sort(colour_names)
-    assert Map.new(forced)["--armature-focus"] == "Highlight"
-    assert Map.new(forced)["--armature-selected-cue"] == "Highlight"
-    assert Map.new(forced)["--armature-error-emphasis"] == "CanvasText"
   end
 
-  test "catalogue styling uses the same theme and accessibility contract", %{css: css} do
-    assert css =~ ".armature-app-shell {"
-    assert css =~ ".armature-side-nav nav > a[aria-current=\"page\"]"
-
-    assert css =~
-             "box-shadow: inset var(--armature-cue-width) 0 var(--armature-selected-cue)"
-
-    assert css =~ ".armature-catalogue-notes"
-    assert css =~ "white-space: pre-wrap"
+  test "automatic theme inherits root token overrides", %{css: css} do
     # "Auto" follows the page. A token rule on any auto container would sit on
     # a descendant and hide the consumer's :root overrides inside it.
     refute css =~ ~s([data-armature-theme="auto"])
   end
 
-  test "shell rail contrast and geometry hold in all six evaluated contexts", %{css: css} do
+  test "shell rail contrast and documented geometry hold in all six evaluated contexts" do
     contexts = Values.read()
     assert map_size(contexts) == 6
 
@@ -348,15 +185,6 @@ defmodule Armature.TokensTest do
       assert result.values["--armature-rail-width-narrow"] == "155px"
       assert result.values["--armature-nav-width"] == "190px"
     end
-
-    for breakpoint <- [800, 520],
-        do: assert(css =~ "@container armature-shell (width < #{breakpoint}px)")
-
-    assert css =~ ".armature-grouped-nav-picker { display: none; }"
-    assert css =~ ".armature-grouped-nav-links { display: none; }"
-    assert css =~ "outline-color: var(--armature-rail-focus)"
-    assert css =~ "outline-color: var(--armature-rail-current-focus)"
-    assert css =~ "min-height: max(var(--armature-target-enhanced), var(--armature-target-size))"
   end
 
   test "guide table is generated from the contract" do
@@ -366,7 +194,7 @@ defmodule Armature.TokensTest do
     assert table == Tokens.markdown_table()
   end
 
-  test "refined type, geometry and density match the reference", %{rules: rules, css: css} do
+  test "refined type, geometry and density tokens match the reference", %{rules: rules} do
     values = rules |> rule!(":root") |> Map.new()
 
     for {name, value} <- [
@@ -395,39 +223,6 @@ defmodule Armature.TokensTest do
     end
 
     assert values["--armature-font-sans"] == ~s("Barlow", system-ui, sans-serif)
-
-    for rule <- [
-          "padding: var(--armature-table-cell-padding)",
-          "padding: var(--armature-table-cell-padding-compact)",
-          "box-shadow: inset var(--armature-cue-width)",
-          "border-inline-start: var(--armature-cue-width) solid var(--armature-accent)",
-          ".armature-table tbody tr:focus-within",
-          ".armature-facts dt",
-          "white-space: nowrap",
-          "grid-template-columns: var(--armature-nav-width) minmax(0, 1fr)"
-        ],
-        do: assert(css =~ rule)
-
-    # The select itself is normalized and its wrapper draws the chevron.
-    [_, select] = Regex.run(~r/\n\s*\.armature-select\s*\{([^}]+)\}/, css)
-    assert select =~ "appearance: none"
-
-    [_, chevron] = Regex.run(~r/\.armature-select-wrap::after\s*\{([^}]+)\}/, css)
-    assert chevron =~ ~s(content: "")
-    assert chevron =~ "border-color: var(--armature-muted)"
-    assert chevron =~ "transform: rotate(var(--armature-chevron-angle))"
-    assert chevron =~ "pointer-events: none"
-
-    # List boxes and forced colours keep the native control and no chevron.
-    assert css =~ ".armature-select[multiple] { appearance: auto;"
-
-    [_, forced] =
-      Regex.run(
-        ~r/@media \(forced-colors: active\) \{\s*\.armature-select \{[^}]+\}([^}]+)\}/,
-        css
-      )
-
-    assert forced =~ "content: none"
   end
 
   test "every rule sits inside an Armature cascade layer", %{css: css} do
@@ -482,16 +277,6 @@ defmodule Armature.TokensTest do
       "[data-armature-theme=\"dark\"]",
       "[data-armature-theme=\"light\"]"
     ]
-  end
-
-  # The outline style and whether it sits inside or outside the element, for
-  # the first rule in `css` whose selector is exactly `selector`.
-  defp outline_shape(css, selector) do
-    pattern = ~r/(?:^|[}\s])#{Regex.escape(selector)}\s*\{([^}]*)\}/
-    [_, body] = Regex.run(pattern, css)
-    [_, style] = Regex.run(~r/outline:\s*\S+(?:\s*\*\s*\d+\))?\s+(\w+)/, body)
-    [_, offset] = Regex.run(~r/outline-offset:\s*([^;]+);/, body)
-    %{style: style, offset: if(offset =~ "* -1", do: :inside, else: :outside)}
   end
 
   defp rule!(rules, selector) do

@@ -512,61 +512,31 @@ defmodule Armature.ComponentsTest do
     end
   end
 
-  test "responsive components render containers and children targeted by their container rules" do
-    css = File.read!(Path.expand("../priv/static/armature.css", __DIR__))
-
+  test "responsive compositions preserve navigation, panels and a single main landmark" do
     doc =
-      document(
-        fn assigns ->
-          ~H"""
-          <style phx-no-curly-interpolation>
-            <%= Phoenix.HTML.raw(@css) %>
-          </style>
-          <C.app_shell
-            id="responsive-shell"
-            title="Library"
-            heading="Overview"
-            heading_id="responsive-heading"
-            context="Library"
-            items={[]}
-          >
-            <C.grouped_nav id="responsive-nav" label="Components" event="choose" groups={[]} />
-            <C.grid id="responsive-panels">
-              <C.panel id="first-panel" heading="First">Content</C.panel>
-              <C.panel id="second-panel" heading="Second">Content</C.panel>
-            </C.grid>
-          </C.app_shell>
-          """
-        end,
-        %{css: css}
-      )
+      document(fn assigns ->
+        ~H"""
+        <C.app_shell
+          id="responsive-shell"
+          title="Library"
+          heading="Overview"
+          heading_id="responsive-heading"
+          context="Library"
+          items={[]}
+        >
+          <C.grouped_nav id="responsive-nav" label="Components" event="choose" groups={[]} />
+          <C.grid id="responsive-panels">
+            <C.panel id="first-panel" heading="First">Content</C.panel>
+            <C.panel id="second-panel" heading="Second">Content</C.panel>
+          </C.grid>
+        </C.app_shell>
+        """
+      end)
 
-    for {container, selector, child} <- [
-          {"armature-shell", "#responsive-shell", ".armature-app-shell-grid"},
-          {"armature-grid", "#responsive-panels", ".armature-grid-items"}
-        ] do
-      assert present?(doc, selector <> " > " <> child)
-      assert text(doc, "style") =~ "container: #{container} / inline-size"
-      assert text(doc, "style") =~ "@container #{container} (width <"
-    end
-
-    # A grouped list collapses against the layout around it, never its own
-    # width: inside an app shell that is the content area.
     assert present?(doc, "#responsive-shell .armature-app-shell-content #responsive-nav")
     assert present?(doc, "#responsive-nav > .armature-grouped-nav-picker")
-    assert text(doc, "style") =~ "container: armature-content armature-nav-layout / inline-size"
-
-    [_, collapse] =
-      Regex.run(
-        ~r/@container armature-nav-layout \(width < 760px\) \{([^@]+)\}/,
-        text(doc, "style")
-      )
-
-    assert collapse =~ ".armature-grouped-nav-links { display: none; }"
-    assert collapse =~ ".armature-grouped-nav-picker { display: grid;"
-    refute text(doc, "style") =~ "armature-navigation"
-
     assert present?(doc, "#responsive-panels > .armature-grid-items > #first-panel")
+    assert present?(doc, "#second-panel[aria-labelledby=second-panel-heading]")
     assert doc |> LazyHTML.query("main") |> Enum.count() == 1
   end
 

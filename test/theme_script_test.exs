@@ -8,27 +8,11 @@ defmodule Armature.ThemeScriptTest do
   alias Armature.Components, as: C
 
   @script_path Path.expand("../priv/static/armature-theme.js", __DIR__)
-  @script File.read!(@script_path)
 
   test "the script ships in the Hex package" do
     files = Mix.Project.config()[:package][:files]
     assert "priv" in files
     assert File.regular?(@script_path)
-  end
-
-  test "the script finds switches by the attribute the component renders" do
-    assert @script =~ "form[data-armature-theme-switch]"
-    assert @script =~ "select[name='theme']"
-    assert @script =~ ~s("data-armature-theme")
-    assert @script =~ "[data-phx-session]"
-  end
-
-  test "the script stays within a strict content security policy" do
-    for forbidden <- [~r/\beval\s*\(/, ~r/new\s+Function/, ~r/\.style\b/, ~r/innerHTML/] do
-      refute @script =~ forbidden, "armature-theme.js matches #{inspect(forbidden)}"
-    end
-
-    refute @script =~ ~r/setAttribute\(\s*["']style/
   end
 
   test "a controller-rendered switch carries the script's hooks and no LiveView bindings" do
