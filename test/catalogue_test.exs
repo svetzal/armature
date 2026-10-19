@@ -17,47 +17,76 @@ defmodule Armature.CatalogueTest do
     :ok
   end
 
-  test "shell level navigation, picker, skip target and history preserve the selected component" do
-    {:ok, view, _} = live(build_conn(), "/ui?node=button")
-    assert has_element?(view, "#armature-catalogue-rail nav[aria-label='Library sections']")
-    assert has_element?(view, "#armature-catalogue-rail > .armature-eyebrow", "Library")
+  describe "catalogue shell" do
+    setup do
+      {:ok, view, _} = live(build_conn(), "/ui?node=button")
+      %{view: view}
+    end
 
-    assert has_element?(
-             view,
-             "#armature-catalogue-rail .armature-side-nav-brand small",
-             "catalogue"
-           )
+    test "rail renders the library sections nav, eyebrow and brand caption", %{view: view} do
+      assert has_element?(view, "#armature-catalogue-rail nav[aria-label='Library sections']")
+      assert has_element?(view, "#armature-catalogue-rail > .armature-eyebrow", "Library")
 
-    assert has_element?(view, "#catalogue-level-atom[aria-current=page]")
-    assert has_element?(view, "main[aria-labelledby=armature-catalogue-heading-button]")
-    assert has_element?(view, "a.armature-skip-link[href='#armature-catalogue-heading-button']")
-    assert has_element?(view, ".armature-page-heading .armature-eyebrow", "Library / Atoms")
-    assert has_element?(view, "label[for=catalogue-components-choice]", "Components")
-    refute has_element?(view, "#catalogue-components nav section[data-level=molecule]")
+      assert has_element?(
+               view,
+               "#armature-catalogue-rail .armature-side-nav-brand small",
+               "catalogue"
+             )
+    end
 
-    view |> form("#catalogue-components-form", %{destination: "/ui?node=link"}) |> render_change()
-    assert_patch(view, "/ui?node=link")
-    assert has_element?(view, "#catalogue-node-link[aria-current=page]")
+    test "current level and node are marked and main is labelled by the heading", %{view: view} do
+      assert has_element?(view, "#catalogue-level-atom[aria-current=page]")
+      assert has_element?(view, "main[aria-labelledby=armature-catalogue-heading-button]")
+      assert has_element?(view, "a.armature-skip-link[href='#armature-catalogue-heading-button']")
+      assert has_element?(view, ".armature-page-heading .armature-eyebrow", "Library / Atoms")
+    end
 
-    assert has_element?(
-             view,
-             "#catalogue-components-choice option[value='/ui?node=link'][selected]"
-           )
+    test "components picker is labelled and lists only the current level", %{view: view} do
+      assert has_element?(view, "label[for=catalogue-components-choice]", "Components")
+      refute has_element?(view, "#catalogue-components nav section[data-level=molecule]")
+    end
 
-    render_patch(view, "/ui?node=button")
-    assert has_element?(view, "#catalogue-node-button[aria-current=page]")
-    render_patch(view, "/ui?node=link")
-    assert has_element?(view, "#armature-catalogue-heading-link[phx-mounted]")
-    render_change(view, "catalogue:choose", %{destination: "https://example.invalid/"})
-    assert has_element?(view, "#catalogue-node-link[aria-current=page]")
-    view |> element("#catalogue-level-organism") |> render_click()
-    assert_patch(view, "/ui?level=organism")
-    assert has_element?(view, "#catalogue-level-organism[aria-current=page]")
-    assert has_element?(view, "#catalogue-components nav section[data-level=organism]")
-    refute has_element?(view, "#catalogue-components nav section[data-level=atom]")
-    view |> element(".armature-side-nav-brand a") |> render_click()
-    assert_patch(view, "/ui")
-    assert has_element?(view, "#armature-catalogue-heading-index")
+    test "choosing a destination patches to it and marks it selected", %{view: view} do
+      view
+      |> form("#catalogue-components-form", %{destination: "/ui?node=link"})
+      |> render_change()
+
+      assert_patch(view, "/ui?node=link")
+      assert has_element?(view, "#catalogue-node-link[aria-current=page]")
+
+      assert has_element?(
+               view,
+               "#catalogue-components-choice option[value='/ui?node=link'][selected]"
+             )
+    end
+
+    test "patching between nodes moves aria-current and remounts the heading", %{view: view} do
+      render_patch(view, "/ui?node=link")
+      render_patch(view, "/ui?node=button")
+      assert has_element?(view, "#catalogue-node-button[aria-current=page]")
+      render_patch(view, "/ui?node=link")
+      assert has_element?(view, "#armature-catalogue-heading-link[phx-mounted]")
+    end
+
+    test "picker ignores destinations outside the catalogue", %{view: view} do
+      render_patch(view, "/ui?node=link")
+      render_change(view, "catalogue:choose", %{destination: "https://example.invalid/"})
+      assert has_element?(view, "#catalogue-node-link[aria-current=page]")
+    end
+
+    test "choosing a level filters the component list to that level", %{view: view} do
+      view |> element("#catalogue-level-organism") |> render_click()
+      assert_patch(view, "/ui?level=organism")
+      assert has_element?(view, "#catalogue-level-organism[aria-current=page]")
+      assert has_element?(view, "#catalogue-components nav section[data-level=organism]")
+      refute has_element?(view, "#catalogue-components nav section[data-level=atom]")
+    end
+
+    test "brand link returns to the index", %{view: view} do
+      view |> element(".armature-side-nav-brand a") |> render_click()
+      assert_patch(view, "/ui")
+      assert has_element?(view, "#armature-catalogue-heading-index")
+    end
   end
 
   test "full page examples have one outer main and isolated named previews with width choices" do
@@ -110,9 +139,13 @@ defmodule Armature.CatalogueTest do
            |> Enum.count() == 1
   end
 
-  test "consumer title is configurable and shell examples announce choices" do
+  test "consumer title is configurable" do
     {:ok, view, _} = live(build_conn(), "/nested/ui?node=theme_switch")
     assert has_element?(view, ".armature-side-nav-brand", "Example library")
+  end
+
+  test "shell examples announce the chosen theme and destination" do
+    {:ok, view, _} = live(build_conn(), "/nested/ui?node=theme_switch")
     view |> form("#example-theme", %{theme: "dark"}) |> render_change()
     assert has_element?(view, "#example-theme-choice option[value=dark][selected]")
     assert has_element?(view, "p[role=status]", "Selected theme: dark")
@@ -149,91 +182,105 @@ defmodule Armature.CatalogueTest do
            )
   end
 
-  test "tokens precede atoms and show contract samples and both theme results" do
-    {:ok, view, _html} = live(build_conn(), "/ui?section=tokens")
-    assert has_element?(view, "nav > a:first-child#catalogue-tokens[aria-current='page']")
-    assert has_element?(view, "#armature-catalogue-heading-tokens", "Tokens")
-
-    assert has_element?(
-             view,
-             "#catalogue-token-statement",
-             "Tokens give every component a shared language."
-           )
-
-    for {id, heading} <- [
-          {"surfaces", "Surfaces and text"},
-          {"accents", "Accents, focus and selection"},
-          {"status", "Status tones"},
-          {"rail", "Rail"},
-          {"typography", "Typography"},
-          {"space", "Space and rhythm"},
-          {"shape", "Shape"},
-          {"density", "Density and targets"},
-          {"motion", "Motion"},
-          {"contrast", "Contrast"}
-        ] do
-      assert has_element?(view, "#catalogue-token-#{id}.armature-panel h2", heading)
+  describe "tokens page" do
+    setup do
+      {:ok, view, _html} = live(build_conn(), "/ui?section=tokens")
+      %{view: view, values: Armature.Tokens.Values.read([])}
     end
 
-    assert_token_demonstrations(view)
+    test "tokens link is first in the section nav and current", %{view: view} do
+      assert has_element?(view, "nav > a:first-child#catalogue-tokens[aria-current='page']")
+      assert has_element?(view, "#armature-catalogue-heading-tokens", "Tokens")
+    end
 
-    values = Armature.Tokens.Values.read([])
+    test "renders the statement and every themed panel heading", %{view: view} do
+      assert has_element?(
+               view,
+               "#catalogue-token-statement",
+               "Tokens give every component a shared language."
+             )
 
-    for token <- Armature.Tokens.all() do
-      selector = "#token-#{String.trim_leading(token.name, "--")}"
-      assert has_element?(view, "#catalogue-token-reference #{selector} th", token.name)
-      assert has_element?(view, "#{selector} td", token.role)
+      for {id, heading} <- [
+            {"surfaces", "Surfaces and text"},
+            {"accents", "Accents, focus and selection"},
+            {"status", "Status tones"},
+            {"rail", "Rail"},
+            {"typography", "Typography"},
+            {"space", "Space and rhythm"},
+            {"shape", "Shape"},
+            {"density", "Density and targets"},
+            {"motion", "Motion"},
+            {"contrast", "Contrast"}
+          ] do
+        assert has_element?(view, "#catalogue-token-#{id}.armature-panel h2", heading)
+      end
+    end
 
-      for {context, _label} <- Armature.Tokens.Values.contexts() do
+    test "demonstrates every token group", %{view: view} do
+      assert_token_demonstrations(view)
+    end
+
+    test "reference table lists every token with its role and value per context",
+         %{view: view, values: values} do
+      for token <- Armature.Tokens.all() do
+        selector = "#token-#{String.trim_leading(token.name, "--")}"
+        assert has_element?(view, "#catalogue-token-reference #{selector} th", token.name)
+        assert has_element?(view, "#{selector} td", token.role)
+
+        for {context, _label} <- Armature.Tokens.Values.contexts() do
+          assert has_element?(
+                   view,
+                   "#{selector} td[data-context='#{context}']",
+                   values[context].values[token.name]
+                 )
+        end
+      end
+    end
+
+    test "contrast table reports minimum, ratio and verdict per pair and theme",
+         %{view: view, values: values} do
+      for {context, _label} <- Armature.Tokens.Values.contexts(), pair <- values[context].pairs do
+        selector =
+          "#catalogue-token-contrast tr" <>
+            "[data-foreground='#{pair.foreground}'][data-background='#{pair.background}']"
+
+        assert has_element?(view, selector <> " td", "#{pair.minimum}:1")
+        expected_ratio = :erlang.float_to_binary(pair.ratio, decimals: 2) <> ":1"
+        assert has_element?(view, selector <> " td[data-theme='#{context}']", expected_ratio)
+
         assert has_element?(
                  view,
-                 "#{selector} td[data-context='#{context}']",
-                 values[context].values[token.name]
+                 selector <> " td[data-theme='#{context}']",
+                 if(pair.pass?, do: "Pass", else: "Fail")
                )
       end
     end
 
-    for {context, _label} <- Armature.Tokens.Values.contexts(), pair <- values[context].pairs do
-      selector =
-        "#catalogue-token-contrast tr" <>
-          "[data-foreground='#{pair.foreground}'][data-background='#{pair.background}']"
+    test "reference and contrast tables have one row per token and pair",
+         %{view: view, values: values} do
+      doc = LazyHTML.from_fragment(render(view))
 
-      assert has_element?(view, selector <> " td", "#{pair.minimum}:1")
-      expected_ratio = :erlang.float_to_binary(pair.ratio, decimals: 2) <> ":1"
-      assert has_element?(view, selector <> " td[data-theme='#{context}']", expected_ratio)
+      assert Enum.count(LazyHTML.query(doc, "#catalogue-token-reference tbody tr")) ==
+               length(Armature.Tokens.all())
 
-      assert has_element?(
-               view,
-               selector <> " td[data-theme='#{context}']",
-               if(pair.pass?, do: "Pass", else: "Fail")
-             )
+      assert Enum.count(LazyHTML.query(doc, "#catalogue-token-contrast table")) == 1
+
+      assert Enum.count(LazyHTML.query(doc, "#catalogue-token-contrast tbody tr")) ==
+               length(values.light.pairs)
     end
 
-    doc = LazyHTML.from_fragment(render(view))
+    test "theme control applies to the token page", %{view: view} do
+      view |> form("#catalogue-theme", %{theme: "dark"}) |> render_change()
+      assert has_element?(view, "#armature-catalogue[data-armature-theme='dark']")
+    end
 
-    assert Enum.count(LazyHTML.query(doc, "#catalogue-token-reference tbody tr")) ==
-             length(Armature.Tokens.all())
-
-    assert Enum.count(LazyHTML.query(doc, "#catalogue-token-contrast table")) == 1
-
-    assert Enum.count(LazyHTML.query(doc, "#catalogue-token-contrast tbody tr")) ==
-             length(values.light.pairs)
-
-    assert has_element?(view, "#catalogue-token-selection button[aria-pressed=true]")
-    assert has_element?(view, "#catalogue-focus-sample")
-    assert has_element?(view, "#catalogue-tabular-sample")
-    assert has_element?(view, "#catalogue-density-compact[data-density=compact]")
-    assert has_element?(view, "#catalogue-token-select.armature-select")
-    assert has_element?(view, "#catalogue-token-search-search[type=search]")
-    assert has_element?(view, "#catalogue-motion-demo .armature-token-motion-fast")
-
-    view |> form("#catalogue-theme", %{theme: "dark"}) |> render_change()
-    assert has_element?(view, "#armature-catalogue[data-armature-theme='dark']")
-    view |> element("#catalogue-level-atom") |> render_click()
-    view |> element("#catalogue-node-button") |> render_click()
-    assert has_element?(view, "#catalogue-tokens")
-    view |> element("#catalogue-tokens") |> render_click()
-    assert has_element?(view, "#armature-catalogue-heading-tokens")
+    test "returning from an atom restores the token page", %{view: view} do
+      view |> element("#catalogue-level-atom") |> render_click()
+      view |> element("#catalogue-node-button") |> render_click()
+      assert has_element?(view, "#catalogue-tokens")
+      view |> element("#catalogue-tokens") |> render_click()
+      assert has_element?(view, "#armature-catalogue-heading-tokens")
+    end
   end
 
   test "index groups components in level order and renders one heading" do
@@ -307,56 +354,102 @@ defmodule Armature.CatalogueTest do
     refute has_element?(view, "#armature-catalogue[data-armature-theme]")
   end
 
-  test "examples validate fields and keep action state while navigating" do
-    {:ok, view, _} = live(build_conn(), "/ui?node=button")
-    view |> element("#example-action") |> render_click()
-    assert has_element?(view, "p[role=status]", "Activated 1 times.")
-    render_patch(view, "/ui?node=field")
-    view |> form("#sample-form", %{"sample" => %{"name" => ""}}) |> render_submit()
-    assert has_element?(view, "#sample_name[aria-invalid=true]")
-    refute has_element?(view, "#example-saved")
-    view |> form("#sample-form", %{"sample" => %{"name" => "Sample"}}) |> render_change()
-    refute has_element?(view, "#sample_name[aria-invalid=true]")
-    view |> form("#sample-form", %{"sample" => %{"name" => "Sample"}}) |> render_submit()
-    assert has_element?(view, "#example-saved[role=status]")
-    render_patch(view, "/ui?node=button")
-    assert has_element?(view, "p[role=status]", "Activated 1 times.")
+  describe "record examples" do
+    setup do
+      {:ok, view, _} = live(build_conn(), "/ui?node=table_inspector")
+      %{view: view}
+    end
+
+    test "sorting a column toggles between ascending and descending", %{view: view} do
+      view |> element("button[phx-value-key=score]") |> render_click()
+      assert has_element?(view, "th[aria-sort=ascending]", "Score")
+      view |> element("button[phx-value-key=score]") |> render_click()
+      assert has_element?(view, "th[aria-sort=descending]", "Score")
+    end
+
+    test "next page announces the following range", %{view: view} do
+      view |> element("button[aria-label='Next page']") |> render_click()
+      assert has_element?(view, "#example-records-pagination-range", "26–50 of 200")
+    end
+
+    test "changing the page size returns to the first page", %{view: view} do
+      view |> element("button[aria-label='Next page']") |> render_click()
+
+      view
+      |> form("#example-records-pagination-size-form", %{"page_size" => "10"})
+      |> render_change()
+
+      assert has_element?(view, "#example-records-pagination-range", "1–10 of 200")
+    end
+
+    test "search narrows the result count", %{view: view} do
+      search(view, "R-001")
+      assert has_element?(view, "#example-records-toolbar-count", "1 results")
+    end
+
+    test "selecting a row presses it and shows its details", %{view: view} do
+      select_first_record(view)
+      assert has_element?(view, "button[phx-value-id=R-001][aria-pressed=true]")
+      assert has_element?(view, "#example-selected-record", "R-001")
+    end
+
+    test "a search that excludes the selection keeps it and explains why", %{view: view} do
+      select_first_record(view)
+      search(view, "no match")
+      assert has_element?(view, "#example-selected-record", "R-001")
+      assert has_element?(view, "p", "The selected record is outside the current results.")
+      assert has_element?(view, "#example-records-pagination-range", "0–0 of 0")
+    end
+
+    test "selection survives navigating to the data_table example", %{view: view} do
+      select_first_record(view)
+      render_patch(view, "/ui?node=data_table")
+      assert has_element?(view, "#example-selected-record", "R-001")
+    end
+
+    test "unknown select, sort, page and size values are ignored", %{view: view} do
+      select_first_record(view)
+      render_click(view, "record_select", %{"id" => "unknown"})
+      render_click(view, "record_sort", %{"key" => "unknown"})
+      render_click(view, "record_page", %{"page" => "invalid"})
+      render_click(view, "record_size", %{"page_size" => "0"})
+      assert has_element?(view, "#example-selected-record", "R-001")
+    end
   end
 
-  test "record examples sort, page, search and retain selected details" do
-    {:ok, view, _} = live(build_conn(), "/ui?node=table_inspector")
-    view |> element("button[phx-value-key=score]") |> render_click()
-    assert has_element?(view, "th[aria-sort=ascending]", "Score")
-    view |> element("button[phx-value-key=score]") |> render_click()
-    assert has_element?(view, "th[aria-sort=descending]", "Score")
-    view |> element("button[aria-label='Next page']") |> render_click()
-    assert has_element?(view, "#example-records-pagination-range", "26–50 of 200")
+  describe "action and form examples" do
+    setup do
+      {:ok, view, _} = live(build_conn(), "/ui?node=button")
+      %{view: view}
+    end
 
-    view
-    |> form("#example-records-pagination-size-form", %{"page_size" => "10"})
-    |> render_change()
+    test "example action counts activations", %{view: view} do
+      view |> element("#example-action") |> render_click()
+      assert has_element?(view, "p[role=status]", "Activated 1 times.")
+    end
 
-    assert has_element?(view, "#example-records-pagination-range", "1–10 of 200")
-    view |> form("#example-records-toolbar-search-form", %{"query" => "R-001"}) |> render_change()
-    assert has_element?(view, "#example-records-toolbar-count", "1 results")
-    view |> element("#example-records-table-R-001") |> render_click()
-    assert has_element?(view, "button[phx-value-id=R-001][aria-pressed=true]")
-    assert has_element?(view, "#example-selected-record", "R-001")
+    test "blank names are marked invalid on submit and not saved", %{view: view} do
+      render_patch(view, "/ui?node=field")
+      view |> form("#sample-form", %{"sample" => %{"name" => ""}}) |> render_submit()
+      assert has_element?(view, "#sample_name[aria-invalid=true]")
+      refute has_element?(view, "#example-saved")
+    end
 
-    view
-    |> form("#example-records-toolbar-search-form", %{"query" => "no match"})
-    |> render_change()
+    test "a corrected name clears invalid state and saves", %{view: view} do
+      render_patch(view, "/ui?node=field")
+      view |> form("#sample-form", %{"sample" => %{"name" => ""}}) |> render_submit()
+      view |> form("#sample-form", %{"sample" => %{"name" => "Sample"}}) |> render_change()
+      refute has_element?(view, "#sample_name[aria-invalid=true]")
+      view |> form("#sample-form", %{"sample" => %{"name" => "Sample"}}) |> render_submit()
+      assert has_element?(view, "#example-saved[role=status]")
+    end
 
-    assert has_element?(view, "#example-selected-record", "R-001")
-    assert has_element?(view, "p", "The selected record is outside the current results.")
-    assert has_element?(view, "#example-records-pagination-range", "0–0 of 0")
-    render_patch(view, "/ui?node=data_table")
-    assert has_element?(view, "#example-selected-record", "R-001")
-    render_click(view, "record_select", %{"id" => "unknown"})
-    render_click(view, "record_sort", %{"key" => "unknown"})
-    render_click(view, "record_page", %{"page" => "invalid"})
-    render_click(view, "record_size", %{"page_size" => "0"})
-    assert has_element?(view, "#example-selected-record", "R-001")
+    test "action state persists across navigation", %{view: view} do
+      view |> element("#example-action") |> render_click()
+      render_patch(view, "/ui?node=field")
+      render_patch(view, "/ui?node=button")
+      assert has_element?(view, "p[role=status]", "Activated 1 times.")
+    end
   end
 
   test "row labels announce selection and keep it across search and paging" do
@@ -403,6 +496,15 @@ defmodule Armature.CatalogueTest do
 
   # Each themed panel must show its tokens at work, not only label a group:
   # removing a demonstration fails here.
+  defp search(view, query) do
+    view |> form("#example-records-toolbar-search-form", %{"query" => query}) |> render_change()
+  end
+
+  defp select_first_record(view) do
+    search(view, "R-001")
+    view |> element("#example-records-table-R-001") |> render_click()
+  end
+
   defp assert_token_demonstrations(view) do
     assert_colour_demonstrations(view)
     assert_type_and_space_demonstrations(view)
@@ -423,6 +525,8 @@ defmodule Armature.CatalogueTest do
     assert has_element?(view, "#catalogue-token-accents button[aria-pressed=true]")
     assert has_element?(view, "#catalogue-token-accents .armature-notice")
     assert has_element?(view, "#catalogue-token-accents .armature-select-wrap select")
+    assert has_element?(view, "#catalogue-token-selection button[aria-pressed=true]")
+    assert has_element?(view, "#catalogue-token-select.armature-select")
 
     for tone <- ~w(success warning error) do
       assert has_element?(view, "#catalogue-token-status .armature-status.armature-tone-#{tone}")
@@ -479,6 +583,7 @@ defmodule Armature.CatalogueTest do
     end
 
     assert has_element?(view, "#catalogue-token-density .armature-search input[type=search]")
+    assert has_element?(view, "#catalogue-token-search-search[type=search]")
 
     assert has_element?(
              view,

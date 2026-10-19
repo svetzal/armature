@@ -400,47 +400,64 @@ defmodule Armature.ComponentsTest do
     refute present?(doc, "[role], aside, section, main")
   end
 
-  test "data tables expose scoped sortable headings and named record selection" do
-    for sort_by <- ~w(name score), direction <- ~w(asc desc) do
-      doc =
-        document(
-          fn assigns ->
-            ~H"""
-            <C.data_table
-              id="records"
-              rows={[%{id: "R-1", name: "Example", score: 12}, %{id: "R-2", name: "Other", score: 3}]}
-              caption="Example records"
-              sort_by={@sort_by}
-              sort_direction={@direction}
-              sort_event="order"
-              select_event="choose"
-              selected_id="R-1"
-              inspector_id="details"
-            >
-              <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
-              <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
-            </C.data_table>
-            <C.inspector id="details" title="Record details">Supporting information</C.inspector>
-            """
-          end,
-          %{direction: direction, sort_by: sort_by}
-        )
+  describe "data_table sorting" do
+    test "marks only the heading sorted by sort_by with aria-sort" do
+      for sort_by <- ~w(name score), direction <- ~w(asc desc) do
+        doc = sortable_records_document(sort_by, direction)
+        [inactive] = ~w(name score) -- [sort_by]
 
-      # aria-sort belongs to the heading whose button sorts by `sort_by`, and
-      # to no other heading.
-      [inactive] = ~w(name score) -- [sort_by]
-      assert present?(doc, "th[aria-sort] button[phx-value-key=#{sort_by}]")
-      assert present?(doc, "th:not([aria-sort]) button[phx-value-key=#{inactive}]")
-      refute present?(doc, "th[aria-sort] button[phx-value-key=#{inactive}]")
+        assert present?(doc, "th[aria-sort] button[phx-value-key=#{sort_by}]")
+        assert present?(doc, "th:not([aria-sort]) button[phx-value-key=#{inactive}]")
+        refute present?(doc, "th[aria-sort] button[phx-value-key=#{inactive}]")
+        assert length(LazyHTML.to_tree(LazyHTML.query(doc, "th[aria-sort]"))) == 1
+      end
+    end
 
-      # Unsorted sortable columns show a decorative hint; the sorted one shows its arrow.
-      assert present?(
-               doc,
-               "button[phx-value-key=#{inactive}] .armature-sort-hint[aria-hidden=true]"
-             )
+    test "reports ascending or descending on the sorted heading" do
+      for sort_by <- ~w(name score),
+          {direction, aria_sort} <- [{"asc", "ascending"}, {"desc", "descending"}] do
+        doc = sortable_records_document(sort_by, direction)
+        assert attribute(doc, "th[aria-sort]", "aria-sort") == aria_sort
+      end
+    end
 
-      refute present?(doc, "th[aria-sort] .armature-sort-hint")
+    test "shows a decorative sort hint only on unsorted sortable headings" do
+      for sort_by <- ~w(name score), direction <- ~w(asc desc) do
+        doc = sortable_records_document(sort_by, direction)
+        [inactive] = ~w(name score) -- [sort_by]
 
+        assert present?(
+                 doc,
+                 "button[phx-value-key=#{inactive}] .armature-sort-hint[aria-hidden=true]"
+               )
+
+        refute present?(doc, "th[aria-sort] .armature-sort-hint")
+      end
+    end
+
+    test "names sort buttons after their column and sends the sort event with the key" do
+      for sort_by <- ~w(name score), direction <- ~w(asc desc) do
+        doc = sortable_records_document(sort_by, direction)
+
+        assert present?(
+                 doc,
+                 "th button[type=button][phx-click=order][phx-value-key=name][aria-label='Sort by Name']"
+               )
+
+        assert present?(
+                 doc,
+                 "th button[type=button][phx-click=order][phx-value-key=score][aria-label='Sort by Score']"
+               )
+      end
+    end
+  end
+
+  describe "data_table selection" do
+    setup do
+      %{doc: sortable_records_document("name", "asc")}
+    end
+
+    test "labels the caption and the keyboard-reachable scroll region", %{doc: doc} do
       assert text(doc, "table caption") == "Example records"
 
       assert present?(
@@ -449,19 +466,15 @@ defmodule Armature.ComponentsTest do
              )
 
       assert length(LazyHTML.to_tree(LazyHTML.query(doc, "th[scope=col]"))) == 2
-      assert length(LazyHTML.to_tree(LazyHTML.query(doc, "th[aria-sort]"))) == 1
+      assert doc |> LazyHTML.query("thead th") |> Enum.count() == 2
+    end
 
-      assert attribute(doc, "th[aria-sort]", "aria-sort") ==
-               if(direction == "asc", do: "ascending", else: "descending")
-
-      assert present?(
-               doc,
-               "th button[type=button][phx-click=order][phx-value-key=name][aria-label='Sort by Name']"
-             )
-
+    test "marks numeric columns on heading and cells", %{doc: doc} do
       assert present?(doc, "th.armature-numeric button[phx-value-key=score]")
       assert present?(doc, "td.armature-numeric")
+    end
 
+    test "presses the selected row label and points it at the inspector", %{doc: doc} do
       assert present?(
                doc,
                "button[phx-click=choose][phx-value-id=R-1][aria-pressed=true][aria-controls=details]"
@@ -470,10 +483,18 @@ defmodule Armature.ComponentsTest do
       assert present?(doc, "button[phx-value-id=R-2][aria-pressed=false]")
       assert text(doc, "#records-R-1 .armature-row-select") == "Example"
       refute present?(doc, "tbody button[aria-label]")
-      assert doc |> LazyHTML.query("thead th") |> Enum.count() == 2
+    end
+
+    test "renders one selection button per row", %{doc: doc} do
       assert doc |> LazyHTML.query("#records-R-1 td") |> Enum.count() == 2
       assert doc |> LazyHTML.query("#records-R-1 button") |> Enum.count() == 1
+    end
+
+    test "makes the whole row clickable for selection", %{doc: doc} do
       assert present?(doc, "#records-R-1.armature-clickable-row[phx-click=choose]")
+    end
+
+    test "inspector is labelled by its heading and is not a live region", %{doc: doc} do
       assert present?(doc, "aside#details[aria-labelledby=details-heading]")
       assert text(doc, "#details-heading") == "Record details"
       refute present?(doc, "aside[aria-live], aside[role=status]")
@@ -662,48 +683,54 @@ defmodule Armature.ComponentsTest do
     assert text(doc, ".armature-toolbar-actions button") == "Export"
   end
 
-  test "pagination names controls, disables boundaries and announces ranges" do
-    for {page, pages, first, last, total} <- [
-          {1, 80, 1, 25, 2000},
-          {2, 80, 26, 50, 2000},
-          {80, 80, 1976, 2000, 2000},
-          {1, 1, 0, 0, 0}
-        ] do
-      doc =
-        document(&C.pagination/1, %{
-          id: "pages",
-          page: page,
-          pages: pages,
-          first: first,
-          last: last,
-          total: total,
-          page_event: "page",
-          page_size: 25,
-          page_sizes: [10, 25, 50],
-          size_event: "size"
-        })
+  describe "pagination" do
+    test "names the page navigation" do
+      assert present?(pagination_document(1, 80, 1, 25, 2000), "nav[aria-label='Table pages']")
+    end
 
-      assert present?(doc, "nav[aria-label='Table pages']")
+    test "previous and next send the adjacent page number" do
+      doc = pagination_document(2, 80, 26, 50, 2000)
 
       assert present?(
                doc,
-               "button[aria-label='Previous page'][phx-click=page][phx-value-page='#{max(1, page - 1)}']"
+               "button[aria-label='Previous page'][phx-click=page][phx-value-page='1']"
              )
 
-      assert present?(
-               doc,
-               "button[aria-label='Next page'][phx-value-page='#{min(pages, page + 1)}']"
-             )
+      assert present?(doc, "button[aria-label='Next page'][phx-click=page][phx-value-page='3']")
+    end
 
-      assert present?(doc, "button[aria-label='Previous page'][disabled]") == (page == 1)
-      assert present?(doc, "button[aria-label='Next page'][disabled]") == (page == pages)
+    test "disables previous on the first page and next on the last" do
+      for {page, pages, first, last, total, previous_disabled?, next_disabled?} <- [
+            {1, 80, 1, 25, 2000, true, false},
+            {2, 80, 26, 50, 2000, false, false},
+            {80, 80, 1976, 2000, 2000, false, true},
+            {1, 1, 0, 0, 0, true, true}
+          ] do
+        doc = pagination_document(page, pages, first, last, total)
 
-      expected =
-        "#{first |> Integer.to_string() |> String.replace(~r/\B(?=(\d{3})+(?!\d))/, ",")}–#{last |> Integer.to_string() |> String.replace(~r/\B(?=(\d{3})+(?!\d))/, ",")} of #{total |> Integer.to_string() |> String.replace(~r/\B(?=(\d{3})+(?!\d))/, ",")}"
+        assert present?(doc, "button[aria-label='Previous page'][disabled]") ==
+                 previous_disabled?
 
-      assert text(doc, "#pages-range[role=status][aria-live=polite][aria-atomic=true]") ==
-               expected
+        assert present?(doc, "button[aria-label='Next page'][disabled]") == next_disabled?
+      end
+    end
 
+    test "announces the visible range with thousands separators as a polite status" do
+      for {page, pages, first, last, total, announcement} <- [
+            {1, 80, 1, 25, 2000, "1–25 of 2,000"},
+            {2, 80, 26, 50, 2000, "26–50 of 2,000"},
+            {80, 80, 1976, 2000, 2000, "1,976–2,000 of 2,000"},
+            {1, 1, 0, 0, 0, "0–0 of 0"}
+          ] do
+        doc = pagination_document(page, pages, first, last, total)
+
+        assert text(doc, "#pages-range[role=status][aria-live=polite][aria-atomic=true]") ==
+                 announcement
+      end
+    end
+
+    test "labels the page size picker and selects the current size" do
+      doc = pagination_document(1, 80, 1, 25, 2000)
       assert text(doc, "label[for=pages-size]") == "Records per page"
 
       assert present?(
@@ -712,18 +739,20 @@ defmodule Armature.ComponentsTest do
              )
     end
 
-    doc =
-      document(&C.pagination/1, %{
-        id: "one",
-        page: 1,
-        pages: 1,
-        first: 1,
-        last: 1,
-        total: 1,
-        page_event: "page"
-      })
+    test "omits the page size picker when no sizes are given" do
+      doc =
+        document(&C.pagination/1, %{
+          id: "one",
+          page: 1,
+          pages: 1,
+          first: 1,
+          last: 1,
+          total: 1,
+          page_event: "page"
+        })
 
-    refute present?(doc, "select")
+      refute present?(doc, "select")
+    end
   end
 
   test "record headers expose the heading, context, status and actions" do
@@ -849,63 +878,51 @@ defmodule Armature.ComponentsTest do
     end
   end
 
-  test "shell landmarks, skip target, current navigation and action slots have names" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.app_shell
-          id="shell"
-          home_patch="/index"
-          title="Library"
-          heading="Overview"
-          heading_id="overview"
-          eyebrow="Library / Overview"
-          context="Library / Catalogue"
-          items={[%{id: "overview-link", label: "Overview", href: "/", current: true}]}
-        >
-          <:footnote>Synthetic examples</:footnote>
-          <:top_actions><C.theme_switch id="theme" value="dark" event="theme" /></:top_actions>
-          <:heading_actions><C.status label="Ready" /></:heading_actions>
-          <C.panel id="summary" heading="Summary">
-            Content
-            <:actions><C.button>Refresh</C.button></:actions>
-          </C.panel>
-        </C.app_shell>
-        <C.side_nav
-          id="separate-nav"
-          title="Examples"
-          label="Example sections"
-          items={[%{label: "First", patch: "/first", current: false}]}
-        />
-        <C.top_bar context="Examples">
-          <:actions><C.button>Action</C.button></:actions>
-        </C.top_bar>
-        <C.page_heading id="separate-heading" title="Examples" eyebrow="Library" />
-        <C.eyebrow>Section</C.eyebrow>
-        """
-      end)
+  describe "app_shell" do
+    setup do
+      %{doc: shell_document()}
+    end
 
-    assert text(doc, "#shell > a:first-child[href='#overview']") == "Skip to main content"
+    test "skip link targets the main heading", %{doc: doc} do
+      assert text(doc, "#shell > a:first-child[href='#overview']") == "Skip to main content"
+    end
 
-    assert present?(
-             doc,
-             ".armature-side-nav-brand a[href='/index'][data-phx-link=patch][aria-label='Library home']"
-           )
+    test "brand link patches home with an accessible name", %{doc: doc} do
+      assert present?(
+               doc,
+               ".armature-side-nav-brand a[href='/index'][data-phx-link=patch][aria-label='Library home']"
+             )
+    end
 
-    assert present?(doc, "main[aria-labelledby=overview] h1#overview[tabindex='-1']")
-    assert present?(doc, "nav[aria-label='Main'] #overview-link[aria-current=page]")
+    test "main landmark is labelled by its focusable heading", %{doc: doc} do
+      assert present?(doc, "main[aria-labelledby=overview] h1#overview[tabindex='-1']")
+    end
 
-    assert present?(
-             doc,
-             "#separate-nav nav[aria-label='Example sections'] a[data-phx-link=patch]:not([aria-current])"
-           )
+    test "current item is marked inside the named main nav", %{doc: doc} do
+      assert present?(doc, "nav[aria-label='Main'] #overview-link[aria-current=page]")
+    end
 
-    assert present?(doc, "header[aria-label='Library / Catalogue']")
-    assert text(doc, "#summary[aria-labelledby=summary-heading] h2") == "Summary"
-    assert present?(doc, "#summary button")
-    assert present?(doc, "label[for=theme-choice]")
-    assert present?(doc, "#theme-choice option[value=dark][selected]")
-    assert text(doc, ".armature-side-nav-footnote") == "Synthetic examples"
+    test "side_nav renders patch links without a false current marker", %{doc: doc} do
+      assert present?(
+               doc,
+               "#separate-nav nav[aria-label='Example sections'] a[data-phx-link=patch]:not([aria-current])"
+             )
+    end
+
+    test "top_bar names its header from context", %{doc: doc} do
+      assert present?(doc, "header[aria-label='Library / Catalogue']")
+    end
+
+    test "panel is labelled by its heading and renders its actions", %{doc: doc} do
+      assert text(doc, "#summary[aria-labelledby=summary-heading] h2") == "Summary"
+      assert present?(doc, "#summary button")
+    end
+
+    test "top_actions and footnote slots render their content", %{doc: doc} do
+      assert present?(doc, "label[for=theme-choice]")
+      assert present?(doc, "#theme-choice option[value=dark][selected]")
+      assert text(doc, ".armature-side-nav-footnote") == "Synthetic examples"
+    end
   end
 
   test "an app shell carries no catalogue words when the caller gives no brand or caption" do
@@ -998,6 +1015,82 @@ defmodule Armature.ComponentsTest do
 
   defp document(component, assigns \\ %{}) do
     component |> render_component(assigns) |> LazyHTML.from_fragment()
+  end
+
+  defp shell_document do
+    document(fn assigns ->
+      ~H"""
+      <C.app_shell
+        id="shell"
+        home_patch="/index"
+        title="Library"
+        heading="Overview"
+        heading_id="overview"
+        eyebrow="Library / Overview"
+        context="Library / Catalogue"
+        items={[%{id: "overview-link", label: "Overview", href: "/", current: true}]}
+      >
+        <:footnote>Synthetic examples</:footnote>
+        <:top_actions><C.theme_switch id="theme" value="dark" event="theme" /></:top_actions>
+        <:heading_actions><C.status label="Ready" /></:heading_actions>
+        <C.panel id="summary" heading="Summary">
+          Content
+          <:actions><C.button>Refresh</C.button></:actions>
+        </C.panel>
+      </C.app_shell>
+      <C.side_nav
+        id="separate-nav"
+        title="Examples"
+        label="Example sections"
+        items={[%{label: "First", patch: "/first", current: false}]}
+      />
+      <C.top_bar context="Examples">
+        <:actions><C.button>Action</C.button></:actions>
+      </C.top_bar>
+      <C.page_heading id="separate-heading" title="Examples" eyebrow="Library" />
+      <C.eyebrow>Section</C.eyebrow>
+      """
+    end)
+  end
+
+  defp sortable_records_document(sort_by, direction) do
+    document(
+      fn assigns ->
+        ~H"""
+        <C.data_table
+          id="records"
+          rows={[%{id: "R-1", name: "Example", score: 12}, %{id: "R-2", name: "Other", score: 3}]}
+          caption="Example records"
+          sort_by={@sort_by}
+          sort_direction={@direction}
+          sort_event="order"
+          select_event="choose"
+          selected_id="R-1"
+          inspector_id="details"
+        >
+          <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
+          <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
+        </C.data_table>
+        <C.inspector id="details" title="Record details">Supporting information</C.inspector>
+        """
+      end,
+      %{direction: direction, sort_by: sort_by}
+    )
+  end
+
+  defp pagination_document(page, pages, first, last, total) do
+    document(&C.pagination/1, %{
+      id: "pages",
+      page: page,
+      pages: pages,
+      first: first,
+      last: last,
+      total: total,
+      page_event: "page",
+      page_size: 25,
+      page_sizes: [10, 25, 50],
+      size_event: "size"
+    })
   end
 
   defp present?(doc, selector), do: doc |> LazyHTML.query(selector) |> LazyHTML.to_tree() != []
