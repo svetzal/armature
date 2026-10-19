@@ -15,6 +15,7 @@ Until 1.0.0, a minor version can change the public surface.
   Replace behavioral CSS/JavaScript source matching with computed appearance,
   measured geometry and keyboard interactions; retain token, composition,
   packaging and rendered semantics contracts in ExUnit.
+- Update the browser-test dependency `@playwright/test` from 1.61.1 to 1.64.1.
 
 ### Fixed
 
