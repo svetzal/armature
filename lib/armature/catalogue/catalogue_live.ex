@@ -2,6 +2,7 @@ defmodule Armature.Catalogue.CatalogueLive do
   @moduledoc false
   use Phoenix.LiveView
   alias Phoenix.LiveView.JS
+  alias Armature.Catalogue.{Page, Preview}
   alias Armature.Components, as: A
 
   @external_resource "priv/static/armature.css"
@@ -29,41 +30,21 @@ defmodule Armature.Catalogue.CatalogueLive do
 
   @impl true
   def handle_params(params, uri, socket) do
-    nodes = socket.assigns.nodes
-    selected_node = Enum.find(nodes, &(to_string(&1.id) == params["node"]))
-    level = Enum.find(Armature.Registry.levels(), &(to_string(&1) == params["level"]))
-    node = selected_node || if(level, do: Enum.find(nodes, &(&1.level == level)))
-    level = if node, do: node.level, else: level
-    path = URI.parse(uri).path
-    tokens? = params["section"] == "tokens"
-    heading_key = if tokens?, do: "tokens", else: if(node, do: node.id, else: "index")
-
-    heading =
-      if tokens?,
-        do: "Tokens",
-        else: if(node, do: to_string(node.id), else: "Component catalogue")
-
-    section = if tokens?, do: "Tokens", else: if(level, do: level_name(level), else: "Catalogue")
+    %{node: node} = page = Page.resolve(socket.assigns.nodes, params)
 
     {:noreply,
-     assign(socket,
-       node: node,
-       level: level,
-       heading_id: "armature-catalogue-heading-#{heading_key}",
-       heading: heading,
-       eyebrow: "Library / " <> section,
-       tokens?: tokens?,
-       path: path,
+     socket
+     |> assign(page)
+     |> assign(
+       path: URI.parse(uri).path,
        examples: if(node, do: socket.assigns.examples_module.examples(node.id), else: []),
-       usage: if(node, do: usage(node), else: ""),
-       uses: if(node, do: Enum.filter(socket.assigns.nodes, &(&1.id in node.uses)), else: []),
-       used_by: if(node, do: Enum.filter(socket.assigns.nodes, &(node.id in &1.uses)), else: [])
+       usage: if(node, do: Page.usage(node), else: "")
      )}
   end
 
   @impl true
   def handle_event("catalogue:choose", %{"destination" => destination}, socket) do
-    if Enum.any?(socket.assigns.nodes, &(node_path(socket.assigns.path, &1) == destination)) do
+    if Enum.any?(socket.assigns.nodes, &(Page.node_path(socket.assigns.path, &1) == destination)) do
       {:noreply, push_patch(socket, to: destination)}
     else
       {:noreply, socket}
@@ -187,7 +168,7 @@ defmodule Armature.Catalogue.CatalogueLive do
                 <p :if={@uses == []}>No registered ingredients.</p>
                 <ul>
                   <li :for={item <- @uses}>
-                    <A.link patch={node_path(@path, item)}>{item.id}</A.link>
+                    <A.link patch={Page.node_path(@path, item)}>{item.id}</A.link>
                   </li>
                 </ul>
               </section>
@@ -196,7 +177,7 @@ defmodule Armature.Catalogue.CatalogueLive do
                 <p :if={@used_by == []}>No registered dependants.</p>
                 <ul>
                   <li :for={item <- @used_by}>
-                    <A.link patch={node_path(@path, item)}>{item.id}</A.link>
+                    <A.link patch={Page.node_path(@path, item)}>{item.id}</A.link>
                   </li>
                 </ul>
               </section>
@@ -214,62 +195,11 @@ defmodule Armature.Catalogue.CatalogueLive do
     content = example.render.(%{state: state, __changed__: nil})
     html = Phoenix.HTML.Safe.to_iodata(content) |> IO.iodata_to_binary()
 
-    isolated? = page_landmark?(html)
-
-    Map.merge(example, %{content: content, html: html, isolated?: isolated?})
-  end
-
-  @sectioning ~w(article aside main nav section)
-  @void ~w(area base br col embed hr img input link meta param source track wbr)
-
-  # True when the example would add a page-level landmark to the catalogue's
-  # own document: a main element, an explicit main, banner or contentinfo
-  # role, or a header or footer that no sectioning element contains. Such
-  # examples render in their own document. A header inside an aside is not a
-  # page landmark, so interactive compositions stay inline and keep working.
-  defp page_landmark?(html) do
-    if Regex.match?(~r/<main\b|role=["'](?:main|banner|contentinfo)["']/i, html) do
-      true
-    else
-      ~r/<(\/?)([a-zA-Z][\w-]*)\b[^>]*?(\/?)>/
-      |> Regex.scan(html)
-      |> Enum.reduce_while([], fn [_, closing, name, self_closing], stack ->
-        name = String.downcase(name)
-
-        cond do
-          closing == "/" ->
-            {:cont, drop_to(stack, name)}
-
-          name in ~w(header footer) and not Enum.any?(stack, &(&1 in @sectioning)) ->
-            {:halt, :landmark}
-
-          self_closing == "/" or name in @void ->
-            {:cont, stack}
-
-          true ->
-            {:cont, [name | stack]}
-        end
-      end)
-      |> Kernel.==(:landmark)
-    end
-  end
-
-  defp drop_to(stack, name) do
-    case Enum.split_while(stack, &(&1 != name)) do
-      {_inner, [^name | rest]} -> rest
-      {_inner, []} -> stack
-    end
+    Map.merge(example, %{content: content, html: html, isolated?: Preview.isolated?(html)})
   end
 
   defp example_preview(assigns) do
-    theme = if assigns.theme == "auto", do: "", else: ~s(data-armature-theme="#{assigns.theme}")
-
-    document =
-      ~s(<!doctype html><html lang="en" #{theme}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>) <>
-        @stylesheet <>
-        "body { margin: var(--armature-space-zero); }</style></head><body>" <>
-        assigns.example.html <> "</body></html>"
-
+    document = Preview.document(assigns.example.html, assigns.theme, @stylesheet)
     assigns = assign(assigns, :document, document)
 
     ~H"""
@@ -303,7 +233,7 @@ defmodule Armature.Catalogue.CatalogueLive do
       Enum.map(Armature.Registry.levels(), fn item ->
         %{
           id: "catalogue-level-#{item}",
-          label: level_name(item),
+          label: Page.level_name(item),
           patch: path <> "?level=#{item}",
           current: !tokens? && level == item
         }
@@ -315,7 +245,7 @@ defmodule Armature.Catalogue.CatalogueLive do
 
     Enum.map(levels, fn item ->
       %{
-        label: level_name(item),
+        label: Page.level_name(item),
         level: item,
         items:
           nodes
@@ -324,26 +254,11 @@ defmodule Armature.Catalogue.CatalogueLive do
             %{
               id: "catalogue-node-#{component.id}",
               label: to_string(component.id),
-              patch: node_path(path, component),
+              patch: Page.node_path(path, component),
               current: node != nil && node.id == component.id
             }
           end)
       }
     end)
-  end
-
-  defp level_name(level), do: level |> to_string() |> String.capitalize() |> Kernel.<>("s")
-  defp node_path(path, node), do: path <> "?" <> URI.encode_query(%{"node" => node.id})
-
-  defp usage(node) do
-    with {:docs_v1, _, _, _, _, _, docs} <- Code.fetch_docs(node.module),
-         {_, _, _, %{"en" => text}, _} <-
-           Enum.find(docs, fn {identity, _, _, _, _} ->
-             identity == {:function, node.function, 1}
-           end) do
-      text
-    else
-      _ -> "No usage documentation available."
-    end
   end
 end

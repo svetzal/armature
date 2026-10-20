@@ -10,6 +10,9 @@ Until 1.0.0, a minor version can change the public surface.
 
 ### Changed
 
+- Move catalogue page resolution, usage lookup and preview isolation out of
+  the catalogue LiveView into internal, unit-tested modules. No public API
+  change.
 - Execute theme switching, responsive layout and accessibility behavior in a
   required Playwright browser gate using real components and packaged assets.
   Replace behavioral CSS/JavaScript source matching with computed appearance,
