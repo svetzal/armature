@@ -17,11 +17,22 @@ defmodule Armature.TracerTest do
     end
   end
 
-  test "installation is idempotent and preserves other tracers" do
+  test "repeated installation adds the tracer once" do
+    TestTracer.install()
+    TestTracer.install()
+    assert Enum.count(Code.get_compiler_option(:tracers), &(&1 == TestTracer)) == 1
+  end
+
+  test "installation preserves other tracers" do
     previous = Code.get_compiler_option(:tracers)
-    TestTracer.install()
-    TestTracer.install()
-    assert Code.get_compiler_option(:tracers) == previous
+    Code.put_compiler_option(:tracers, [OtherTracer | List.delete(previous, TestTracer)])
+
+    try do
+      TestTracer.install()
+      assert OtherTracer in Code.get_compiler_option(:tracers)
+    after
+      Code.put_compiler_option(:tracers, previous)
+    end
   end
 
   test "inventory registry cases reject asynchronous execution" do

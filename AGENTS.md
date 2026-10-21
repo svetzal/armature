@@ -43,6 +43,8 @@ composition rule without a changelog entry that says why.
 - No consumer names, brands or business terms in this repository. Examples use
   neutral synthetic content.
 - Keep the public surface small. Anything public is a semver commitment.
+- A test verifies one behaviour and is named for it. If the name needs "and"
+  or a comma, split the test; share rendered documents through `setup`.
 
 ## Versioning and releases
 
