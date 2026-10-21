@@ -39,29 +39,39 @@ defmodule Armature.TokensTest do
     {:ok, css: css, rules: rules}
   end
 
-  test "contract names, groups, roles and contrast references are complete" do
-    tokens = Tokens.all()
-    names = Enum.map(tokens, & &1.name)
+  test "contract token names are unique armature-prefixed custom properties" do
+    names = Enum.map(Tokens.all(), & &1.name)
 
     assert names == Enum.uniq(names)
+    assert Enum.all?(names, &String.starts_with?(&1, "--armature-"))
+  end
 
-    for token <- tokens do
-      assert String.starts_with?(token.name, "--armature-")
+  test "every contract token belongs to a known group" do
+    for token <- Tokens.all() do
       assert token.group in [:colour, :typography, :space, :shape, :motion, :control]
+    end
+  end
+
+  test "every contract token role is a sentence ending in a period" do
+    for token <- Tokens.all() do
       assert String.ends_with?(token.role, ".")
+    end
+  end
 
-      if token.group == :colour do
-        assert is_list(token.contrast)
+  test "colour contrast references name colour tokens at a known WCAG ratio" do
+    tokens = Tokens.all()
 
-        for pair <- token.contrast do
-          assert Enum.any?(tokens, &(&1.name == pair.background and &1.group == :colour))
-          assert pair.ratio in [3, 4.5]
-        end
+    for token <- tokens, token.group == :colour do
+      assert is_list(token.contrast)
+
+      for pair <- token.contrast do
+        assert Enum.any?(tokens, &(&1.name == pair.background and &1.group == :colour))
+        assert pair.ratio in [3, 4.5]
       end
     end
   end
 
-  test "light, automatic dark and explicit themes define exactly the contract", %{rules: rules} do
+  test "every theme selector defines exactly the contract", %{rules: rules} do
     expected = Tokens.all() |> Enum.map(& &1.name) |> Enum.sort()
 
     for selector <- theme_selectors() do
@@ -69,21 +79,25 @@ defmodule Armature.TokensTest do
       names = Enum.map(values, &elem(&1, 0))
       assert Enum.sort(names) == expected, "Token mismatch in #{selector}"
     end
+  end
 
+  test "explicit dark theme equals automatic dark theme", %{rules: rules} do
     assert rule!(rules, "[data-armature-theme=\"dark\"]") ==
              rule!(rules, ":root:where(:not([data-armature-theme=\"light\"]))")
+  end
 
+  test "explicit light theme equals root", %{rules: rules} do
     assert rule!(rules, ":root") ==
              rule!(rules, "[data-armature-theme=\"light\"]")
   end
 
-  test "all overrides and references belong to the contract", %{css: css} do
+  test "every custom property named in the stylesheet belongs to the contract", %{css: css} do
     expected = MapSet.new(Tokens.all(), & &1.name)
     names = Regex.scan(~r/--[a-z][\w-]*/, css) |> List.flatten() |> MapSet.new()
     assert names == expected
   end
 
-  test "actual light and dark colour values meet every declared WCAG contrast pair" do
+  test "actual theme colour values meet every declared WCAG contrast pair" do
     assert :ok = Values.check!()
   end
 
@@ -123,36 +137,63 @@ defmodule Armature.TokensTest do
     refute colour_literal?(".red-label { font-family: \"Black\"; }")
   end
 
-  test "base and component rules use declared variables for dimensions and motion", %{css: css} do
-    [_, base] = String.split(css, "@layer armature.base {")
-    refute Regex.match?(~r/--[\w-]+\s*:/, base)
-    declarations = Regex.replace(~r/@(?:media|container)[^{]+\{/, base, "")
-    refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s|%)\b/, declarations)
-  end
-
-  test "component layer uses only tokens for presentation and gives layouts only arrangement", %{
-    css: css
-  } do
-    [_, components] = String.split(css, "@layer armature.components {")
-    refute colour_literal?(components)
-    refute Regex.match?(~r/--[\w-]+\s*:/, components)
-    # Breakpoints cannot consume CSS custom properties; declarations still must.
-    declarations = Regex.replace(~r/@(?:media|container)[^{]+\{/, components, "")
-    refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s)\b/, declarations)
-
-    assert components =~ "color: var(--armature-on-accent)"
-    assert components =~ "background: var(--armature-accent)"
-
-    for tone <- ~w(success warning error) do
-      assert components =~ "color: var(--armature-#{tone}-emphasis)"
-      assert components =~ "background: var(--armature-#{tone}-bg)"
+  describe "base layer" do
+    setup %{css: css} do
+      [_, base] = String.split(css, "@layer armature.base {")
+      {:ok, base: base}
     end
 
-    for [_, declarations] <-
-          Regex.scan(~r/\.armature-(?:stack|cluster|grid|split)[^{]*\{([^}]+)\}/, components) do
-      refute declarations =~ "color"
-      refute declarations =~ "border"
-      refute declarations =~ "background"
+    test "defines no custom properties", %{base: base} do
+      refute Regex.match?(~r/--[\w-]+\s*:/, base)
+    end
+
+    test "uses declared variables instead of literal dimensions or durations", %{base: base} do
+      declarations = Regex.replace(~r/@(?:media|container)[^{]+\{/, base, "")
+      refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s|%)\b/, declarations)
+    end
+  end
+
+  describe "component layer" do
+    setup %{css: css} do
+      [_, components] = String.split(css, "@layer armature.components {")
+      {:ok, components: components}
+    end
+
+    test "contains no colour literals", %{components: components} do
+      refute colour_literal?(components)
+    end
+
+    test "defines no custom properties", %{components: components} do
+      refute Regex.match?(~r/--[\w-]+\s*:/, components)
+    end
+
+    test "uses declared variables instead of literal dimensions or durations", %{
+      components: components
+    } do
+      # Breakpoints cannot consume CSS custom properties; declarations still must.
+      declarations = Regex.replace(~r/@(?:media|container)[^{]+\{/, components, "")
+      refute Regex.match?(~r/\b\d*\.?\d+(?:px|rem|em|ms|s)\b/, declarations)
+    end
+
+    test "applies the accent tokens", %{components: components} do
+      assert components =~ "color: var(--armature-on-accent)"
+      assert components =~ "background: var(--armature-accent)"
+    end
+
+    test "applies the status tone tokens", %{components: components} do
+      for tone <- ~w(success warning error) do
+        assert components =~ "color: var(--armature-#{tone}-emphasis)"
+        assert components =~ "background: var(--armature-#{tone}-bg)"
+      end
+    end
+
+    test "layouts declare no colour border or background", %{components: components} do
+      for [_, declarations] <-
+            Regex.scan(~r/\.armature-(?:stack|cluster|grid|split)[^{]*\{([^}]+)\}/, components) do
+        refute declarations =~ "color"
+        refute declarations =~ "border"
+        refute declarations =~ "background"
+      end
     end
   end
 
@@ -169,21 +210,37 @@ defmodule Armature.TokensTest do
     refute css =~ ~s([data-armature-theme="auto"])
   end
 
-  test "shell rail contrast and documented geometry hold in all six evaluated contexts" do
-    contexts = Values.read()
-    assert map_size(contexts) == 6
+  describe "evaluated theme contexts" do
+    setup do
+      {:ok, contexts: Values.read()}
+    end
 
-    for {_context, result} <- contexts do
-      assert result.values["--armature-rail-surface"] == "#173c32"
+    test "six contexts are evaluated", %{contexts: contexts} do
+      assert map_size(contexts) == 6
+    end
 
-      rail_pairs =
-        Enum.filter(result.pairs, &String.starts_with?(&1.foreground, "--armature-rail-"))
+    test "the rail surface keeps its reference value in every context", %{contexts: contexts} do
+      for {_context, result} <- contexts do
+        assert result.values["--armature-rail-surface"] == "#173c32"
+      end
+    end
 
-      assert length(rail_pairs) == 5
-      assert Enum.all?(rail_pairs, & &1.pass?)
-      assert result.values["--armature-rail-width"] == "210px"
-      assert result.values["--armature-rail-width-narrow"] == "155px"
-      assert result.values["--armature-nav-width"] == "190px"
+    test "all five rail contrast pairs pass in every context", %{contexts: contexts} do
+      for {_context, result} <- contexts do
+        rail_pairs =
+          Enum.filter(result.pairs, &String.starts_with?(&1.foreground, "--armature-rail-"))
+
+        assert length(rail_pairs) == 5
+        assert Enum.all?(rail_pairs, & &1.pass?)
+      end
+    end
+
+    test "rail geometry keeps its documented widths in every context", %{contexts: contexts} do
+      for {_context, result} <- contexts do
+        assert result.values["--armature-rail-width"] == "210px"
+        assert result.values["--armature-rail-width-narrow"] == "155px"
+        assert result.values["--armature-nav-width"] == "190px"
+      end
     end
   end
 
@@ -194,7 +251,7 @@ defmodule Armature.TokensTest do
     assert table == Tokens.markdown_table()
   end
 
-  test "refined type, geometry and density tokens match the reference", %{rules: rules} do
+  test "root token values match the reference", %{rules: rules} do
     values = rules |> rule!(":root") |> Map.new()
 
     for {name, value} <- [
@@ -236,21 +293,31 @@ defmodule Armature.TokensTest do
     assert Enum.all?(top_level, &String.starts_with?(&1, "@layer")), inspect(top_level)
   end
 
-  test "optional Barlow stylesheet ships both weights and their licence" do
-    css = File.read!(Path.expand("../priv/static/armature-fonts.css", __DIR__))
-
-    for weight <- [400, 600] do
-      assert css =~ "font-weight: #{weight}"
-      assert css =~ "fonts/barlow-#{weight}.woff2"
-
-      assert File.read!(Path.expand("../priv/static/fonts/barlow-#{weight}.woff2", __DIR__))
-             |> binary_part(0, 4) == "wOF2"
+  describe "optional Barlow stylesheet" do
+    setup do
+      {:ok, fonts_css: File.read!(Path.expand("../priv/static/armature-fonts.css", __DIR__))}
     end
 
-    assert length(Regex.scan(~r/font-display: swap/, css)) == 2
+    test "declares both weights with swap display", %{fonts_css: css} do
+      for weight <- [400, 600] do
+        assert css =~ "font-weight: #{weight}"
+        assert css =~ "fonts/barlow-#{weight}.woff2"
+      end
 
-    assert File.read!(Path.expand("../priv/static/fonts/OFL.txt", __DIR__)) =~
-             "SIL OPEN FONT LICENSE Version 1.1"
+      assert length(Regex.scan(~r/font-display: swap/, css)) == 2
+    end
+
+    test "ships real WOFF2 files for both weights" do
+      for weight <- [400, 600] do
+        assert File.read!(Path.expand("../priv/static/fonts/barlow-#{weight}.woff2", __DIR__))
+               |> binary_part(0, 4) == "wOF2"
+      end
+    end
+
+    test "ships the font licence" do
+      assert File.read!(Path.expand("../priv/static/fonts/OFL.txt", __DIR__)) =~
+               "SIL OPEN FONT LICENSE Version 1.1"
+    end
   end
 
   # The prelude of each top-level statement or block, found by tracking brace depth.

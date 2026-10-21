@@ -52,14 +52,30 @@ defmodule Armature.IdentityResolutionTest do
              [{:untested_component, :first}, {:untested_component, :second}]
   end
 
-  test "resolution preserves declaration order, nested modules and block scopes" do
+  test "an alias applies only to calls after its declaration" do
     calls = CompiledCalls.calls(Example.Outer)
     assert calls["before"] == [{Example.First, :text}]
     assert calls["after_alias"] == [{Example.First, :text}, {Example.Second, :text}]
+  end
+
+  test "a function-local import stays inside its function" do
+    calls = CompiledCalls.calls(Example.Outer)
     assert calls["local_import"] == [{Example.Second, :text}]
     assert calls["after_function"] == [{Example.First, :text}]
-    assert calls["branches"] == [{Example.First, :text}, {Example.Second, :text}]
-    assert calls["after_nested"] == [{Example.Second, :text}]
+  end
+
+  test "a block-local alias stays inside its block" do
+    assert CompiledCalls.calls(Example.Outer)["branches"] == [
+             {Example.First, :text},
+             {Example.Second, :text}
+           ]
+  end
+
+  test "a nested module leaves the outer scope unchanged" do
+    assert CompiledCalls.calls(Example.Outer)["after_nested"] == [{Example.Second, :text}]
+  end
+
+  test "a nested module inherits the outer scope until it declares its own" do
     nested = CompiledCalls.calls(Example.Outer.Inner)
     assert nested["inherited"] == [{Example.Second, :text}]
     assert nested["changed"] == [{Example.First, :text}]
@@ -80,7 +96,7 @@ defmodule Armature.IdentityResolutionTest do
            ]
   end
 
-  test "test markup and captures share import exclusions and nested alias scopes" do
+  test "test inventory credits only the module each lexical scope resolves to" do
     nodes = [node(:first, Example.First, :text), node(:second, Example.Second, :text)]
     inventory = TestTracer.inventory("test/support/inventory/second.exs")
 
@@ -96,10 +112,18 @@ defmodule Armature.IdentityResolutionTest do
              [{:untested_component, :first}, {:untested_component, :second}]
   end
 
-  test "module definitions and repeated imports do not invent aliases or exports" do
-    calls = CompiledCalls.calls(Example.RepeatedImports)
-    assert calls["item"] == [{Example.First, :text}, {First, :text}]
-    assert calls["imported"] == [{Example.First, :text}, {Example.RepeatedImports, :mark}]
+  test "a bare module name is not resolved through the enclosing namespace" do
+    assert CompiledCalls.calls(Example.RepeatedImports)["item"] == [
+             {Example.First, :text},
+             {First, :text}
+           ]
+  end
+
+  test "repeated imports do not claim locally defined components" do
+    assert CompiledCalls.calls(Example.RepeatedImports)["imported"] == [
+             {Example.First, :text},
+             {Example.RepeatedImports, :mark}
+           ]
   end
 
   test "test source files have independent lexical scopes" do
@@ -110,7 +134,7 @@ defmodule Armature.IdentityResolutionTest do
              [{:untested_component, :first}, {:untested_component, :second}]
   end
 
-  test "nested self aliases and __MODULE__ cannot credit a top-level namesake" do
+  test "a nested self alias in markup cannot credit a top-level namesake" do
     nodes = [
       node(:top, Inner, :text),
       node(:nested, Example.Outer.Inner, :text),
@@ -120,7 +144,9 @@ defmodule Armature.IdentityResolutionTest do
 
     assert Checks.markup_uses(snapshot(nodes)) ==
              [{:markup_mismatch, :item, [:top], [:nested]}]
+  end
 
+  test "a nested self capture in tests cannot credit a top-level namesake" do
     inventory = TestTracer.inventory("test/support/inventory/nested.exs")
 
     assert Checks.exercised(%{
@@ -148,24 +174,28 @@ defmodule Armature.IdentityResolutionTest do
     end
   end
 
-  test "compiler rejects ambiguous imports and missing local components without inventing identities" do
-    for file <- ["ambiguous", "missing"] do
-      output =
-        ExUnit.CaptureIO.capture_io(:stderr, fn ->
-          assert_raise CompileError, fn ->
-            Code.compile_file("test/support/invalid/#{file}.exs")
-          end
-        end)
+  test "an ambiguous import fails to compile without inventing identities" do
+    assert_rejected_without_identities("test/support/invalid/ambiguous.exs")
+  end
 
-      assert output =~ "text/1"
-      assert TestTracer.inventory("test/support/invalid/#{file}.exs") == MapSet.new()
-    end
+  test "a missing local component fails to compile without inventing identities" do
+    assert_rejected_without_identities("test/support/invalid/missing.exs")
   end
 
   test "synchronous inventory sees captures from all separately compiled test files" do
     nodes = [node(:first, Example.First, :text), node(:second, Example.Second, :text)]
     inventory = TestTracer.inventory("test/inventory_*_test.exs")
     assert Checks.exercised(%{nodes: nodes, test_source: inventory}) == []
+  end
+
+  defp assert_rejected_without_identities(path) do
+    output =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert_raise CompileError, fn -> Code.compile_file(path) end
+      end)
+
+    assert output =~ "text/1"
+    assert TestTracer.inventory(path) == MapSet.new()
   end
 
   defp snapshot(nodes) do

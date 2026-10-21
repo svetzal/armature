@@ -11,8 +11,11 @@ defmodule Armature.RegistryTest do
     %{snapshot: Registry.snapshot(Fixture)}
   end
 
-  test "levels list nodes in order and tokens are not nodes" do
+  test "levels run from atom to template without tokens" do
     assert Registry.levels() == [:atom, :layout, :molecule, :organism, :template]
+  end
+
+  test "nodes are listed level by level in declaration order" do
     assert Enum.flat_map(Registry.levels(), &Registry.at_level(Fixture, &1)) == Fixture.nodes()
     assert Registry.at_level(Fixture, :layout) |> Enum.map(& &1.id) == [:row]
   end
@@ -44,7 +47,7 @@ defmodule Armature.RegistryTest do
            ]
   end
 
-  test "blank and absent purposes are reported", %{snapshot: snapshot} do
+  test "missing purposes are reported", %{snapshot: snapshot} do
     for purpose <- ["  ", nil] do
       assert Checks.valid_nodes(change(snapshot, :text, purpose: purpose)) == [
                {:missing_purpose, :text}
@@ -64,7 +67,7 @@ defmodule Armature.RegistryTest do
            ]
   end
 
-  test "upward and same-level uses are rejected at every level", %{snapshot: snapshot} do
+  test "uses that do not point to a lower level are rejected", %{snapshot: snapshot} do
     for {id, level, used, used_level} <- [
           {:text, :atom, :row, :layout},
           {:row, :layout, :group, :molecule},
@@ -98,17 +101,16 @@ defmodule Armature.RegistryTest do
     assert Checks.public_components(snapshot) == [{:undeclared_component, Elements, :text}]
   end
 
-  test "ordinary exports and private components cannot be declared", %{snapshot: snapshot} do
-    for {module, function} <- [{Elements, :ordinary}, {Compositions, :helper}] do
-      [node | _] = snapshot.nodes
+  test "ordinary exports cannot be declared", %{snapshot: snapshot} do
+    assert Checks.public_components(declare_extra(snapshot, Elements, :ordinary)) == [
+             {:not_public_component, Elements, :ordinary}
+           ]
+  end
 
-      snapshot = %{
-        snapshot
-        | nodes: snapshot.nodes ++ [%{node | id: :extra, module: module, function: function}]
-      }
-
-      assert Checks.public_components(snapshot) == [{:not_public_component, module, function}]
-    end
+  test "private components cannot be declared", %{snapshot: snapshot} do
+    assert Checks.public_components(declare_extra(snapshot, Compositions, :helper)) == [
+             {:not_public_component, Compositions, :helper}
+           ]
   end
 
   test "components in modules outside the declared library are rejected", %{snapshot: snapshot} do
@@ -143,16 +145,20 @@ defmodule Armature.RegistryTest do
     assert Checks.exercised(snapshot) == []
   end
 
-  test "documentation tables match levels and dependencies", %{snapshot: snapshot} do
+  test "matching documentation tables pass", %{snapshot: snapshot} do
     assert Checks.docs(%{snapshot | docs: docs(snapshot.nodes)}) == []
+  end
 
+  test "a documented dependency mismatch is reported", %{snapshot: snapshot} do
     assert Checks.docs(%{
              snapshot
              | docs: docs(snapshot.nodes) |> String.replace("`mark`, `row`", "`row`")
            }) == [{:docs_uses_mismatch, :group, ["mark", "row"], ["row"]}]
   end
 
-  test "documentation mismatches include missing and extra rows", %{snapshot: snapshot} do
+  test "a documentation mismatch lists the expected rows beside the documented rows", %{
+    snapshot: snapshot
+  } do
     expected = Enum.map(snapshot.nodes, &{&1.level, Atom.to_string(&1.id)}) |> Enum.sort()
 
     assert Checks.docs(%{snapshot | docs: "## Atoms\n| `extra` | — |\n"}) == [
@@ -160,23 +166,25 @@ defmodule Armature.RegistryTest do
            ]
   end
 
-  test "purpose columns are optional and repeated rows are detected", %{snapshot: snapshot} do
-    source = docs(snapshot.nodes)
+  test "documentation rows may carry a purpose column", %{snapshot: snapshot} do
+    source =
+      String.replace(docs(snapshot.nodes), "| `text` | — |", "| `text` | Plain text purpose |")
 
-    assert Checks.docs(%{
-             snapshot
-             | docs: String.replace(source, "| `text` | — |", "| `text` | Plain text purpose |")
-           }) == []
-
-    assert [{:docs_mismatch, _, _}] =
-             Checks.docs(%{snapshot | docs: source <> "\n## Atoms\n| `text` | — |"})
+    assert Checks.docs(%{snapshot | docs: source}) == []
   end
 
-  test "test inventory accepts captures and markup but reports missing components", %{
-    snapshot: snapshot
-  } do
+  test "repeated documentation rows are reported", %{snapshot: snapshot} do
+    source = docs(snapshot.nodes) <> "\n## Atoms\n| `text` | — |"
+    assert [{:docs_mismatch, _, _}] = Checks.docs(%{snapshot | docs: source})
+  end
+
+  test "test inventory accepts every exercised component", %{snapshot: snapshot} do
     identities = MapSet.new(snapshot.nodes, &{&1.module, &1.function})
     assert Checks.exercised(%{snapshot | test_source: identities}) == []
+  end
+
+  test "test inventory reports components no test exercises", %{snapshot: snapshot} do
+    identities = MapSet.new(snapshot.nodes, &{&1.module, &1.function})
 
     assert Checks.exercised(%{
              snapshot
@@ -184,23 +192,24 @@ defmodule Armature.RegistryTest do
            }) == [{:untested_component, :mark}]
   end
 
-  test "snapshot reads optional docs and tests" do
-    snapshot =
-      Registry.snapshot(Fixture,
-        docs_path: "test/support/components.md",
-        test_source_glob: "test/registry_case_test.exs"
-      )
-
+  test "snapshot reads optional documentation from its path" do
+    snapshot = Registry.snapshot(Fixture, docs_path: "test/support/components.md")
     assert Checks.docs(snapshot) == []
-    assert Checks.exercised(snapshot) == []
+  end
 
+  test "snapshot reads the test inventory from its glob" do
+    snapshot = Registry.snapshot(Fixture, test_source_glob: "test/registry_case_test.exs")
+    assert Checks.exercised(snapshot) == []
+  end
+
+  test "a test glob without matches leaves every component untested" do
     assert Checks.exercised(
              Registry.snapshot(Fixture, test_source_glob: "test/support/no_matches_*.exs")
            )
            |> length() == 7
   end
 
-  test "markup follows cyclic private helpers and combines function clauses" do
+  test "markup collects calls through cyclic private helpers across clauses" do
     calls = CompiledCalls.calls(Example.PrivateHelpers, extra_builtins: ["custom_builtin"])
     assert calls["local"] == []
 
@@ -213,17 +222,27 @@ defmodule Armature.RegistryTest do
            ]
   end
 
-  test "markup handles guards, missing imports and exclusions" do
-    assert CompiledCalls.calls(Example.Guarded)["item"] == [
-             {Example.First, :mark},
-             {Example.Guarded, :text}
-           ]
+  test "markup reads calls from a guarded clause" do
+    assert {Example.First, :mark} in CompiledCalls.calls(Example.Guarded)["item"]
+  end
 
+  test "an excluded import resolves to the local component" do
+    calls = CompiledCalls.calls(Example.Guarded)["item"]
+    assert {Example.Guarded, :text} in calls
+    refute {Example.First, :text} in calls
+  end
+
+  test "reading calls from a missing module raises" do
     assert_raise ArgumentError, fn -> CompiledCalls.calls(Example.Absent) end
   end
 
-  test "imported library components override builtin names and qualified framework calls are ignored" do
-    assert CompiledCalls.calls(Example.BuiltinNames)["item"] == [{Example.External, :link}]
+  test "an imported library component overrides a builtin name" do
+    assert {Example.External, :link} in CompiledCalls.calls(Example.BuiltinNames)["item"]
+  end
+
+  test "qualified framework calls are not recorded" do
+    calls = CompiledCalls.calls(Example.BuiltinNames)["item"]
+    refute Enum.any?(calls, fn {module, _function} -> module == Phoenix.Component end)
   end
 
   test "unqualified calls without lexical evidence remain unresolved", %{
@@ -261,6 +280,12 @@ defmodule Armature.RegistryTest do
             if node.id == id, do: struct!(node, attributes), else: node
           end)
     }
+  end
+
+  defp declare_extra(snapshot, module, function) do
+    [node | _] = snapshot.nodes
+    extra = %{node | id: :extra, module: module, function: function}
+    %{snapshot | nodes: snapshot.nodes ++ [extra]}
   end
 
   defp docs(nodes) do

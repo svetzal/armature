@@ -33,8 +33,11 @@ defmodule Armature.Catalogue.PageTest do
       assert_index(Page.resolve(@nodes, %{}))
     end
 
-    test "falls back to the index for an unknown node or level" do
+    test "falls back to the index for an unknown node" do
       assert_index(Page.resolve(@nodes, %{"node" => "unknown"}))
+    end
+
+    test "falls back to the index for an unknown level" do
       assert_index(Page.resolve(@nodes, %{"level" => "unknown"}))
     end
 
@@ -82,14 +85,14 @@ defmodule Armature.Catalogue.PageTest do
       assert page.eyebrow == "Library / Tokens"
     end
 
-    test "lists the nodes a node uses and the nodes that use it" do
-      field = Page.resolve(@nodes, %{"node" => "field"})
-      button = Page.resolve(@nodes, %{"node" => "button"})
+    test "lists the nodes a node uses" do
+      assert Page.resolve(@nodes, %{"node" => "field"}).uses == [@button]
+      assert Page.resolve(@nodes, %{"node" => "button"}).uses == []
+    end
 
-      assert field.uses == [@button]
-      assert field.used_by == []
-      assert button.uses == []
-      assert button.used_by == [@field]
+    test "lists the nodes that use a node" do
+      assert Page.resolve(@nodes, %{"node" => "button"}).used_by == [@field]
+      assert Page.resolve(@nodes, %{"node" => "field"}).used_by == []
     end
   end
 

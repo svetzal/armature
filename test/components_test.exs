@@ -36,37 +36,71 @@ defmodule Armature.ComponentsTest do
     assert text(doc, "#example-form a.armature-link[href='/']") == "Return"
   end
 
-  test "buttons have native names, default type, variants, disabled state and rest attributes" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.button id="save" phx-click="save">Save</C.button>
-        <C.button id="cancel" variant="secondary" disabled type="submit">Cancel</C.button>
-        """
-      end)
+  describe "button" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.button id="save" phx-click="save">Save</C.button>
+          <C.button id="cancel" variant="secondary" disabled type="submit">Cancel</C.button>
+          """
+        end)
 
-    assert text(doc, "button#save[type=button][phx-click=save]") == "Save"
-    assert text(doc, "button#cancel.armature-button-secondary[disabled][type=submit]") == "Cancel"
-    refute present?(doc, "#save[disabled]")
-    refute present?(doc, "[role=button]")
+      %{doc: doc}
+    end
+
+    test "defaults to type button", %{doc: doc} do
+      assert text(doc, "button#save[type=button]") == "Save"
+    end
+
+    test "keeps an explicit type", %{doc: doc} do
+      assert text(doc, "button#cancel[type=submit]") == "Cancel"
+    end
+
+    test "forwards rest attributes such as phx-click", %{doc: doc} do
+      assert present?(doc, "button#save[phx-click=save]")
+    end
+
+    test "applies the variant class", %{doc: doc} do
+      assert present?(doc, "button#cancel.armature-button-secondary")
+    end
+
+    test "renders disabled only when asked", %{doc: doc} do
+      assert present?(doc, "button#cancel[disabled]")
+      refute present?(doc, "#save[disabled]")
+    end
+
+    test "renders a native button rather than a button role", %{doc: doc} do
+      refute present?(doc, "[role=button]")
+    end
   end
 
-  test "links preserve native navigation, patching and href with visible names" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.link id="href" href="/first" target="_blank">First</C.link>
-        <C.link id="navigate" navigate="/second" replace>Second</C.link>
-        <C.link id="patch" patch="/third">Third</C.link>
-        """
-      end)
+  describe "link" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.link id="href" href="/first" target="_blank">First</C.link>
+          <C.link id="navigate" navigate="/second" replace>Second</C.link>
+          <C.link id="patch" patch="/third">Third</C.link>
+          """
+        end)
 
-    assert text(doc, "a#href[href='/first'][target='_blank']") == "First"
+      %{doc: doc}
+    end
 
-    assert text(doc, "a#navigate[data-phx-link=redirect][data-phx-link-state=replace]") ==
-             "Second"
+    test "href links keep their target", %{doc: doc} do
+      assert text(doc, "a#href[href='/first'][target='_blank']") == "First"
+    end
 
-    assert text(doc, "a#patch[data-phx-link=patch][href='/third']") == "Third"
+    test "navigate links replace the history state", %{doc: doc} do
+      assert text(doc, "a#navigate[data-phx-link=redirect][data-phx-link-state=replace]") ==
+               "Second"
+    end
+
+    test "patch links patch to their path", %{doc: doc} do
+      assert text(doc, "a#patch[data-phx-link=patch][href='/third']") == "Third"
+    end
   end
 
   test "icons are decorative even when their supplied SVG has a title" do
@@ -84,49 +118,77 @@ defmodule Armature.ComponentsTest do
     assert text(doc, "#next") =~ "Next"
   end
 
-  test "standalone controls are native, named, disabled and preserve values" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.input id="name" name="name" value="Example" aria-label="Name" required />
-        <C.select
-          id="choice"
-          name="choice"
-          value="second"
-          options={[{"First", "first"}, {"Second", "second"}]}
-          prompt="Choose"
-          aria-label="Choice"
-          disabled
-        />
-        <C.textarea id="notes" name="notes" value="Some notes" aria-label="Notes" readonly />
-        """
-      end)
+  describe "standalone controls" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.input id="name" name="name" value="Example" aria-label="Name" required />
+          <C.select
+            id="choice"
+            name="choice"
+            value="second"
+            options={[{"First", "first"}, {"Second", "second"}]}
+            prompt="Choose"
+            aria-label="Choice"
+            disabled
+          />
+          <C.textarea id="notes" name="notes" value="Some notes" aria-label="Notes" readonly />
+          <C.input id="accepted" type="checkbox" name="accepted" value="yes" checked aria-label="Accept" />
+          <C.input id="disabled" disabled aria-label="Disabled" />
+          <C.textarea id="disabled-notes" disabled aria-label="Disabled notes" />
+          """
+        end)
 
-    assert present?(doc, "input#name[aria-label=Name][value=Example][required]")
+      %{doc: doc}
+    end
 
-    assert present?(
-             doc,
-             "select#choice[aria-label=Choice][disabled] option[value=second][selected]"
-           )
+    test "input keeps its value", %{doc: doc} do
+      assert present?(doc, "input#name[value=Example]")
+    end
 
-    assert text(doc, "#choice option[value='']") == "Choose"
-    assert text(doc, "textarea#notes[aria-label=Notes][readonly]") == "Some notes"
-    refute present?(doc, "[role=textbox], [role=combobox]")
-  end
+    test "input keeps its required state", %{doc: doc} do
+      assert present?(doc, "input#name[required]")
+    end
 
-  test "checkbox inputs preserve their submitted value separately from checked state" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.input id="accepted" type="checkbox" name="accepted" value="yes" checked aria-label="Accept" />
-        <C.input id="disabled" disabled aria-label="Disabled" />
-        <C.textarea id="disabled-notes" disabled aria-label="Disabled notes" />
-        """
-      end)
+    test "each control keeps its accessible name", %{doc: doc} do
+      assert present?(doc, "input#name[aria-label=Name]")
+      assert present?(doc, "select#choice[aria-label=Choice]")
+      assert present?(doc, "textarea#notes[aria-label=Notes]")
+    end
 
-    assert present?(doc, "input#accepted[type=checkbox][value=yes][checked][aria-label=Accept]")
-    assert present?(doc, "input#disabled[disabled]")
-    assert present?(doc, "textarea#disabled-notes[disabled]")
+    test "select marks the current value selected", %{doc: doc} do
+      assert present?(doc, "select#choice option[value=second][selected]")
+    end
+
+    test "select renders the prompt as the empty option", %{doc: doc} do
+      assert text(doc, "#choice option[value='']") == "Choose"
+    end
+
+    test "select renders disabled when asked", %{doc: doc} do
+      assert present?(doc, "select#choice[disabled]")
+    end
+
+    test "textarea keeps its readonly state", %{doc: doc} do
+      assert present?(doc, "textarea#notes[readonly]")
+    end
+
+    test "textarea renders its content", %{doc: doc} do
+      assert text(doc, "textarea#notes") == "Some notes"
+    end
+
+    test "controls add no ARIA textbox or combobox roles", %{doc: doc} do
+      refute present?(doc, "[role=textbox], [role=combobox]")
+    end
+
+    test "checkbox input keeps its submitted value apart from its checked state", %{doc: doc} do
+      assert present?(doc, "input#accepted[type=checkbox][value=yes][checked][aria-label=Accept]")
+    end
+
+    test "disabled text controls render disabled", %{doc: doc} do
+      assert present?(doc, "input#disabled[disabled]")
+      assert present?(doc, "textarea#disabled-notes[disabled]")
+    end
   end
 
   test "all status tones convey their meaning in text without becoming live regions" do
@@ -146,180 +208,263 @@ defmodule Armature.ComponentsTest do
     end
   end
 
-  test "field binds a visible label, hint, errors and preserved descriptions for every control" do
-    for type <- ~w(text select textarea) do
-      doc =
-        document(
-          fn assigns ->
-            ~H"""
-            <p id="external">Supporting text</p>
-            <C.field
-              id="sample"
-              name="sample"
-              value="first"
-              label="Sample"
-              type={@type}
-              hint="A hint"
-              errors={["Check this value"]}
-              aria-describedby="external sample-hint"
-              options={[{"First", "first"}]}
-            />
-            """
-          end,
-          %{type: type}
-        )
+  describe "field with hint and errors" do
+    setup do
+      docs =
+        for type <- ~w(text select textarea), into: %{} do
+          doc =
+            document(
+              fn assigns ->
+                ~H"""
+                <p id="external">Supporting text</p>
+                <C.field
+                  id="sample"
+                  name="sample"
+                  value="first"
+                  label="Sample"
+                  type={@type}
+                  hint="A hint"
+                  errors={["Check this value"]}
+                  aria-describedby="external sample-hint"
+                  options={[{"First", "first"}]}
+                />
+                """
+              end,
+              %{type: type}
+            )
 
-      tag = if type == "text", do: "input", else: type
-      assert text(doc, "label[for=sample]") == "Sample"
-      assert present?(doc, "#{tag}#sample[name=sample][aria-invalid=true]")
-      assert attribute(doc, "#sample", "aria-describedby") == "external sample-hint sample-errors"
-      assert_descriptions_exist(doc, "#sample")
-      assert text(doc, "#sample-errors") == "Check this value"
+          tag = if type == "text", do: "input", else: type
+          {tag, doc}
+        end
+
+      %{docs: docs}
+    end
+
+    test "binds a visible label to the control", %{docs: docs} do
+      for {_tag, doc} <- docs, do: assert(text(doc, "label[for=sample]") == "Sample")
+    end
+
+    test "marks the control invalid when errors exist", %{docs: docs} do
+      for {tag, doc} <- docs do
+        assert present?(doc, "#{tag}#sample[name=sample][aria-invalid=true]")
+      end
+    end
+
+    test "appends the errors id to the caller's aria-describedby", %{docs: docs} do
+      for {_tag, doc} <- docs do
+        assert attribute(doc, "#sample", "aria-describedby") ==
+                 "external sample-hint sample-errors"
+      end
+    end
+
+    test "every described-by id exists in the document", %{docs: docs} do
+      for {_tag, doc} <- docs, do: assert_descriptions_exist(doc, "#sample")
+    end
+
+    test "renders the error text", %{docs: docs} do
+      for {_tag, doc} <- docs, do: assert(text(doc, "#sample-errors") == "Check this value")
     end
   end
 
-  test "valid fields omit invalid state and absent description ids, overriding caller invalid state" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.field id="valid" name="valid" label="Valid" aria-invalid="true" />
-        <C.field id="hinted" name="hinted" label="Hinted" hint="A hint" />
-        <C.field id="errored" name="errored" label="Errored" errors={["Required"]} />
-        """
-      end)
+  describe "field descriptions" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.field id="valid" name="valid" label="Valid" aria-invalid="true" />
+          <C.field id="hinted" name="hinted" label="Hinted" hint="A hint" />
+          <C.field id="errored" name="errored" label="Errored" errors={["Required"]} />
+          """
+        end)
 
-    refute present?(doc, "#valid[aria-invalid], #valid[aria-describedby], #hinted[aria-invalid]")
-    assert attribute(doc, "#hinted", "aria-describedby") == "hinted-hint"
-    assert attribute(doc, "#errored", "aria-describedby") == "errored-errors"
-    assert_descriptions_exist(doc, "#hinted")
-    assert_descriptions_exist(doc, "#errored")
+      %{doc: doc}
+    end
+
+    test "a valid field carries neither invalid state nor description", %{doc: doc} do
+      refute present?(doc, "#valid[aria-invalid], #valid[aria-describedby]")
+    end
+
+    test "a hinted field without errors is not invalid", %{doc: doc} do
+      refute present?(doc, "#hinted[aria-invalid]")
+    end
+
+    test "a hinted field is described by its hint", %{doc: doc} do
+      assert attribute(doc, "#hinted", "aria-describedby") == "hinted-hint"
+      assert_descriptions_exist(doc, "#hinted")
+    end
+
+    test "an errored field is described by its errors", %{doc: doc} do
+      assert attribute(doc, "#errored", "aria-describedby") == "errored-errors"
+      assert_descriptions_exist(doc, "#errored")
+    end
   end
 
-  test "FormField errors appear only for used inputs and are translated by the caller" do
-    for {params, invalid?} <- [
-          {%{"name" => "", "_unused_name" => ""}, false},
-          {%{"name" => ""}, true}
-        ] do
-      form =
-        to_form(params, as: :sample, errors: [name: {"needs %{count} characters", [count: 2]}])
-
-      translate = fn {message, options} ->
-        String.replace(message, "%{count}", to_string(options[:count]))
+  describe "FormField errors" do
+    test "derive the input identity from the form field" do
+      for params <- [%{"name" => "", "_unused_name" => ""}, %{"name" => ""}] do
+        doc = translated_form_field_document(params)
+        assert present?(doc, "input#sample_name[name='sample[name]']")
+        assert text(doc, "label[for=sample_name]") == "Name"
       end
+    end
 
-      doc =
-        document(
-          fn assigns ->
-            ~H"""
-            <C.field field={@form[:name]} label="Name" hint="A hint" translate_error={@translate} />
-            """
-          end,
-          %{form: form, translate: translate}
-        )
+    test "are hidden for unused inputs" do
+      doc = translated_form_field_document(%{"name" => "", "_unused_name" => ""})
 
-      assert present?(doc, "input#sample_name[name='sample[name]']")
-      assert text(doc, "label[for=sample_name]") == "Name"
-      assert present?(doc, "#sample_name[aria-invalid=true]") == invalid?
-      assert present?(doc, "#sample_name-errors") == invalid?
-      if invalid?, do: assert(text(doc, "#sample_name-errors") == "needs 2 characters")
+      refute present?(doc, "#sample_name[aria-invalid=true]")
+      refute present?(doc, "#sample_name-errors")
+      assert_descriptions_exist(doc, "#sample_name")
+    end
+
+    test "are shown translated for used inputs" do
+      doc = translated_form_field_document(%{"name" => ""})
+
+      assert present?(doc, "#sample_name[aria-invalid=true]")
+      assert text(doc, "#sample_name-errors") == "needs 2 characters"
       assert_descriptions_exist(doc, "#sample_name")
     end
   end
 
-  test "FormField values, default error messages and explicit overrides are preserved" do
-    form = to_form(%{"name" => "First"}, as: :sample, errors: [name: {"Invalid", []}])
+  describe "FormField attributes" do
+    setup do
+      form = to_form(%{"name" => "First"}, as: :sample, errors: [name: {"Invalid", []}])
 
-    doc =
-      document(
-        fn assigns ->
-          ~H"""
-          <C.field field={@form[:name]} label="Name" />
-          <C.field field={@form[:name]} id="override" name="other" value="Second" label="Other" />
-          <C.field
-            field={@form[:name]}
-            id="multi"
-            type="select"
-            multiple
-            label="Choices"
-            options={[{"First", "First"}]}
-          />
-          """
-        end,
-        %{form: form}
-      )
-
-    assert present?(doc, "#sample_name[value=First]")
-    assert text(doc, "#sample_name-errors") == "Invalid"
-    assert present?(doc, "#override[name=other][value=Second]")
-    assert present?(doc, "select#multi[multiple][name='sample[name][]']")
-  end
-
-  test "checkbox fields reflect boolean FormField values and submit false when unchecked" do
-    for {value, checked?} <- [
-          {true, true},
-          {"true", true},
-          {false, false},
-          {"false", false},
-          {nil, false}
-        ] do
       doc =
         document(
           fn assigns ->
             ~H"""
-            <C.field field={@form[:accepted]} type="checkbox" label="Accept the terms" />
+            <C.field field={@form[:name]} label="Name" />
+            <C.field field={@form[:name]} id="override" name="other" value="Second" label="Other" />
+            <C.field
+              field={@form[:name]}
+              id="multi"
+              type="select"
+              multiple
+              label="Choices"
+              options={[{"First", "First"}]}
+            />
             """
           end,
-          %{form: to_form(%{"accepted" => value}, as: :sample)}
+          %{form: form}
         )
 
-      assert present?(doc, "input#sample_accepted[type=checkbox][value=true]")
-      assert present?(doc, "input#sample_accepted[checked]") == checked?
-      # The box comes before its label, together in one row.
-      assert present?(doc, ".armature-check > input#sample_accepted + label[for=sample_accepted]")
-
-      assert doc |> LazyHTML.query("label[for=sample_accepted]") |> LazyHTML.to_tree() |> length() ==
-               1
-
-      # The hidden fallback precedes the box, so a ticked box's later value wins.
-      [hidden, box] =
-        doc |> LazyHTML.query("input[name='sample[accepted]']") |> LazyHTML.to_tree()
-
-      assert {"type", "hidden"} in elem(hidden, 1) and {"value", "false"} in elem(hidden, 1)
-      assert {"type", "checkbox"} in elem(box, 1)
+      %{doc: doc}
     end
 
-    # What a browser sends for an unticked and a ticked box, through Plug's decoder.
-    assert Plug.Conn.Query.decode("sample[accepted]=false") == %{
-             "sample" => %{"accepted" => "false"}
-           }
+    test "take the value from the form", %{doc: doc} do
+      assert present?(doc, "#sample_name[value=First]")
+    end
 
-    assert Plug.Conn.Query.decode("sample[accepted]=false&sample[accepted]=true") ==
-             %{"sample" => %{"accepted" => "true"}}
+    test "show the default error message", %{doc: doc} do
+      assert text(doc, "#sample_name-errors") == "Invalid"
+    end
+
+    test "yield to explicit attributes", %{doc: doc} do
+      assert present?(doc, "#override[name=other][value=Second]")
+    end
+
+    test "suffix a multiple select name with brackets", %{doc: doc} do
+      assert present?(doc, "select#multi[multiple][name='sample[name][]']")
+    end
   end
 
-  test "disabled checkbox fields submit nothing and an explicit checked wins" do
-    form = to_form(%{"accepted" => false}, as: :sample)
+  describe "checkbox field" do
+    @checkbox_values [
+      {true, true},
+      {"true", true},
+      {false, false},
+      {"false", false},
+      {nil, false}
+    ]
 
-    doc =
-      document(
-        fn assigns ->
-          ~H"""
-          <C.field field={@form[:accepted]} type="checkbox" label="Locked" disabled />
-          <C.field
-            field={@form[:accepted]}
-            id="forced"
-            type="checkbox"
-            label="Forced"
-            checked
-          />
-          """
-        end,
-        %{form: form}
-      )
+    test "checked state follows the form value" do
+      for {value, checked?} <- @checkbox_values do
+        doc = checkbox_field_document(value)
+        assert present?(doc, "input#sample_accepted[checked]") == checked?
+      end
+    end
 
-    assert present?(doc, "input[type=hidden][name='sample[accepted]'][disabled]")
-    assert present?(doc, "input#sample_accepted[type=checkbox][disabled]")
-    assert present?(doc, "input#forced[type=checkbox][checked]")
+    test "the box submits true" do
+      for {value, _checked?} <- @checkbox_values do
+        doc = checkbox_field_document(value)
+        assert present?(doc, "input#sample_accepted[type=checkbox][value=true]")
+      end
+    end
+
+    test "places a hidden false before the box" do
+      for {value, _checked?} <- @checkbox_values do
+        doc = checkbox_field_document(value)
+
+        [hidden, box] =
+          doc |> LazyHTML.query("input[name='sample[accepted]']") |> LazyHTML.to_tree()
+
+        assert {"type", "hidden"} in elem(hidden, 1)
+        assert {"value", "false"} in elem(hidden, 1)
+        assert {"type", "checkbox"} in elem(box, 1)
+      end
+    end
+
+    test "renders one label right after the box in one row" do
+      for {value, _checked?} <- @checkbox_values do
+        doc = checkbox_field_document(value)
+
+        assert present?(
+                 doc,
+                 ".armature-check > input#sample_accepted + label[for=sample_accepted]"
+               )
+
+        assert doc
+               |> LazyHTML.query("label[for=sample_accepted]")
+               |> LazyHTML.to_tree()
+               |> length() ==
+                 1
+      end
+    end
+
+    # What a browser sends for an unticked and a ticked box, through Plug's
+    # decoder. The hidden fallback relies on the later value winning.
+    test "a later checkbox value wins over the hidden false when decoded" do
+      assert Plug.Conn.Query.decode("sample[accepted]=false") == %{
+               "sample" => %{"accepted" => "false"}
+             }
+
+      assert Plug.Conn.Query.decode("sample[accepted]=false&sample[accepted]=true") ==
+               %{"sample" => %{"accepted" => "true"}}
+    end
+  end
+
+  describe "checkbox field overrides" do
+    setup do
+      form = to_form(%{"accepted" => false}, as: :sample)
+
+      doc =
+        document(
+          fn assigns ->
+            ~H"""
+            <C.field field={@form[:accepted]} type="checkbox" label="Locked" disabled />
+            <C.field
+              field={@form[:accepted]}
+              id="forced"
+              type="checkbox"
+              label="Forced"
+              checked
+            />
+            """
+          end,
+          %{form: form}
+        )
+
+      %{doc: doc}
+    end
+
+    test "disabled checkbox fields disable their hidden fallback too", %{doc: doc} do
+      assert present?(doc, "input[type=hidden][name='sample[accepted]'][disabled]")
+      assert present?(doc, "input#sample_accepted[type=checkbox][disabled]")
+    end
+
+    test "an explicit checked attribute wins over the form value", %{doc: doc} do
+      assert present?(doc, "input#forced[type=checkbox][checked]")
+    end
   end
 
   test "plain fields require a stable id" do
@@ -328,34 +473,44 @@ defmodule Armature.ComponentsTest do
     end
   end
 
-  test "notices announce results with appropriate roles and keep static guidance quiet" do
-    for tone <- ~w(neutral success warning error), result <- [false, true] do
-      doc =
-        document(
-          fn assigns ->
-            ~H"""
-            <C.notice id="feedback" tone={@tone} result={@result} title="Outcome">
-              Explained in words
-              <:actions><C.button id="continue">Continue</C.button></:actions>
-            </C.notice>
-            """
-          end,
-          %{tone: tone, result: result}
-        )
+  describe "notice" do
+    @notice_tones ~w(neutral success warning error)
 
-      if result do
-        role = if tone == "error", do: "alert", else: "status"
-        assert present?(doc, "#feedback[role=#{role}][aria-atomic=true]")
-      else
+    test "error results use role alert" do
+      doc = notice_document("error", true)
+      assert present?(doc, "#feedback[role=alert][aria-atomic=true]")
+    end
+
+    test "non-error results use role status" do
+      for tone <- @notice_tones -- ["error"] do
+        doc = notice_document(tone, true)
+        assert present?(doc, "#feedback[role=status][aria-atomic=true]")
+      end
+    end
+
+    test "static guidance carries no live region" do
+      for tone <- @notice_tones do
+        doc = notice_document(tone, false)
         refute present?(doc, "#feedback[role], #feedback[aria-live], #feedback[aria-atomic]")
       end
+    end
 
-      assert text(doc, ".armature-notice-title") == "Outcome"
-      assert text(doc, "button#continue[type=button]") == "Continue"
+    test "renders the title" do
+      for tone <- @notice_tones, result <- [false, true] do
+        doc = notice_document(tone, result)
+        assert text(doc, ".armature-notice-title") == "Outcome"
+      end
+    end
+
+    test "renders actions" do
+      for tone <- @notice_tones, result <- [false, true] do
+        doc = notice_document(tone, result)
+        assert text(doc, "button#continue[type=button]") == "Continue"
+      end
     end
   end
 
-  test "notices can omit their title and actions" do
+  test "notices render without a title or actions" do
     doc =
       document(fn assigns ->
         ~H"""
@@ -367,37 +522,45 @@ defmodule Armature.ComponentsTest do
     assert text(doc, "#guidance") == "Supporting information"
   end
 
-  test "every layout preserves content order without adding semantic roles" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.stack id="stack">
-          <p>First</p><p>Second</p>
-        </C.stack>
-        <C.cluster id="cluster">
-          <p>First</p><p>Second</p>
-        </C.cluster>
-        <C.grid id="grid">
-          <p>First</p><p>Second</p>
-        </C.grid>
-        <C.split id="split">
-          <p>First</p><:secondary>
-            <p>Second</p>
-          </:secondary>
-        </C.split>
-        """
-      end)
+  describe "layouts" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.stack id="stack">
+            <p>First</p><p>Second</p>
+          </C.stack>
+          <C.cluster id="cluster">
+            <p>First</p><p>Second</p>
+          </C.cluster>
+          <C.grid id="grid">
+            <p>First</p><p>Second</p>
+          </C.grid>
+          <C.split id="split">
+            <p>First</p><:secondary>
+              <p>Second</p>
+            </:secondary>
+          </C.split>
+          """
+        end)
 
-    for name <- ~w(stack cluster grid split) do
-      assert present?(doc, "div##{name}.armature-#{name}")
-
-      assert doc
-             |> LazyHTML.query("##{name} p")
-             |> LazyHTML.to_tree()
-             |> Enum.map(fn {_, _, [content]} -> content end) == ["First", "Second"]
+      %{doc: doc}
     end
 
-    refute present?(doc, "[role], aside, section, main")
+    test "every layout preserves content order", %{doc: doc} do
+      for name <- ~w(stack cluster grid split) do
+        assert present?(doc, "div##{name}.armature-#{name}")
+
+        assert doc
+               |> LazyHTML.query("##{name} p")
+               |> LazyHTML.to_tree()
+               |> Enum.map(fn {_, _, [content]} -> content end) == ["First", "Second"]
+      end
+    end
+
+    test "layouts add no semantic roles", %{doc: doc} do
+      refute present?(doc, "[role], aside, section, main")
+    end
   end
 
   describe "data_table sorting" do
@@ -435,19 +598,28 @@ defmodule Armature.ComponentsTest do
       end
     end
 
-    test "names sort buttons after their column and sends the sort event with the key" do
+    test "sort buttons are named after their column" do
       for sort_by <- ~w(name score), direction <- ~w(asc desc) do
         doc = sortable_records_document(sort_by, direction)
 
         assert present?(
                  doc,
-                 "th button[type=button][phx-click=order][phx-value-key=name][aria-label='Sort by Name']"
+                 "th button[type=button][phx-value-key=name][aria-label='Sort by Name']"
                )
 
         assert present?(
                  doc,
-                 "th button[type=button][phx-click=order][phx-value-key=score][aria-label='Sort by Score']"
+                 "th button[type=button][phx-value-key=score][aria-label='Sort by Score']"
                )
+      end
+    end
+
+    test "sort buttons send the sort event with the column key" do
+      for sort_by <- ~w(name score), direction <- ~w(asc desc) do
+        doc = sortable_records_document(sort_by, direction)
+
+        assert present?(doc, "th button[phx-click=order][phx-value-key=name]")
+        assert present?(doc, "th button[phx-click=order][phx-value-key=score]")
       end
     end
   end
@@ -457,30 +629,40 @@ defmodule Armature.ComponentsTest do
       %{doc: sortable_records_document("name", "asc")}
     end
 
-    test "labels the caption and the keyboard-reachable scroll region", %{doc: doc} do
+    test "labels the caption", %{doc: doc} do
       assert text(doc, "table caption") == "Example records"
+    end
 
+    test "exposes a keyboard-reachable scroll region named after the caption", %{doc: doc} do
       assert present?(
                doc,
                "#records-scroll[tabindex='0'][role=region][aria-label='Example records']"
              )
+    end
 
+    test "renders one column header per column with scope col", %{doc: doc} do
       assert length(LazyHTML.to_tree(LazyHTML.query(doc, "th[scope=col]"))) == 2
       assert doc |> LazyHTML.query("thead th") |> Enum.count() == 2
     end
 
-    test "marks numeric columns on heading and cells", %{doc: doc} do
+    test "marks numeric columns throughout", %{doc: doc} do
       assert present?(doc, "th.armature-numeric button[phx-value-key=score]")
       assert present?(doc, "td.armature-numeric")
     end
 
-    test "presses the selected row label and points it at the inspector", %{doc: doc} do
-      assert present?(
-               doc,
-               "button[phx-click=choose][phx-value-id=R-1][aria-pressed=true][aria-controls=details]"
-             )
+    test "presses the selected row label", %{doc: doc} do
+      assert present?(doc, "button[phx-click=choose][phx-value-id=R-1][aria-pressed=true]")
+    end
 
+    test "points the row label at the inspector", %{doc: doc} do
+      assert present?(doc, "button[phx-value-id=R-1][aria-controls=details]")
+    end
+
+    test "leaves unselected rows unpressed", %{doc: doc} do
       assert present?(doc, "button[phx-value-id=R-2][aria-pressed=false]")
+    end
+
+    test "names the row button by its visible text", %{doc: doc} do
       assert text(doc, "#records-R-1 .armature-row-select") == "Example"
       refute present?(doc, "tbody button[aria-label]")
     end
@@ -494,71 +676,93 @@ defmodule Armature.ComponentsTest do
       assert present?(doc, "#records-R-1.armature-clickable-row[phx-click=choose]")
     end
 
-    test "inspector is labelled by its heading and is not a live region", %{doc: doc} do
+    test "inspector is labelled by its heading", %{doc: doc} do
       assert present?(doc, "aside#details[aria-labelledby=details-heading]")
       assert text(doc, "#details-heading") == "Record details"
+    end
+
+    test "inspector is not a live region", %{doc: doc} do
       refute present?(doc, "aside[aria-live], aside[role=status]")
     end
   end
 
-  test "selectable tables reject missing or multiple row labels and declared action columns" do
-    for columns <- [[], [%{row_label: true}, %{row_label: true}]] do
+  describe "selectable table validation" do
+    test "rejects a missing row label" do
       assert_raise ArgumentError, "selectable tables require exactly one row_label column", fn ->
-        document(&C.data_table/1, %{
-          id: "invalid",
-          rows: [],
-          caption: "Records",
-          select_event: "choose",
-          inspector_id: "details",
-          col: columns
-        })
+        invalid_selectable_table_document([])
       end
     end
 
-    assert_raise ArgumentError, ~r/selectable rows allow only the row-label button/, fn ->
-      document(fn assigns ->
-        ~H"""
-        <C.data_table
-          id="actions"
-          rows={[%{id: "R-1"}]}
-          caption="Records"
-          select_event="choose"
-          inspector_id="details"
-        >
-          <:col :let={row} label="Identifier" row_label>{row.id}</:col>
-          <:col label="Actions" interactive><C.link href="/record">Open</C.link></:col>
-        </C.data_table>
-        """
-      end)
+    test "rejects two row labels" do
+      assert_raise ArgumentError, "selectable tables require exactly one row_label column", fn ->
+        invalid_selectable_table_document([%{row_label: true}, %{row_label: true}])
+      end
+    end
+
+    test "rejects an interactive column alongside selection" do
+      assert_raise ArgumentError, ~r/selectable rows allow only the row-label button/, fn ->
+        document(fn assigns ->
+          ~H"""
+          <C.data_table
+            id="actions"
+            rows={[%{id: "R-1"}]}
+            caption="Records"
+            select_event="choose"
+            inspector_id="details"
+          >
+            <:col :let={row} label="Identifier" row_label>{row.id}</:col>
+            <:col label="Actions" interactive><C.link href="/record">Open</C.link></:col>
+          </C.data_table>
+          """
+        end)
+      end
     end
   end
 
-  test "responsive compositions preserve navigation, panels and a single main landmark" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.app_shell
-          id="responsive-shell"
-          title="Library"
-          heading="Overview"
-          heading_id="responsive-heading"
-          context="Library"
-          items={[]}
-        >
-          <C.grouped_nav id="responsive-nav" label="Components" event="choose" groups={[]} />
-          <C.grid id="responsive-panels">
-            <C.panel id="first-panel" heading="First">Content</C.panel>
-            <C.panel id="second-panel" heading="Second">Content</C.panel>
-          </C.grid>
-        </C.app_shell>
-        """
-      end)
+  describe "responsive composition" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.app_shell
+            id="responsive-shell"
+            title="Library"
+            heading="Overview"
+            heading_id="responsive-heading"
+            context="Library"
+            items={[]}
+          >
+            <C.grouped_nav id="responsive-nav" label="Components" event="choose" groups={[]} />
+            <C.grid id="responsive-panels">
+              <C.panel id="first-panel" heading="First">Content</C.panel>
+              <C.panel id="second-panel" heading="Second">Content</C.panel>
+            </C.grid>
+          </C.app_shell>
+          """
+        end)
 
-    assert present?(doc, "#responsive-shell .armature-app-shell-content #responsive-nav")
-    assert present?(doc, "#responsive-nav > .armature-grouped-nav-picker")
-    assert present?(doc, "#responsive-panels > .armature-grid-items > #first-panel")
-    assert present?(doc, "#second-panel[aria-labelledby=second-panel-heading]")
-    assert doc |> LazyHTML.query("main") |> Enum.count() == 1
+      %{doc: doc}
+    end
+
+    test "grouped navigation renders inside the shell content", %{doc: doc} do
+      assert present?(doc, "#responsive-shell .armature-app-shell-content #responsive-nav")
+    end
+
+    test "grouped navigation keeps its native picker", %{doc: doc} do
+      assert present?(doc, "#responsive-nav > .armature-grouped-nav-picker")
+    end
+
+    test "panels render inside the grid items", %{doc: doc} do
+      assert present?(doc, "#responsive-panels > .armature-grid-items > #first-panel")
+    end
+
+    test "panels are labelled by their headings", %{doc: doc} do
+      assert present?(doc, "#second-panel[aria-labelledby=second-panel-heading]")
+    end
+
+    test "a composition keeps a single main landmark", %{doc: doc} do
+      assert doc |> LazyHTML.query("main") |> Enum.count() == 1
+    end
   end
 
   test "tables without selection render rows that have no identifier" do
@@ -582,21 +786,30 @@ defmodule Armature.ComponentsTest do
     refute present?(doc, "tr[phx-click], [phx-value-id]")
   end
 
-  test "tables without selection keep row ids from the rows or from row_id" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.data_table id="by-id" rows={[%{id: "R-1"}]} caption="Records">
-          <:col :let={row} label="Identifier">{row.id}</:col>
-        </C.data_table>
-        <C.data_table id="by-key" rows={[%{key: "K-1"}]} row_id={& &1.key} caption="Records">
-          <:col :let={row} label="Key">{row.key}</:col>
-        </C.data_table>
-        """
-      end)
+  describe "row ids without selection" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.data_table id="by-id" rows={[%{id: "R-1"}]} caption="Records">
+            <:col :let={row} label="Identifier">{row.id}</:col>
+          </C.data_table>
+          <C.data_table id="by-key" rows={[%{key: "K-1"}]} row_id={& &1.key} caption="Records">
+            <:col :let={row} label="Key">{row.key}</:col>
+          </C.data_table>
+          """
+        end)
 
-    assert present?(doc, "tr#by-id-R-1")
-    assert present?(doc, "tr#by-key-K-1")
+      %{doc: doc}
+    end
+
+    test "rows keep ids from their id field", %{doc: doc} do
+      assert present?(doc, "tr#by-id-R-1")
+    end
+
+    test "rows take ids from row_id", %{doc: doc} do
+      assert present?(doc, "tr#by-key-K-1")
+    end
   end
 
   test "selectable tables need a row identifier" do
@@ -628,89 +841,108 @@ defmodule Armature.ComponentsTest do
     end
   end
 
-  test "tables without selection or sorting remain native and empty results use words" do
+  test "tables without a sort event render no sort buttons" do
     for rows <- [[], [%{id: "R-1", name: "Example"}]] do
-      doc =
-        document(
-          fn assigns ->
-            ~H"""
-            <C.data_table id="plain" rows={@rows} caption="Records" caption_hidden>
-              <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
-            </C.data_table>
-            """
-          end,
-          %{rows: rows}
-        )
-
-      refute present?(doc, "button, th[aria-sort]")
-
-      if rows == [] do
-        refute present?(doc, "table")
-        assert text(doc, "#plain-empty") == "No records to display."
-      else
-        assert present?(doc, "caption.armature-sr-only")
-        assert present?(doc, "th[scope=col]")
-      end
+      refute present?(plain_table_document(rows), "button, th[aria-sort]")
     end
   end
 
-  test "toolbar labels search and announces the count with caller actions" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.table_toolbar
-          id="tools"
-          search_label="Find records"
-          search_event="search"
-          query="Example"
-          total={200}
-        >
-          <:actions><C.button>Export</C.button></:actions>
-        </C.table_toolbar>
-        """
-      end)
+  test "a hidden caption stays in the document for screen readers" do
+    doc = plain_table_document([%{id: "R-1", name: "Example"}])
 
-    assert text(doc, "label[for=tools-search]") == "Find records"
+    assert present?(doc, "caption.armature-sr-only")
+    assert present?(doc, "th[scope=col]")
+  end
 
-    assert present?(
-             doc,
-             "form#tools-search-form[phx-change=search] input#tools-search[type=search][name=query][value=Example]"
-           )
+  test "empty tables explain the absence in words" do
+    doc = plain_table_document([])
 
-    assert text(doc, "#tools-count[role=status][aria-live=polite][aria-atomic=true]") ==
-             "200 results"
+    refute present?(doc, "table")
+    assert text(doc, "#plain-empty") == "No records to display."
+  end
 
-    assert text(doc, ".armature-toolbar-actions button") == "Export"
+  describe "table_toolbar" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.table_toolbar
+            id="tools"
+            search_label="Find records"
+            search_event="search"
+            query="Example"
+            total={200}
+          >
+            <:actions><C.button>Export</C.button></:actions>
+          </C.table_toolbar>
+          """
+        end)
+
+      %{doc: doc}
+    end
+
+    test "binds its label to the search input", %{doc: doc} do
+      assert text(doc, "label[for=tools-search]") == "Find records"
+    end
+
+    test "search form sends the search event with the query value", %{doc: doc} do
+      assert present?(
+               doc,
+               "form#tools-search-form[phx-change=search] input#tools-search[type=search][name=query][value=Example]"
+             )
+    end
+
+    test "count is a polite atomic status", %{doc: doc} do
+      assert text(doc, "#tools-count[role=status][aria-live=polite][aria-atomic=true]") ==
+               "200 results"
+    end
+
+    test "renders caller actions", %{doc: doc} do
+      assert text(doc, ".armature-toolbar-actions button") == "Export"
+    end
   end
 
   describe "pagination" do
+    @page_boundaries [
+      {1, 80, 1, 25, 2000, true, false},
+      {2, 80, 26, 50, 2000, false, false},
+      {80, 80, 1976, 2000, 2000, false, true},
+      {1, 1, 0, 0, 0, true, true}
+    ]
+
     test "names the page navigation" do
       assert present?(pagination_document(1, 80, 1, 25, 2000), "nav[aria-label='Table pages']")
     end
 
-    test "previous and next send the adjacent page number" do
+    test "previous sends the preceding page number" do
       doc = pagination_document(2, 80, 26, 50, 2000)
 
       assert present?(
                doc,
                "button[aria-label='Previous page'][phx-click=page][phx-value-page='1']"
              )
+    end
+
+    test "next sends the following page number" do
+      doc = pagination_document(2, 80, 26, 50, 2000)
 
       assert present?(doc, "button[aria-label='Next page'][phx-click=page][phx-value-page='3']")
     end
 
-    test "disables previous on the first page and next on the last" do
-      for {page, pages, first, last, total, previous_disabled?, next_disabled?} <- [
-            {1, 80, 1, 25, 2000, true, false},
-            {2, 80, 26, 50, 2000, false, false},
-            {80, 80, 1976, 2000, 2000, false, true},
-            {1, 1, 0, 0, 0, true, true}
-          ] do
+    test "disables previous on the first page" do
+      for {page, pages, first, last, total, previous_disabled?, _next_disabled?} <-
+            @page_boundaries do
         doc = pagination_document(page, pages, first, last, total)
 
         assert present?(doc, "button[aria-label='Previous page'][disabled]") ==
                  previous_disabled?
+      end
+    end
 
+    test "disables next on the last page" do
+      for {page, pages, first, last, total, _previous_disabled?, next_disabled?} <-
+            @page_boundaries do
+        doc = pagination_document(page, pages, first, last, total)
         assert present?(doc, "button[aria-label='Next page'][disabled]") == next_disabled?
       end
     end
@@ -729,9 +961,13 @@ defmodule Armature.ComponentsTest do
       end
     end
 
-    test "labels the page size picker and selects the current size" do
+    test "labels the page size picker" do
       doc = pagination_document(1, 80, 1, 25, 2000)
       assert text(doc, "label[for=pages-size]") == "Records per page"
+    end
+
+    test "selects the current page size" do
+      doc = pagination_document(1, 80, 1, 25, 2000)
 
       assert present?(
                doc,
@@ -755,70 +991,110 @@ defmodule Armature.ComponentsTest do
     end
   end
 
-  test "record headers expose the heading, context, status and actions" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.record_header id="record" title="Record R-1" context="Example collection" status="Ready">
-          <:actions><C.button>Update</C.button></:actions>
-        </C.record_header>
-        """
-      end)
+  describe "record_header" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.record_header id="record" title="Record R-1" context="Example collection" status="Ready">
+            <:actions><C.button>Update</C.button></:actions>
+          </C.record_header>
+          """
+        end)
 
-    assert text(doc, "header#record h2#record-heading") == "Record R-1"
-    assert text(doc, "header p") == "Example collection"
-    assert text(doc, "header .armature-status") == "Ready"
-    assert text(doc, "header button") == "Update"
-    doc = document(&C.record_header/1, %{id: "minimal", title: "Record"})
-    refute present?(doc, "p, .armature-status, button")
+      %{doc: doc}
+    end
+
+    test "renders the heading", %{doc: doc} do
+      assert text(doc, "header#record h2#record-heading") == "Record R-1"
+    end
+
+    test "renders the context", %{doc: doc} do
+      assert text(doc, "header p") == "Example collection"
+    end
+
+    test "renders the status", %{doc: doc} do
+      assert text(doc, "header .armature-status") == "Ready"
+    end
+
+    test "renders the actions", %{doc: doc} do
+      assert text(doc, "header button") == "Update"
+    end
+
+    test "a minimal header renders only its heading" do
+      doc = document(&C.record_header/1, %{id: "minimal", title: "Record"})
+      refute present?(doc, "p, .armature-status, button")
+    end
   end
 
-  test "table inspector composes the workflow and announces selection without focusing" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.table_inspector
-          id="browser"
-          rows={[%{id: "R-1", name: "Example"}]}
-          caption="Records"
-          total={1}
-          page={1}
-          pages={1}
-          first={1}
-          last={1}
-          search_event="search"
-          sort_event="sort"
-          page_event="page"
-          select_event="select"
-          selected_id="R-1"
-          selection_label="Selected R-1"
-          inspector_title="Selected record"
-          size_event="size"
-          page_sizes={[10, 25, 50]}
-          page_size={25}
-        >
-          <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
-          <:actions><C.button>Export</C.button></:actions>
-          <:details><C.record_header id="selected" title="Record R-1" /></:details>
-        </C.table_inspector>
-        """
-      end)
+  describe "table_inspector" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.table_inspector
+            id="browser"
+            rows={[%{id: "R-1", name: "Example"}]}
+            caption="Records"
+            total={1}
+            page={1}
+            pages={1}
+            first={1}
+            last={1}
+            search_event="search"
+            sort_event="sort"
+            page_event="page"
+            select_event="select"
+            selected_id="R-1"
+            selection_label="Selected R-1"
+            inspector_title="Selected record"
+            size_event="size"
+            page_sizes={[10, 25, 50]}
+            page_size={25}
+          >
+            <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
+            <:actions><C.button>Export</C.button></:actions>
+            <:details><C.record_header id="selected" title="Record R-1" /></:details>
+          </C.table_inspector>
+          """
+        end)
 
-    assert present?(doc, "#browser .armature-split #browser-table")
-    assert present?(doc, "#browser-toolbar input[type=search]")
-    assert present?(doc, "#browser-pagination nav, nav#browser-pagination")
-    assert present?(doc, "button[aria-controls=browser-inspector][aria-pressed=true]")
-    assert present?(doc, "a[href='#browser-inspector']")
+      %{doc: doc}
+    end
 
-    assert text(doc, "#browser-selection[role=status][aria-live=polite][aria-atomic=true]") ==
-             "Selected R-1"
+    test "composes its workflow parts under its own id", %{doc: doc} do
+      assert present?(doc, "#browser .armature-split #browser-table")
+      assert present?(doc, "#browser-toolbar input[type=search]")
+      assert present?(doc, "#browser-pagination nav, nav#browser-pagination")
+    end
 
-    assert present?(
-             doc,
-             "aside#browser-inspector[tabindex='-1'][aria-labelledby=browser-inspector-heading] h2"
-           )
+    test "selected row controls the inspector", %{doc: doc} do
+      assert present?(doc, "button[aria-controls=browser-inspector][aria-pressed=true]")
+    end
 
-    refute present?(doc, "[autofocus], aside[aria-live]")
+    test "offers a skip link to the inspector", %{doc: doc} do
+      assert present?(doc, "a[href='#browser-inspector']")
+    end
+
+    test "announces the selection as a polite status", %{doc: doc} do
+      assert text(doc, "#browser-selection[role=status][aria-live=polite][aria-atomic=true]") ==
+               "Selected R-1"
+    end
+
+    test "inspector is focusable by script", %{doc: doc} do
+      assert present?(
+               doc,
+               "aside#browser-inspector[tabindex='-1'][aria-labelledby=browser-inspector-heading] h2"
+             )
+    end
+
+    test "nothing takes focus on render", %{doc: doc} do
+      refute present?(doc, "[autofocus]")
+    end
+
+    test "inspector is not a live region", %{doc: doc} do
+      refute present?(doc, "aside[aria-live]")
+    end
   end
 
   test "facts associate each visible label with its value" do
@@ -838,44 +1114,43 @@ defmodule Armature.ComponentsTest do
     assert text(doc, "dl.armature-facts > div:last-child dd") == "42"
   end
 
-  test "search clear is named and sends an empty query, with a decorative search icon" do
-    for query <- ["", "Example"] do
-      doc =
-        document(
-          fn assigns ->
-            ~H"""
-            <C.table_toolbar id="search" search_event="filter" query={@query} total={1} />
-            """
-          end,
-          %{query: query}
-        )
+  describe "toolbar search" do
+    test "search icon is decorative" do
+      for query <- ["", "Example"] do
+        doc = toolbar_search_document(query)
+        assert present?(doc, ".armature-search > .armature-icon[aria-hidden=true]")
+      end
+    end
 
-      assert present?(doc, ".armature-search > .armature-icon[aria-hidden=true]")
+    test "the clear button appears only with a query" do
+      for query <- ["", "Example"] do
+        doc = toolbar_search_document(query)
+        assert present?(doc, "#search-clear") == (query != "")
+      end
+    end
+
+    test "the clear button sends an empty query" do
+      doc = toolbar_search_document("Example")
 
       assert present?(
                doc,
                "#search-clear[aria-label='Clear search'][phx-click=filter][phx-value-query='']"
-             ) == (query != "")
+             )
     end
   end
 
-  test "table density defaults to default and accepts compact" do
-    for density <- ~w(default compact) do
-      doc =
-        document(
-          fn assigns ->
-            ~H"""
-            <C.data_table id="density" caption="Records" rows={[%{id: "R-001"}]} density={@density}>
-              <:col :let={row} label="Identifier">{row.id}</:col>
-            </C.data_table>
-            """
-          end,
-          %{density: density}
-        )
+  test "tables render default density" do
+    doc = density_document("default")
 
-      assert present?(doc, "table#density[data-density=#{density}]")
-      assert text(doc, "#density td") == "R-001"
-    end
+    assert present?(doc, "table#density[data-density=default]")
+    assert text(doc, "#density td") == "R-001"
+  end
+
+  test "table density accepts compact" do
+    doc = density_document("compact")
+
+    assert present?(doc, "table#density[data-density=compact]")
+    assert text(doc, "#density td") == "R-001"
   end
 
   describe "app_shell" do
@@ -913,14 +1188,20 @@ defmodule Armature.ComponentsTest do
       assert present?(doc, "header[aria-label='Library / Catalogue']")
     end
 
-    test "panel is labelled by its heading and renders its actions", %{doc: doc} do
+    test "panel is labelled by its heading", %{doc: doc} do
       assert text(doc, "#summary[aria-labelledby=summary-heading] h2") == "Summary"
+    end
+
+    test "panel renders its actions", %{doc: doc} do
       assert present?(doc, "#summary button")
     end
 
-    test "top_actions and footnote slots render their content", %{doc: doc} do
+    test "top_actions slot renders its content", %{doc: doc} do
       assert present?(doc, "label[for=theme-choice]")
       assert present?(doc, "#theme-choice option[value=dark][selected]")
+    end
+
+    test "footnote slot renders its content", %{doc: doc} do
       assert text(doc, ".armature-side-nav-footnote") == "Synthetic examples"
     end
   end
@@ -949,68 +1230,93 @@ defmodule Armature.ComponentsTest do
     assert present?(doc, "#plain-shell-rail nav[aria-label='Main'] a[aria-current=page]")
   end
 
-  test "an app shell renders the brand, navigation name and section caption it is given" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.app_shell
-          id="named-shell"
-          title="Ledger"
-          subtitle="Finance"
-          nav_label="Ledger sections"
-          section_label="Accounts"
-          heading="Overview"
-          heading_id="named-overview"
-          context="Ledger"
-          items={[%{label: "Overview", href: "/"}]}
-        >
-          <p>Content</p>
-        </C.app_shell>
-        """
-      end)
+  describe "app_shell given a brand" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.app_shell
+            id="named-shell"
+            title="Ledger"
+            subtitle="Finance"
+            nav_label="Ledger sections"
+            section_label="Accounts"
+            heading="Overview"
+            heading_id="named-overview"
+            context="Ledger"
+            items={[%{label: "Overview", href: "/"}]}
+          >
+            <p>Content</p>
+          </C.app_shell>
+          """
+        end)
 
-    assert text(doc, "#named-shell-rail > .armature-eyebrow") == "Accounts"
-    assert text(doc, "#named-shell-rail .armature-side-nav-brand span") == "Ledger"
-    assert text(doc, "#named-shell-rail .armature-side-nav-brand small") == "Finance"
-    assert present?(doc, "#named-shell-rail nav[aria-label='Ledger sections']")
+      %{doc: doc}
+    end
+
+    test "renders the section caption it is given", %{doc: doc} do
+      assert text(doc, "#named-shell-rail > .armature-eyebrow") == "Accounts"
+    end
+
+    test "renders the brand title with its subtitle", %{doc: doc} do
+      assert text(doc, "#named-shell-rail .armature-side-nav-brand span") == "Ledger"
+      assert text(doc, "#named-shell-rail .armature-side-nav-brand small") == "Finance"
+    end
+
+    test "names the navigation as given", %{doc: doc} do
+      assert present?(doc, "#named-shell-rail nav[aria-label='Ledger sections']")
+    end
   end
 
-  test "grouped navigation provides matching links and a labelled native picker" do
-    doc =
-      document(fn assigns ->
-        ~H"""
-        <C.grouped_nav
-          id="components"
-          label="Components"
-          event="choose"
-          groups={[
-            %{
-              label: "Atoms",
-              items: [
-                %{id: "button-link", label: "Button", patch: "/?node=button", current: true},
-                %{id: "link-link", label: "Link", href: "/?node=link", current: false}
-              ]
-            }
-          ]}
-        />
-        """
-      end)
+  describe "grouped_nav" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.grouped_nav
+            id="components"
+            label="Components"
+            event="choose"
+            groups={[
+              %{
+                label: "Atoms",
+                items: [
+                  %{id: "button-link", label: "Button", patch: "/?node=button", current: true},
+                  %{id: "link-link", label: "Link", href: "/?node=link", current: false}
+                ]
+              }
+            ]}
+          />
+          """
+        end)
 
-    assert present?(doc, "nav[aria-label=Components] #button-link[aria-current=page]")
-    refute present?(doc, "#link-link[aria-current]")
-    assert text(doc, "label[for=components-choice]") == "Components"
+      %{doc: doc}
+    end
 
-    assert present?(
-             doc,
-             "#components-choice optgroup[label=Atoms] option[value='/?node=button'][selected]"
-           )
+    test "marks the current link", %{doc: doc} do
+      assert present?(doc, "nav[aria-label=Components] #button-link[aria-current=page]")
+      refute present?(doc, "#link-link[aria-current]")
+    end
 
-    assert present?(
-             doc,
-             "form[phx-change=choose] select[name=destination][aria-describedby=components-hint]"
-           )
+    test "labels the native picker", %{doc: doc} do
+      assert text(doc, "label[for=components-choice]") == "Components"
+    end
 
-    assert text(doc, "#components-hint") == "Choosing an option opens its page."
+    test "selects the current destination", %{doc: doc} do
+      assert present?(
+               doc,
+               "#components-choice optgroup[label=Atoms] option[value='/?node=button'][selected]"
+             )
+    end
+
+    test "the picker form sends the choose event", %{doc: doc} do
+      assert present?(doc, "form[phx-change=choose] select[name=destination]")
+    end
+
+    test "the picker is described by its hint", %{doc: doc} do
+      assert present?(doc, "select[name=destination][aria-describedby=components-hint]")
+      assert text(doc, "#components-hint") == "Choosing an option opens its page."
+    end
   end
 
   defp document(component, assigns \\ %{}) do
@@ -1108,5 +1414,96 @@ defmodule Armature.ComponentsTest do
     for id <- doc |> attribute(selector, "aria-describedby") |> String.split() do
       assert present?(doc, "##{id}")
     end
+  end
+
+  defp translated_form_field_document(params) do
+    form =
+      to_form(params, as: :sample, errors: [name: {"needs %{count} characters", [count: 2]}])
+
+    translate = fn {message, options} ->
+      String.replace(message, "%{count}", to_string(options[:count]))
+    end
+
+    document(
+      fn assigns ->
+        ~H"""
+        <C.field field={@form[:name]} label="Name" hint="A hint" translate_error={@translate} />
+        """
+      end,
+      %{form: form, translate: translate}
+    )
+  end
+
+  defp checkbox_field_document(value) do
+    document(
+      fn assigns ->
+        ~H"""
+        <C.field field={@form[:accepted]} type="checkbox" label="Accept the terms" />
+        """
+      end,
+      %{form: to_form(%{"accepted" => value}, as: :sample)}
+    )
+  end
+
+  defp notice_document(tone, result) do
+    document(
+      fn assigns ->
+        ~H"""
+        <C.notice id="feedback" tone={@tone} result={@result} title="Outcome">
+          Explained in words
+          <:actions><C.button id="continue">Continue</C.button></:actions>
+        </C.notice>
+        """
+      end,
+      %{tone: tone, result: result}
+    )
+  end
+
+  defp invalid_selectable_table_document(columns) do
+    document(&C.data_table/1, %{
+      id: "invalid",
+      rows: [],
+      caption: "Records",
+      select_event: "choose",
+      inspector_id: "details",
+      col: columns
+    })
+  end
+
+  defp plain_table_document(rows) do
+    document(
+      fn assigns ->
+        ~H"""
+        <C.data_table id="plain" rows={@rows} caption="Records" caption_hidden>
+          <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
+        </C.data_table>
+        """
+      end,
+      %{rows: rows}
+    )
+  end
+
+  defp toolbar_search_document(query) do
+    document(
+      fn assigns ->
+        ~H"""
+        <C.table_toolbar id="search" search_event="filter" query={@query} total={1} />
+        """
+      end,
+      %{query: query}
+    )
+  end
+
+  defp density_document(density) do
+    document(
+      fn assigns ->
+        ~H"""
+        <C.data_table id="density" caption="Records" rows={[%{id: "R-001"}]} density={@density}>
+          <:col :let={row} label="Identifier">{row.id}</:col>
+        </C.data_table>
+        """
+      end,
+      %{density: density}
+    )
   end
 end

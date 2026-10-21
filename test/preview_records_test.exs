@@ -4,20 +4,54 @@ defmodule Armature.Catalogue.RecordsTest do
 
   @options %{query: "", sort_by: "name", sort_direction: "asc", page: 1, page_size: 25}
 
-  test "search covers the complete set before pagination and ignores case" do
+  test "the record set holds 200 unique records" do
     records = Catalogue.Records.all()
     assert length(records) == 200
     assert length(Enum.uniq_by(records, & &1.id)) == 200
+  end
+
+  test "search covers the complete set before pagination" do
     result = Catalogue.Records.page(%{@options | query: "r-200"})
     assert [%{id: "R-200"}] = result.rows
     assert result.total == 1
+  end
+
+  test "search ignores case" do
     result = Catalogue.Records.page(%{@options | query: "gRoUp 2"})
     assert result.total == 50
     assert Enum.all?(result.rows, &(&1.group == "Group 2"))
   end
 
-  test "text and numeric sorts order the complete set in both directions" do
-    for {sort_by, key} <- [{"name", :name}, {"score", :score}], direction <- ~w(asc desc) do
+  test "text sorts order the complete set in either direction" do
+    assert_sorted_across_set("name", :name)
+  end
+
+  test "numeric sorts order the complete set in either direction" do
+    assert_sorted_across_set("score", :score)
+  end
+
+  test "each page size fills a middle page" do
+    for size <- [10, 25, 50] do
+      result = Catalogue.Records.page(%{@options | page_size: size, page: 2})
+      assert length(result.rows) == size
+      assert result.first == size + 1
+      assert result.last == 2 * size
+      assert result.pages == div(200, size)
+    end
+  end
+
+  test "page numbers are clamped to the available pages" do
+    assert Catalogue.Records.page(%{@options | page: -1}).page == 1
+    assert Catalogue.Records.page(%{@options | page: 100}).page == 8
+  end
+
+  test "a search without matches yields one empty page" do
+    assert %{rows: [], total: 0, pages: 1, page: 1, first: 0, last: 0} =
+             Catalogue.Records.page(%{@options | query: "no match", page: 8})
+  end
+
+  defp assert_sorted_across_set(sort_by, key) do
+    for direction <- ~w(asc desc) do
       result = Catalogue.Records.page(%{@options | sort_by: sort_by, sort_direction: direction})
 
       ordered =
@@ -29,21 +63,5 @@ defmodule Armature.Catalogue.RecordsTest do
 
       assert result.rows == Enum.take(ordered, 25)
     end
-  end
-
-  test "page sizes, boundary clamping and empty ranges remain consistent" do
-    for size <- [10, 25, 50] do
-      result = Catalogue.Records.page(%{@options | page_size: size, page: 2})
-      assert length(result.rows) == size
-      assert result.first == size + 1
-      assert result.last == 2 * size
-      assert result.pages == div(200, size)
-    end
-
-    assert Catalogue.Records.page(%{@options | page: -1}).page == 1
-    assert Catalogue.Records.page(%{@options | page: 100}).page == 8
-
-    assert %{rows: [], total: 0, pages: 1, page: 1, first: 0, last: 0} =
-             Catalogue.Records.page(%{@options | query: "no match", page: 8})
   end
 end
