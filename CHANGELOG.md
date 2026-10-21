@@ -19,6 +19,7 @@ Until 1.0.0, a minor version can change the public surface.
   measured geometry and keyboard interactions; retain token, composition,
   packaging and rendered semantics contracts in ExUnit.
 - Update the browser-test dependency `@playwright/test` from 1.61.1 to 1.64.1.
+- Update the LiveView dependency `phoenix_live_view` from 1.2.12 to 1.2.13.
 
 ### Fixed
 
