@@ -10,6 +10,8 @@ defmodule Armature.Components do
   use Phoenix.Component
   import Phoenix.Component, except: [link: 1]
 
+  @tones ~w(neutral success warning error)
+
   @doc "An uppercase contextual label. It supplements a heading, rather than replacing it."
   attr(:rest, :global)
   slot(:inner_block, required: true)
@@ -52,16 +54,7 @@ defmodule Armature.Components do
       </div>
       <.eyebrow :if={@section_label}>{@section_label}</.eyebrow>
       <nav aria-label={@label}>
-        <.link
-          :for={item <- @items}
-          id={Map.get(item, :id)}
-          href={Map.get(item, :href)}
-          patch={Map.get(item, :patch)}
-          navigate={Map.get(item, :navigate)}
-          aria-current={if Map.get(item, :current), do: "page"}
-        >
-          {item.label}
-        </.link>
+        <.nav_links items={@items} />
       </nav>
       <div :if={@footnote != []} class={["armature-side-nav-footnote"]}>{render_slot(@footnote)}</div>
     </div>
@@ -123,21 +116,18 @@ defmodule Armature.Components do
   slot(:inner_block)
 
   def grouped_nav(assigns) do
+    assigns =
+      assign(assigns,
+        picker_options: picker_options(assigns.groups),
+        current_destination: current_destination(assigns.groups)
+      )
+
     ~H"""
     <div id={@id} class={["armature-grouped-nav"]}>
       <nav aria-label={@label} class={["armature-grouped-nav-links"]}>
         <section :for={group <- @groups} data-level={Map.get(group, :level)}>
           <.eyebrow>{group.label}</.eyebrow>
-          <.link
-            :for={item <- group.items}
-            id={Map.get(item, :id)}
-            href={Map.get(item, :href)}
-            patch={Map.get(item, :patch)}
-            navigate={Map.get(item, :navigate)}
-            aria-current={if Map.get(item, :current), do: "page"}
-          >
-            {item.label}
-          </.link>
+          <.nav_links items={group.items} />
         </section>
       </nav>
       <form
@@ -147,30 +137,14 @@ defmodule Armature.Components do
         phx-submit={@event}
       >
         <label for={@id <> "-choice"}>{@label}</label>
-        <select
+        <.select
           id={@id <> "-choice"}
           name="destination"
+          prompt="Choose a component"
+          value={@current_destination}
+          options={@picker_options}
           aria-describedby={@id <> "-hint"}
-          class={["armature-select"]}
-        >
-          <option
-            value=""
-            selected={
-              !Enum.any?(@groups, fn group -> Enum.any?(group.items, &Map.get(&1, :current)) end)
-            }
-          >
-            Choose a component
-          </option>
-          <optgroup :for={group <- @groups} label={group.label}>
-            <option
-              :for={item <- group.items}
-              value={Map.get(item, :patch) || Map.get(item, :navigate) || Map.get(item, :href)}
-              selected={Map.get(item, :current, false)}
-            >
-              {item.label}
-            </option>
-          </optgroup>
-        </select>
+        />
         <p id={@id <> "-hint"}>Choosing an option opens its page.</p>
       </form>
       {render_slot(@inner_block)}
@@ -425,7 +399,7 @@ defmodule Armature.Components do
 
   @doc "A compact status badge. Its label must express the meaning independently of its tone."
   attr(:label, :string, required: true)
-  attr(:tone, :string, default: "neutral", values: ~w(neutral success warning error))
+  attr(:tone, :string, default: "neutral", values: @tones)
   attr(:rest, :global)
 
   def status(assigns) do
@@ -519,7 +493,7 @@ defmodule Armature.Components do
   information has no live-region role, including static error guidance.
   """
   attr(:id, :string, required: true)
-  attr(:tone, :string, default: "neutral", values: ~w(neutral success warning error))
+  attr(:tone, :string, default: "neutral", values: @tones)
   attr(:result, :boolean, default: false)
   attr(:title, :string, default: nil)
   slot(:inner_block, required: true)
@@ -865,9 +839,9 @@ defmodule Armature.Components do
   @doc """
   A table-and-details template composing the complete data browsing workflow.
 
-  The caller owns filtering, ordering, paging and persistent selection. Columns
-  receive each row; mark exactly one `row_label` and keep all cell content
-  non-interactive (the row-label button is the row's only action). `details` holds
+  The caller owns filtering, ordering, paging and persistent selection. `col`
+  slots are forwarded unchanged to `data_table/1`, which defines their contract,
+  and the paging attributes follow `pagination/1`. `details` holds
   the selected record's content. Update
   `selection_label` on selection changes to announce them without moving focus.
   The skip link targets the inspector; narrow layouts place it below the table.
@@ -942,15 +916,7 @@ defmodule Armature.Components do
           selected_id={@selected_id}
           inspector_id={@id <> "-inspector"}
         >
-          <:col
-            :let={row}
-            :for={col <- @col}
-            label={col.label}
-            numeric={col[:numeric] || false}
-            sort_key={col[:sort_key]}
-            row_label={col[:row_label] || false}
-            interactive={col[:interactive] || false}
-          >
+          <:col :let={row} :for={col <- @col} {Map.drop(col, [:__slot__, :inner_block])}>
             {render_slot(col, row)}
           </:col>
         </.data_table>
@@ -974,6 +940,39 @@ defmodule Armature.Components do
       </.split>
     </div>
     """
+  end
+
+  attr(:items, :list, required: true)
+
+  defp nav_links(assigns) do
+    ~H"""
+    <.link
+      :for={item <- @items}
+      id={Map.get(item, :id)}
+      href={Map.get(item, :href)}
+      patch={Map.get(item, :patch)}
+      navigate={Map.get(item, :navigate)}
+      aria-current={if Map.get(item, :current), do: "page"}
+    >
+      {item.label}
+    </.link>
+    """
+  end
+
+  defp picker_options(groups) do
+    Enum.map(groups, fn group ->
+      {group.label, Enum.map(group.items, &{&1.label, destination(&1)})}
+    end)
+  end
+
+  defp current_destination(groups) do
+    groups
+    |> Enum.flat_map(& &1.items)
+    |> Enum.find_value(&(Map.get(&1, :current) && destination(&1)))
+  end
+
+  defp destination(item) do
+    Map.get(item, :patch) || Map.get(item, :navigate) || Map.get(item, :href)
   end
 
   # Selection needs an identifier per row; plain tables only need distinct DOM

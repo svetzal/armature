@@ -20,9 +20,14 @@ Until 1.0.0, a minor version can change the public surface.
   packaging and rendered semantics contracts in ExUnit.
 - Update the browser-test dependency `@playwright/test` from 1.61.1 to 1.64.1.
 - Update the LiveView dependency `phoenix_live_view` from 1.2.12 to 1.2.13.
+- Share the nav-item renderer between `side_nav` and `grouped_nav`, declare
+  the tone vocabulary once, and forward `table_inspector` columns to
+  `data_table` unchanged. No public API change.
 
 ### Fixed
 
+- `grouped_nav`'s narrow-screen picker composes `select`, so it now gets the
+  same chevron as every other select.
 - Keep selected table rows visible in forced-colour mode after focus leaves.
   Selected rows use an inset outline; focused selected rows use a distinct
   double outline that stays inside the scrolling region.

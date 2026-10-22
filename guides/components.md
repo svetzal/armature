@@ -44,7 +44,7 @@ and override its tokens in your own CSS. Components share light and dark token v
 | Component | Uses | Purpose |
 | --- | --- | --- |
 | `panel` | `cluster` | A named content panel with heading and actions. |
-| `grouped_nav` | `eyebrow`, `link` | Grouped navigation with a labelled narrow-screen picker. |
+| `grouped_nav` | `eyebrow`, `link`, `select` | Grouped navigation with a labelled narrow-screen picker. |
 | `top_bar` | `cluster` | A context band with actions. |
 | `side_nav` | `eyebrow`, `link` | Named section navigation with a brand and footnote. |
 | `data_table` | — | A sortable native table with named record selection. |
