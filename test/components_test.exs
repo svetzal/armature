@@ -1309,6 +1309,13 @@ defmodule Armature.ComponentsTest do
              )
     end
 
+    test "the picker gets the select chevron wrapper", %{doc: doc} do
+      assert present?(
+               doc,
+               "#components .armature-grouped-nav-picker .armature-select-wrap > select#components-choice"
+             )
+    end
+
     test "the picker form sends the choose event", %{doc: doc} do
       assert present?(doc, "form[phx-change=choose] select[name=destination]")
     end

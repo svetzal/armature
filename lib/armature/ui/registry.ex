@@ -55,7 +55,7 @@ defmodule Armature.UI.Registry do
         module: Armature.Components,
         function: :grouped_nav,
         purpose: "Grouped navigation with a labelled narrow-screen picker.",
-        uses: [:eyebrow, :link]
+        uses: [:eyebrow, :link, :select]
       },
       %Node{
         id: :panel,
