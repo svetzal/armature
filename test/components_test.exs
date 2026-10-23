@@ -1204,6 +1204,89 @@ defmodule Armature.ComponentsTest do
     test "footnote slot renders its content", %{doc: doc} do
       assert text(doc, ".armature-side-nav-footnote") == "Synthetic examples"
     end
+
+    test "renders no brand mark when none is given", %{doc: doc} do
+      refute present?(doc, ".armature-side-nav-mark")
+    end
+  end
+
+  describe "side_nav given a mark" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.side_nav id="linked-mark" title="Library" home_patch="/index" items={[]}>
+            <:mark><svg id="linked-art" viewBox="0 0 2 5"><path d="M1 0 2 5H0Z" /></svg></:mark>
+          </C.side_nav>
+          <C.side_nav id="plain-mark" title="Library" items={[]}>
+            <:mark><svg id="plain-art" viewBox="0 0 2 5"><path d="M1 0 2 5H0Z" /></svg></:mark>
+          </C.side_nav>
+          <C.side_nav id="untitled-mark" subtitle="Examples" items={[]}>
+            <:mark><svg id="untitled-art" viewBox="0 0 2 5"><path d="M1 0 2 5H0Z" /></svg></:mark>
+          </C.side_nav>
+          """
+        end)
+
+      %{doc: doc}
+    end
+
+    test "renders the mark before the title inside the home link", %{doc: doc} do
+      assert [{"span", attributes, _}, title] =
+               children(doc, "#linked-mark .armature-side-nav-brand > a")
+
+      assert {"class", "armature-side-nav-mark"} in attributes
+      assert String.trim(title) == "Library"
+    end
+
+    test "renders the mark before the title when the brand is not a link", %{doc: doc} do
+      assert [{"span", attributes, _}, title] =
+               children(doc, "#plain-mark .armature-side-nav-brand > span")
+
+      assert {"class", "armature-side-nav-mark"} in attributes
+      assert String.trim(title) == "Library"
+    end
+
+    test "renders the caller's mark content", %{doc: doc} do
+      assert present?(doc, "#linked-mark .armature-side-nav-mark > svg#linked-art")
+    end
+
+    test "hides the decorative mark from assistive technology", %{doc: doc} do
+      assert present?(doc, "#linked-mark .armature-side-nav-mark[aria-hidden=true]")
+      assert present?(doc, "#plain-mark .armature-side-nav-mark[aria-hidden=true]")
+    end
+
+    test "keeps the title as the home link's accessible name", %{doc: doc} do
+      assert attribute(doc, "#linked-mark .armature-side-nav-brand > a", "aria-label") ==
+               "Library home"
+    end
+
+    test "renders no mark without a title", %{doc: doc} do
+      refute present?(doc, "#untitled-art")
+    end
+  end
+
+  test "an app shell forwards its mark to the side navigation brand" do
+    doc =
+      document(fn assigns ->
+        ~H"""
+        <C.app_shell
+          id="marked-shell"
+          title="Library"
+          heading="Overview"
+          heading_id="marked-overview"
+          context="Library"
+          items={[%{label: "Overview", href: "/"}]}
+        >
+          <:mark><svg id="shell-art" viewBox="0 0 2 5"><path d="M1 0 2 5H0Z" /></svg></:mark>
+          <p>Content</p>
+        </C.app_shell>
+        """
+      end)
+
+    assert present?(
+             doc,
+             "#marked-shell-rail .armature-side-nav-brand .armature-side-nav-mark > svg#shell-art"
+           )
   end
 
   test "an app shell carries no catalogue words when the caller gives no brand or caption" do
@@ -1410,6 +1493,11 @@ defmodule Armature.ComponentsTest do
 
   defp text(doc, selector),
     do: doc |> LazyHTML.query(selector) |> LazyHTML.text() |> String.trim()
+
+  defp children(doc, selector) do
+    [{_, _, children}] = doc |> LazyHTML.query(selector) |> LazyHTML.to_tree()
+    Enum.reject(children, &(is_binary(&1) and String.trim(&1) == ""))
+  end
 
   defp attribute(doc, selector, name) do
     [{_, attributes, _}] = doc |> LazyHTML.query(selector) |> LazyHTML.to_tree()

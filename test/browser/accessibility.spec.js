@@ -30,7 +30,7 @@ for (const theme of ['light', 'dark']) {
   test(`keyboard reaches named controls with visible unobscured focus (${theme})`, async ({ page }) => {
     await page.goto(`/fixtures?theme=${theme}`);
     const controls = ['#theme-one-choice', '#theme-one button', '#theme-two-choice',
-      '.armature-skip-link', '#shell-rail a', '#navigation a', '#open-example', '#enabled', '#valid', '#invalid'];
+      '.armature-skip-link', '#shell-rail .armature-side-nav-brand > a', '#shell-rail nav a', '#navigation a', '#open-example', '#enabled', '#valid', '#invalid'];
     for (const selector of controls) {
       await page.keyboard.press('Tab');
       await visibleFocus(page.locator(selector));
@@ -38,7 +38,7 @@ for (const theme of ['light', 'dark']) {
     await expect(page.locator('#enabled')).toHaveAccessibleName('Save');
     await expect(page.locator('#valid')).toHaveAccessibleName('Name');
     await expect(page.locator('#invalid')).toHaveAccessibleName('Required name');
-    await expect(page.locator('#shell-rail a')).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator('#shell-rail nav a')).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('#disabled')).toBeDisabled();
     await expect(page.locator('#disabled-input')).toBeDisabled();
     await expect(page.locator('#invalid')).toHaveAccessibleDescription('Enter a name');
@@ -114,9 +114,9 @@ for (const theme of ['light', 'dark']) {
     for (const width of [1280, 320]) {
       await page.setViewportSize({ width, height: 900 });
       for (const selector of ['#enabled', '#valid', '#invalid', '#theme-one-choice',
-        '#records .armature-sort', '#records-r1 button', '#shell-rail a']) {
+        '#records .armature-sort', '#records-r1 button', '#shell-rail nav a']) {
         const r = await page.locator(selector).boundingBox();
-        const minimum = width === 320 || selector === '#shell-rail a' ? 44 : 24;
+        const minimum = width === 320 || selector === '#shell-rail nav a' ? 44 : 24;
         expect(r.width, selector).toBeGreaterThanOrEqual(minimum);
         expect(r.height, selector).toBeGreaterThanOrEqual(minimum);
       }
@@ -156,7 +156,7 @@ for (const theme of ['light', 'dark']) {
     await visibleFocus(invalid);
     expect((await styles(invalid)).outline).toBe('solid');
     expect((await styles(page.locator('#disabled'))).border).toBe('dashed');
-    expect((await styles(page.locator('#shell-rail a'))).border).toBe('solid');
+    expect((await styles(page.locator('#shell-rail nav a'))).border).toBe('solid');
     expect((await styles(page.locator('#theme-one-choice'))).appearance).toBe('auto');
     const wrapper = page.locator('#theme-one .armature-select-wrap');
     expect((await styles(wrapper, '::after')).content).toBe('none');

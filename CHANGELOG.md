@@ -8,6 +8,16 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Added
+
+- `side_nav` and `app_shell` take an optional `mark` slot: a logo or symbol
+  (an `<img>` or inline SVG) shown before the brand title, on the same row and
+  inside the home link when there is one. It renders only with a title, is
+  hidden from assistive technology because the title names the brand, and
+  takes its height from the new `--armature-brand-mark-size` token, with its
+  width following the image's aspect ratio. `app_shell` forwards it to
+  `side_nav`. No existing call site changes.
+
 ### Changed
 
 - Move catalogue page resolution, usage lookup and preview isolation out of

@@ -30,8 +30,13 @@ defmodule Armature.Components do
   "Main", so give a second rail on the same page its own name. `title` and
   `subtitle` form the brand, and `section_label` adds a caption above the links.
   Each renders only when given. Optional `home_patch` links the wordmark to an
-  index. The caller owns the current page. The rail becomes a wrapping row on
-  small screens; its subtitle, caption and footnote then hide.
+  index. The optional `mark` slot puts a logo or symbol, such as an `<img>` or
+  an inline SVG, on the same row before the title and inside its link. It
+  renders only with a title, which names the brand, so the mark is hidden from
+  assistive technology. Its height is `--armature-brand-mark-size` and its width
+  follows the image's aspect ratio. The caller owns the current page. The rail
+  becomes a wrapping row on small screens; its subtitle, caption and footnote
+  then hide.
   """
   attr(:id, :string, required: true)
   attr(:title, :string, default: nil)
@@ -40,6 +45,7 @@ defmodule Armature.Components do
   attr(:section_label, :string, default: nil)
   attr(:home_patch, :string, default: nil)
   attr(:items, :list, required: true)
+  slot(:mark)
   slot(:footnote)
 
   def side_nav(assigns) do
@@ -47,9 +53,9 @@ defmodule Armature.Components do
     <div id={@id} class={["armature-side-nav"]}>
       <div :if={@title || @subtitle} class={["armature-side-nav-brand"]}>
         <.link :if={@title && @home_patch} patch={@home_patch} aria-label={@title <> " home"}>
-          {@title}
+          <.brand_mark mark={@mark} />{@title}
         </.link>
-        <span :if={@title && !@home_patch}>{@title}</span>
+        <span :if={@title && !@home_patch}><.brand_mark mark={@mark} />{@title}</span>
         <small :if={@subtitle}>{@subtitle}</small>
       </div>
       <.eyebrow :if={@section_label}>{@section_label}</.eyebrow>
@@ -58,6 +64,14 @@ defmodule Armature.Components do
       </nav>
       <div :if={@footnote != []} class={["armature-side-nav-footnote"]}>{render_slot(@footnote)}</div>
     </div>
+    """
+  end
+
+  attr(:mark, :list, required: true)
+
+  defp brand_mark(assigns) do
+    ~H"""
+    <span :if={@mark != []} class={["armature-side-nav-mark"]} aria-hidden="true">{render_slot(@mark)}</span>
     """
   end
 
@@ -218,6 +232,8 @@ defmodule Armature.Components do
   Supply globally unique `id` and `heading_id`. Item navigation and theme state
   belong to the consumer. `title`, `subtitle`, `nav_label` and `section_label`
   pass to `side_nav/1`, which renders a brand and caption only when given.
+  The optional `mark` slot passes to `side_nav/1`'s `mark`, a decorative logo
+  or symbol before the title.
   The rail narrows below 800px and stacks below 520px of the shell's own inline size.
 
   The skip link is an ordinary `href` fragment to the h1, which has
@@ -238,6 +254,7 @@ defmodule Armature.Components do
   attr(:home_patch, :string, default: nil)
   attr(:eyebrow, :string, default: nil)
   attr(:rest, :global)
+  slot(:mark)
   slot(:footnote)
   slot(:top_actions)
   slot(:heading_actions)
@@ -261,6 +278,7 @@ defmodule Armature.Components do
           home_patch={@home_patch}
           items={@items}
         >
+          <:mark :if={@mark != []}>{render_slot(@mark)}</:mark>
           <:footnote :if={@footnote != []}>{render_slot(@footnote)}</:footnote>
         </.side_nav>
         <div class={["armature-app-shell-main"]}>

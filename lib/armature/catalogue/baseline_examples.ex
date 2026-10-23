@@ -154,6 +154,9 @@ defmodule Armature.Catalogue.BaselineExamples do
           section_label="Sections"
           items={example_nav()}
         >
+          <:mark>
+            <svg viewBox="0 0 2 5" fill="currentColor"><path d="M1 0 2 2.5 1 5 0 2.5Z" /></svg>
+          </:mark>
           <:footnote>Synthetic content</:footnote>
         </A.side_nav>
       <% :top_bar -> %>

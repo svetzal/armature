@@ -92,6 +92,7 @@ defmodule Armature.Tokens do
       group: :typography,
       role: "Wordmark and secondary group letter spacing."
     },
+    %{name: "--armature-brand-mark-size", group: :space, role: "Height of the rail brand mark."},
     %{name: "--armature-text-eyebrow", group: :typography, role: "Contextual eyebrow size."},
     %{
       name: "--armature-tracking-eyebrow",

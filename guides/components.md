@@ -71,6 +71,11 @@ optional caption above its links. The brand and caption render only when you
 give them. Navigation items have
 `:label`, one of `:href`, `:patch` or `:navigate`, and optional `:id` and `:current`.
 Set `home_patch` to make the wordmark a patch link back to your index.
+The optional `mark` slot puts a logo or symbol (an `<img>` or inline SVG)
+before the title, on the same row and inside its link. It renders only with a
+title and is hidden from assistive technology, because the title names the
+brand. Its height is `--armature-brand-mark-size`; its width follows the
+image's aspect ratio.
 Current links announce `aria-current="page"` and use weight as well as colour.
 The caller owns URLs, selection and events. `heading_rest` forwards focus
 commands to the h1. Optional `footnote`, `top_actions` and `heading_actions`
@@ -90,8 +95,8 @@ slots supply supporting content and named controls.
 ```
 
 `side_nav` names its navigation with `label` (default "Main"); give each
-further navigation on a page its own name. Its `title`, `subtitle` and
-`section_label` are optional and render nothing when omitted.
+further navigation on a page its own name. Its `title`, `subtitle`,
+`section_label` and `mark` are optional and render nothing when omitted.
 `top_bar` carries a visible `context` and optional `actions`. `page_heading`
 uses an h1 and optional `eyebrow` and `actions`; `eyebrow` alone adds context,
 not a heading. `panel` names a region with its h2 and optional `actions`.

@@ -52,8 +52,12 @@ defmodule Armature.Browser.Fixtures do
         heading_id="heading"
         context="Library"
         title="Library"
+        home_patch="/fixtures"
         items={[%{label: "Overview", href: "/fixtures", current: true}]}
       >
+        <:mark>
+          <svg viewBox="0 0 2 5" fill="currentColor"><path d="M1 0 2 2.5 1 5 0 2.5Z" /></svg>
+        </:mark>
         <p>Component fixtures</p>
       </C.app_shell>
     </div>
