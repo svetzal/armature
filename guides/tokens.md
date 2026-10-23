@@ -105,6 +105,7 @@ uses the contract directly, and its samples follow the catalogue theme control.
 | `--armature-text-brand` | typography | Rail wordmark size. |  |
 | `--armature-weight-brand` | typography | Rail wordmark weight. |  |
 | `--armature-tracking-brand` | typography | Wordmark and secondary group letter spacing. |  |
+| `--armature-brand-mark-size` | space | Height of the rail brand mark. |  |
 | `--armature-text-eyebrow` | typography | Contextual eyebrow size. |  |
 | `--armature-tracking-eyebrow` | typography | Contextual eyebrow letter spacing. |  |
 | `--armature-text-page-heading` | typography | Application page heading size. |  |

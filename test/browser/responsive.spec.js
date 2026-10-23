@@ -91,3 +91,32 @@ for (const theme of ['light', 'dark']) {
     }
   });
 }
+
+for (const theme of ['light', 'dark']) {
+  test(`brand mark shares the title row at its token height on both sides of 520 (${theme})`, async ({ page }) => {
+    await page.goto(`/fixtures?theme=${theme}`);
+    const link = page.locator('#shell-rail .armature-side-nav-brand > a');
+    const mark = link.locator('.armature-side-nav-mark > svg');
+    const size = await page.evaluate(() =>
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--armature-brand-mark-size')));
+    expect(size).toBeGreaterThan(0);
+    for (const width of [801, 519]) {
+      await resize(page, '#shell-host', width);
+      const markBox = await mark.boundingBox();
+      const linkBox = await link.boundingBox();
+      const title = await link.evaluate(element => {
+        const node = [...element.childNodes].find(child => child.nodeType === Node.TEXT_NODE && child.textContent.trim());
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        const { x, y, height } = range.getBoundingClientRect();
+        return { x, middle: y + height / 2 };
+      });
+      expect(markBox.height).toBeCloseTo(size, 0);
+      expect(markBox.width).toBeCloseTo(size * 2 / 5, 0);
+      expect(markBox.x).toBeCloseTo(linkBox.x, 0);
+      expect(title.x).toBeGreaterThan(markBox.x + markBox.width);
+      expect(Math.abs(title.middle - (markBox.y + markBox.height / 2))).toBeLessThan(2);
+    }
+    await expect(link).toHaveAccessibleName('Library home');
+  });
+}

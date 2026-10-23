@@ -23,6 +23,7 @@
     --armature-text-brand: 24px;
     --armature-weight-brand: 750;
     --armature-tracking-brand: 1px;
+    --armature-brand-mark-size: 28px;
     --armature-text-eyebrow: 10px;
     --armature-tracking-eyebrow: 1.6px;
     --armature-text-page-heading: 30px;
@@ -130,6 +131,7 @@
     --armature-text-brand: 24px;
     --armature-weight-brand: 750;
     --armature-tracking-brand: 1px;
+    --armature-brand-mark-size: 28px;
     --armature-text-eyebrow: 10px;
     --armature-tracking-eyebrow: 1.6px;
     --armature-text-page-heading: 30px;
@@ -236,6 +238,7 @@
     --armature-text-brand: 24px;
     --armature-weight-brand: 750;
     --armature-tracking-brand: 1px;
+    --armature-brand-mark-size: 28px;
     --armature-text-eyebrow: 10px;
     --armature-tracking-eyebrow: 1.6px;
     --armature-text-page-heading: 30px;
@@ -342,6 +345,7 @@
     --armature-text-brand: 24px;
     --armature-weight-brand: 750;
     --armature-tracking-brand: 1px;
+    --armature-brand-mark-size: 28px;
     --armature-text-eyebrow: 10px;
     --armature-tracking-eyebrow: 1.6px;
     --armature-text-page-heading: 30px;
@@ -537,7 +541,10 @@
   .armature-eyebrow { font-family: var(--armature-font-sans); line-height: var(--armature-line-height); margin: var(--armature-space-zero); font-size: var(--armature-text-eyebrow); font-weight: var(--armature-weight-emphasis); letter-spacing: var(--armature-tracking-eyebrow); text-transform: uppercase; color: var(--armature-muted); }
   .armature-side-nav { display: flex; flex-direction: column; gap: var(--armature-space-rail-gap); padding: var(--armature-space-6) var(--armature-space-text); background: var(--armature-rail-surface); color: var(--armature-rail-text); font-family: var(--armature-font-sans); }
   .armature-side-nav-brand { padding: var(--armature-space-zero) var(--armature-space-3) var(--armature-space-6); margin-bottom: var(--armature-space-4); border-bottom: var(--armature-border-width) solid var(--armature-rail-divider); font-size: var(--armature-text-brand); font-weight: var(--armature-weight-brand); letter-spacing: var(--armature-tracking-brand); overflow-wrap: anywhere; }
-  .armature-side-nav-brand > a { display: block; color: var(--armature-rail-text); font-size: inherit; font-weight: inherit; line-height: inherit; text-decoration: none; }
+  .armature-side-nav-brand > a { display: flex; align-items: center; gap: var(--armature-space-2); color: var(--armature-rail-text); font-size: inherit; font-weight: inherit; line-height: inherit; text-decoration: none; }
+  .armature-side-nav-brand > span { display: flex; align-items: center; gap: var(--armature-space-2); }
+  .armature-side-nav-mark { display: flex; flex: none; align-items: center; height: var(--armature-brand-mark-size); }
+  .armature-side-nav-mark > * { display: block; width: auto; height: 100%; max-width: none; }
   .armature-side-nav-brand small { display: block; font-size: var(--armature-text-small); font-weight: var(--armature-weight-normal); letter-spacing: normal; color: var(--armature-rail-muted); }
   .armature-side-nav > .armature-eyebrow { color: var(--armature-rail-muted); padding: var(--armature-space-detail) var(--armature-space-3); }
   .armature-side-nav nav { display: flex; flex-direction: column; gap: var(--armature-space-rail-gap); }
