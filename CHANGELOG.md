@@ -8,6 +8,11 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-10-23
+
+No change breaks the public surface: the new slot and token are optional,
+and no call site that compiled against 0.2.2 stops compiling or rendering.
+
 ### Added
 
 - `side_nav` and `app_shell` take an optional `mark` slot: a logo or symbol
@@ -230,7 +235,8 @@ First release. The public surface can change in minor versions until 1.0.0.
   organisms, never themselves. Layouts use atoms only. Tokens are CSS custom
   properties, not registry nodes.
 
-[Unreleased]: https://github.com/svetzal/armature/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/svetzal/armature/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/svetzal/armature/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/svetzal/armature/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/svetzal/armature/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/svetzal/armature/compare/v0.1.0...v0.2.0
