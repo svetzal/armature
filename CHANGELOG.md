@@ -8,7 +8,9 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
-Proposed as 0.3.1. No markup, attribute, event or script change: only the
+## [0.3.1] - 2026-10-24
+
+No markup, attribute, event or script change: only the
 look of `theme_switch`, and three new tokens.
 
 ### Changed
@@ -323,7 +325,8 @@ First release. The public surface can change in minor versions until 1.0.0.
   organisms, never themselves. Layouts use atoms only. Tokens are CSS custom
   properties, not registry nodes.
 
-[Unreleased]: https://github.com/svetzal/armature/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/svetzal/armature/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/svetzal/armature/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/svetzal/armature/compare/v0.2.4...v0.3.0
 [0.2.4]: https://github.com/svetzal/armature/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/svetzal/armature/compare/v0.2.2...v0.2.3
