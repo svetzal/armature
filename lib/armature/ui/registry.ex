@@ -30,8 +30,8 @@ defmodule Armature.UI.Registry do
         level: :molecule,
         module: Armature.Components,
         function: :theme_switch,
-        purpose: "A labelled native light, dark or auto choice.",
-        uses: [:select]
+        purpose: "A segmented system, light or dark choice of native radios.",
+        uses: [:icon]
       },
       %Node{
         id: :side_nav,

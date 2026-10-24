@@ -59,14 +59,24 @@
     return explicit(theme) ? theme : "auto";
   }
 
-  function choiceOf(form) {
-    return form.querySelector("select[name='theme']");
+  function choicesOf(form) {
+    return form.querySelectorAll("input[type='radio'][name='theme']");
+  }
+
+  function chosen(form) {
+    return form.querySelector("input[type='radio'][name='theme']:checked");
+  }
+
+  function check(form, theme) {
+    Array.prototype.forEach.call(choicesOf(form), function (radio) {
+      radio.checked = radio.value === theme;
+    });
   }
 
   function unmanagedSwitches() {
     var forms = document.querySelectorAll("form[data-armature-theme-switch]");
     return Array.prototype.filter.call(forms, function (form) {
-      return form.closest("[data-phx-session]") === null && choiceOf(form) !== null;
+      return form.closest("[data-phx-session]") === null && choicesOf(form).length > 0;
     });
   }
 
@@ -85,25 +95,30 @@
     return status;
   }
 
-  // Built from the switch's own label and option text, so it reads in the
-  // page's language.
-  function announce(form, select) {
-    var label = select.labels && select.labels[0];
-    var option = select.options[select.selectedIndex];
-    var name = option ? option.textContent.trim() : select.value;
-    statusOf(form).textContent = label ? label.textContent.trim() + ": " + name : name;
+  function words(element) {
+    return element ? element.textContent.replace(/\s+/g, " ").trim() : "";
   }
 
-  function choose(form, select) {
-    apply(select.value);
-    remember(select.value);
+  // Built from the switch's own legend and the chosen radio's label, so it
+  // reads in the page's language: "Theme: Dark".
+  function announce(form, radio) {
+    var legend = words(form.querySelector("legend"));
+    var name = words(radio.labels && radio.labels[0]) || radio.value;
+    statusOf(form).textContent = legend ? legend + ": " + name : name;
+  }
+
+  function choose(form) {
+    var radio = chosen(form);
+    if (radio === null) return;
+
+    apply(radio.value);
+    remember(radio.value);
 
     unmanagedSwitches().forEach(function (other) {
-      var otherSelect = choiceOf(other);
-      if (otherSelect !== select) otherSelect.value = current();
+      if (other !== form) check(other, current());
     });
 
-    announce(form, select);
+    announce(form, radio);
   }
 
   function enhance() {
@@ -113,17 +128,16 @@
       if (form.hasAttribute("data-armature-theme-enhanced")) return;
       form.setAttribute("data-armature-theme-enhanced", "");
 
-      var select = choiceOf(form);
-      select.value = theme;
+      check(form, theme);
       statusOf(form);
 
       form.addEventListener("change", function (event) {
-        if (event.target === select) choose(form, select);
+        if (event.target.name === "theme") choose(form);
       });
 
       form.addEventListener("submit", function (event) {
         event.preventDefault();
-        choose(form, select);
+        choose(form);
       });
     });
   }

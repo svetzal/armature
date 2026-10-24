@@ -1197,8 +1197,7 @@ defmodule Armature.ComponentsTest do
     end
 
     test "top_actions slot renders its content", %{doc: doc} do
-      assert present?(doc, "label[for=theme-choice]")
-      assert present?(doc, "#theme-choice option[value=dark][selected]")
+      assert present?(doc, ".armature-top-bar form#theme input#theme-dark[checked]")
     end
 
     test "footnote slot renders its content", %{doc: doc} do
@@ -1406,6 +1405,73 @@ defmodule Armature.ComponentsTest do
     test "the picker is described by its hint", %{doc: doc} do
       assert present?(doc, "select[name=destination][aria-describedby=components-hint]")
       assert text(doc, "#components-hint") == "Choosing an option opens its page."
+    end
+  end
+
+  describe "theme_switch" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <C.theme_switch id="theme" value="light" />
+          """
+        end)
+
+      %{doc: doc}
+    end
+
+    test "groups the choices in a fieldset named by its legend", %{doc: doc} do
+      assert text(doc, "#theme > fieldset > legend") == "Theme"
+    end
+
+    test "hides the legend visually by default", %{doc: doc} do
+      assert present?(doc, "#theme legend.armature-sr-only")
+    end
+
+    test "offers auto, light and dark as radios named theme", %{doc: doc} do
+      values =
+        for {"input", attributes, _} <-
+              doc |> LazyHTML.query("#theme input[type=radio][name=theme]") |> LazyHTML.to_tree(),
+            do: :proplists.get_value("value", attributes)
+
+      assert values == ["auto", "light", "dark"]
+    end
+
+    test "checks only the radio that matches value", %{doc: doc} do
+      assert present?(doc, "#theme-light[checked]")
+      refute present?(doc, "#theme-auto[checked], #theme-dark[checked]")
+    end
+
+    test "names each segment in words", %{doc: doc} do
+      names = for value <- ~w(auto light dark), do: text(doc, "label:has(> #theme-#{value})")
+      assert names == ["System", "Light", "Dark"]
+    end
+
+    test "gives each segment a tooltip matching its name", %{doc: doc} do
+      assert attribute(doc, "label:has(> #theme-auto)", "title") == "System"
+    end
+
+    test "draws each icon as hidden decoration in the current colour", %{doc: doc} do
+      assert doc
+             |> LazyHTML.query("#theme .armature-icon[aria-hidden=true] > svg")
+             |> Enum.count() ==
+               3
+
+      assert doc |> LazyHTML.query("#theme svg[stroke=currentColor]") |> Enum.count() == 3
+    end
+
+    test "checks auto when no value is given" do
+      doc = document(fn assigns -> ~H|<C.theme_switch id="theme" />| end)
+      assert present?(doc, "#theme-auto[checked]")
+    end
+
+    test "shows the legend when label_visible is set" do
+      doc =
+        document(fn assigns ->
+          ~H|<C.theme_switch id="theme" label="Appearance" label_visible />|
+        end)
+
+      assert text(doc, "#theme legend:not(.armature-sr-only)") == "Appearance"
     end
   end
 

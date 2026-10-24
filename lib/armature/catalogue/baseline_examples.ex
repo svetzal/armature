@@ -119,6 +119,10 @@ defmodule Armature.Catalogue.BaselineExamples do
     do:
       "Hint, validation, select, textarea, checkbox and disabled controls. Submit an empty name to see an error."
 
+  defp description(:theme_switch),
+    do:
+      "System, Light and Dark as native radios. The second switch shows its legend; both share one choice."
+
   defp description(:notice), do: "Static guidance, polite results and error alerts."
 
   defp description(id) when id in [:stack, :cluster, :grid, :split],
@@ -143,7 +147,16 @@ defmodule Armature.Catalogue.BaselineExamples do
           <:actions><A.status label="Ready" /></:actions>
         </A.page_heading>
       <% :theme_switch -> %>
-        <A.theme_switch id="example-theme" value={@state.theme} event="example:theme" />
+        <A.stack>
+          <A.theme_switch id="example-theme" value={@state.theme} event="example:theme" />
+          <A.theme_switch
+            id="example-theme-labelled"
+            value={@state.theme}
+            label="Appearance"
+            label_visible
+            event="example:theme"
+          />
+        </A.stack>
         <p role="status">Selected theme: {@state.theme}</p>
       <% :side_nav -> %>
         <A.side_nav

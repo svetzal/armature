@@ -58,7 +58,7 @@ for (const theme of ['light', 'dark']) {
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.goto('/ui?node=button');
     await expect(page.locator('[data-phx-main]')).toHaveClass(/phx-connected/);
-    await page.locator('#catalogue-theme-choice').selectOption(theme);
+    await page.locator(`#catalogue-theme-${theme}`).check();
     await expect(page.locator('#catalogue-components-choice')).toBeVisible();
     await page.locator('#catalogue-components-choice').selectOption('/ui?node=link');
     await expect(page).toHaveURL(/node=link/);
@@ -72,7 +72,7 @@ for (const theme of ['light', 'dark']) {
   test(`catalogue walkthrough includes table selection and inspector reflow (${theme})`, async ({ page }) => {
     await page.goto('/ui?node=table_inspector');
     await expect(page.locator('[data-phx-main]')).toHaveClass(/phx-connected/);
-    await page.locator('#catalogue-theme-choice').selectOption(theme);
+    await page.locator(`#catalogue-theme-${theme}`).check();
     const template = page.locator('#example-records');
     const selection = template.locator('.armature-row-select').first();
     await selection.click();

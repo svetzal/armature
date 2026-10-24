@@ -199,7 +199,7 @@ defmodule Armature.CatalogueTest do
   test "theme switch example announces the chosen theme" do
     {:ok, view, _} = live(build_conn(), "/nested/ui?node=theme_switch")
     view |> form("#example-theme", %{theme: "dark"}) |> render_change()
-    assert has_element?(view, "#example-theme-choice option[value=dark][selected]")
+    assert has_element?(view, "#example-theme-dark[checked]")
     assert has_element?(view, "p[role=status]", "Selected theme: dark")
   end
 

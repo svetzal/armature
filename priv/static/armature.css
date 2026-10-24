@@ -565,6 +565,68 @@
   .armature-page-heading h1 { margin: var(--armature-space-zero); font-size: var(--armature-text-page-heading); font-weight: var(--armature-weight-emphasis); overflow-wrap: anywhere; }
   .armature-theme-switch { color: var(--armature-muted); font-family: var(--armature-font-sans); font-size: var(--armature-text-micro); line-height: var(--armature-line-height); display: flex; flex-wrap: wrap; gap: var(--armature-space-2); align-items: center; }
   .armature-theme-switch select { min-width: var(--armature-space-zero); }
+  .armature-theme-switch fieldset { display: flex; flex-wrap: wrap; align-items: center; gap: var(--armature-space-2); min-inline-size: var(--armature-space-zero); margin: var(--armature-space-zero); padding: var(--armature-space-zero); border: none; }
+  /* A floated legend is not drawn into the fieldset border; it joins the row. */
+  .armature-theme-switch legend { float: inline-start; padding: var(--armature-space-zero); }
+  .armature-theme-switch-options { display: inline-flex; }
+  /* Adjacent segments share one border. Each is a full control-height square,
+     so the group lines up with buttons and inputs in a bar. */
+  .armature-theme-switch-option {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: max(var(--armature-control-height), var(--armature-target-size));
+    min-height: max(var(--armature-control-height), var(--armature-target-size));
+    border: var(--armature-border-width) solid var(--armature-control-border);
+    background: var(--armature-paper);
+    color: var(--armature-muted);
+    cursor: pointer;
+  }
+  .armature-theme-switch-option + .armature-theme-switch-option { margin-inline-start: calc(var(--armature-border-width) * -1); }
+  .armature-theme-switch-option:first-child { border-start-start-radius: var(--armature-radius-base); border-end-start-radius: var(--armature-radius-base); }
+  .armature-theme-switch-option:last-child { border-start-end-radius: var(--armature-radius-base); border-end-end-radius: var(--armature-radius-base); }
+  /* The radio covers the whole segment, border included, so the segment is
+     its pointer target. The segment draws its state and focus instead. */
+  .armature-theme-switch-option > input {
+    position: absolute;
+    inset: calc(var(--armature-border-width) * -1);
+    margin: var(--armature-space-zero);
+    appearance: none;
+    border-radius: inherit;
+    cursor: inherit;
+  }
+  .armature-theme-switch-option > input:focus-visible { outline: none; }
+  .armature-theme-switch-option:hover { background: var(--armature-hover); color: var(--armature-ink); }
+  .armature-theme-switch-option:active { transform: translateY(var(--armature-press-offset)); }
+  /* The current choice is pressed: a selected surface, ink icon and a
+     double-weight cue border, so it does not rest on colour alone. */
+  .armature-theme-switch-option:has(> input:checked) {
+    z-index: 1;
+    background: var(--armature-selected);
+    color: var(--armature-ink);
+    border-color: var(--armature-selected-cue);
+    box-shadow: inset var(--armature-space-zero) var(--armature-space-zero) var(--armature-space-zero) var(--armature-border-width) var(--armature-selected-cue);
+  }
+  .armature-theme-switch-option:has(> input:focus-visible) {
+    z-index: 2;
+    outline: var(--armature-focus-width) solid var(--armature-focus);
+    outline-offset: var(--armature-focus-offset);
+  }
+  /* Forced colours drop the surface and inset shadow, and focus and selection
+     share one system colour, so they differ by shape as elsewhere: the choice
+     is a solid ring inside, focus a ring outside, a focused choice a double ring. */
+  @media (forced-colors: active) {
+    .armature-theme-switch-option:has(> input:checked) {
+      outline: var(--armature-focus-width) solid var(--armature-selected-cue);
+      outline-offset: calc(var(--armature-focus-width) * -1);
+    }
+    .armature-theme-switch-option:has(> input:checked:focus-visible) {
+      outline: calc(var(--armature-focus-width) * 2) double var(--armature-focus);
+      outline-offset: var(--armature-focus-offset);
+    }
+  }
   .armature-panel { color: var(--armature-ink); font-family: var(--armature-font-sans); font-size: var(--armature-text-base); line-height: var(--armature-line-height); background: var(--armature-paper); border: var(--armature-border-width) solid var(--armature-line); border-radius: var(--armature-radius-panel); padding: var(--armature-space-panel-content); }
   .armature-panel h2 { font-size: var(--armature-text-heading); margin: var(--armature-space-zero); }
   .armature-panel > .armature-cluster { margin-bottom: var(--armature-space-4); }

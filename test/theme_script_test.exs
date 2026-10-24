@@ -24,8 +24,8 @@ defmodule Armature.ThemeScriptTest do
       end)
 
     assert present?(doc, "form#theme.armature-theme-switch[data-armature-theme-switch]")
-    assert present?(doc, "#theme select[name=theme] option[value=dark][selected]")
-    assert present?(doc, "#theme label[for=theme-choice]")
+    assert present?(doc, "#theme input[type=radio][name=theme][value=dark][checked]")
+    assert present?(doc, "#theme fieldset > legend")
     refute present?(doc, "#theme[phx-change], #theme[phx-submit]")
   end
 

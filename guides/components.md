@@ -30,7 +30,7 @@ and override its tokens in your own CSS. Components share light and dark token v
 
 | Component | Uses | Purpose |
 | --- | --- | --- |
-| `theme_switch` | `select` | A labelled native light, dark or auto choice. |
+| `theme_switch` | `icon` | A segmented system, light or dark choice of native radios. |
 | `page_heading` | `eyebrow`, `cluster` | A page heading with context and actions. |
 | `field` | `input`, `select`, `textarea` | A labelled control with hint and validation. |
 | `facts` | — | Labelled values in a description list. |
@@ -109,14 +109,23 @@ select. Its description warns that choosing an option opens its page. The select
 supplied destinations before calling `push_patch` or `push_navigate`. Its optional
 content slot can supply guidance. Keep current selection in caller state.
 
-`theme_switch` is a labelled native select; `value` is `"light"`, `"dark"` or
-`"auto"`. In a LiveView it emits `theme` on `event`; the caller applies it.
+`theme_switch` is a three-way segmented control: a `fieldset` whose `legend`
+carries `label` (default "Theme"), and three native radios named `theme` with
+the values `"auto"`, `"light"` and `"dark"`. Their segments show a monitor, a
+sun and a moon, and their names in words are "System", "Light" and "Dark".
+"System" is the name of `"auto"`: that choice follows the operating system or
+browser preference, and the icon shows a screen. The checked segment is
+pressed: a selected surface inside a double-weight border, never colour alone.
+The legend is visually hidden by default; set `label_visible` to show it
+beside the segments. Native radios give one tab stop and arrow-key movement.
+Each radio has the id `<id>-auto`, `<id>-light` or `<id>-dark`.
+In a LiveView it emits `theme` on `event`; the caller applies it.
 On a page without LiveView, omit `event` and load `armature-theme.js` (see
-the README), which applies, remembers and announces the choice. The form
-carries `data-armature-theme-switch` for the script; the script skips any
-switch inside a LiveView. Auto removes the theme attribute, inheriting consumer tokens. Its optional
-content slot can explain the choice. Native selection announces the current
-value and supports keyboard operation; it is not a binary toggle.
+the README), which applies, remembers and announces the choice, for example
+"Theme: Dark". The form carries `data-armature-theme-switch` for the script;
+the script skips any switch inside a LiveView. `"auto"` removes the theme
+attribute, inheriting consumer tokens. Its optional content slot can explain
+the choice or hold a submit button.
 
 The rail is 210px wide, 155px below 800px, and becomes wrapping links below
 520px, hiding its subtitle, label and footnote. These thresholds measure the

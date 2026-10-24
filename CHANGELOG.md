@@ -8,6 +8,40 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+`theme_switch` changes its markup. Code that selects its parts breaks; see
+Changed for what to select instead. Its attributes, slot and event payload
+do not change.
+
+### Changed
+
+- `theme_switch` is now a three-way segmented control, not a labelled
+  `select`. It renders a `fieldset` whose `legend` carries `label`, and three
+  native radios named `theme` with the values `auto`, `light` and `dark`.
+  Each segment shows an inline SVG icon (a monitor, a sun, a moon) and has a
+  name in words: "System", "Light" and "Dark". The checked segment is pressed:
+  a selected surface inside a double-weight border, and an inner ring in
+  forced colours. The control is one `--armature-control-height` tall, with
+  each segment at least `--armature-target-size` square.
+  - Breaking for code that selects the old parts: `select[name=theme]`,
+    `#<id>-choice`, `label[for=<id>-choice]` and its `option` elements are
+    gone. Select `input[name=theme]` (`:checked` for the current choice), the
+    radio ids `#<id>-auto`, `#<id>-light` and `#<id>-dark`, and
+    `#<id> legend` for the label. A test that called `selectOption` on the
+    select now checks a radio.
+  - `event` still receives `%{"theme" => value}` on change and submit, and
+    `value` still takes `"auto"`, `"light"` or `"dark"`.
+  - The visible label is gone by default; the legend still names the group
+    for assistive technology. The new `label_visible` attribute (default
+    `false`) shows it beside the segments.
+  - The announcement from `armature-theme.js` reads "Theme: System" for
+    `auto`, where it read "Theme: Auto".
+- `armature-theme.js` enhances the radios instead of a select. It still
+  applies, remembers and announces the choice, keeps several switches in
+  step, skips switches inside a LiveView and restores the remembered theme
+  before paint. Load the new script with the new markup; the old script does
+  not enhance the new switch.
+- The registry node for `theme_switch` now uses `icon`, not `select`.
+
 ### Added
 
 - `Armature.Tokens.Values.evaluate/1` evaluates stylesheet text in memory and
