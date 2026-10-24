@@ -592,7 +592,6 @@
     border: var(--armature-border-width) solid var(--armature-recessed);
     border-radius: var(--armature-radius-pill);
     background: var(--armature-recessed);
-    box-shadow: inset var(--armature-space-zero) var(--armature-border-width) calc(var(--armature-border-width) * 2) var(--armature-shadow);
   }
   /* Each choice is a pill a little wider than tall, at least the target size.
      Its icon sits on the track, muted, until the choice is current. */
@@ -633,14 +632,15 @@
     border: var(--armature-border-width) solid var(--armature-control-border);
     background: var(--armature-paper);
     color: var(--armature-ink);
-    box-shadow: var(--armature-space-zero) var(--armature-border-width) calc(var(--armature-border-width) * 3) var(--armature-shadow);
+    box-shadow: var(--armature-space-zero) var(--armature-border-width) var(--armature-space-zero) var(--armature-shadow);
   }
-  /* The focus ring follows the pill and fills the track's inset, so it sits
-     on the track surface and does not spill past the track's edge. */
+  /* The focus ring follows the pill at the standard offset. The gap keeps
+     the ring off the thumb's border, so the ring is judged against the track
+     and the surface beyond it, the pairs the contrast contract requires. */
   .armature-theme-switch-option:has(> input:focus-visible) {
     z-index: 1;
     outline: var(--armature-focus-width) solid var(--armature-focus);
-    outline-offset: calc(var(--armature-space-1) - var(--armature-focus-width));
+    outline-offset: var(--armature-focus-offset);
   }
   /* Forced colours drop the surfaces and shadows, and focus and selection
      share one system colour, so they differ by shape as elsewhere: the choice
