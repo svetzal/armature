@@ -2,12 +2,14 @@ defmodule Armature.Tokens.Values do
   @moduledoc """
   Resolves the token stylesheet contract and checks its WCAG contrast pairs.
 
-  `read/1` reads Armature's defaults followed by consumer stylesheet paths on
-  every call. It evaluates `:root`, theme attribute selectors, cascade layers,
-  specificity, source order and `!important` in six contexts: the system
-  colour preference (light or dark) crossed with the container's theme (none,
-  explicit light or explicit dark). See `contexts/0`. Other media conditions are
-  excluded: these results describe the ordinary colour schemes, not forced
+  `evaluate/1` is the pure evaluator over stylesheet text. `read/1` is the
+  file-reading wrapper: it reads Armature's shipped defaults followed by
+  consumer stylesheet paths on every call and passes the joined text to
+  `evaluate/1`. The evaluator handles `:root`, theme attribute selectors,
+  cascade layers, specificity, source order and `!important` in six contexts:
+  the system colour preference (light or dark) crossed with the container's
+  theme (none, explicit light or explicit dark). See `contexts/0`. Other media
+  conditions are excluded: these results describe the ordinary colour schemes, not forced
   colours, reduced motion or viewport-specific target sizes.
 
   This is a deliberately scoped token evaluator, not a browser CSS engine.
@@ -44,9 +46,27 @@ defmodule Armature.Tokens.Values do
   @doc "Every evaluated context, in display order, with a readable label."
   def contexts, do: Enum.map(@contexts, fn {name, _} -> {name, Map.fetch!(@labels, name)} end)
 
-  @doc "Reads stylesheet paths after the shipped defaults and returns values and pair results by context."
+  @doc """
+  Reads stylesheet paths after the shipped defaults and returns values and pair
+  results by context. The files are read on every call; see `evaluate/1`.
+  """
   def read(paths \\ []) do
-    css = Enum.map_join([default_path() | paths], "\n", &File.read!/1)
+    [default_path() | paths]
+    |> Enum.map_join("\n", &File.read!/1)
+    |> evaluate()
+  end
+
+  @doc """
+  Evaluates complete stylesheet text and returns values and pair results by
+  context, without touching the filesystem.
+
+  The text must include the defaults (`priv/static/armature.css`) followed by
+  any overrides, in load order, as `read/1` would join them.
+
+      Armature.Tokens.Values.evaluate(defaults <> ":root { --armature-ink: #000; }")
+  """
+  @spec evaluate(String.t()) :: %{atom() => %{values: map(), pairs: list()}}
+  def evaluate(css) do
     rules = parse(css)
     layers = layer_order(css)
 

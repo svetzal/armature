@@ -8,6 +8,18 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Added
+
+- `Armature.Tokens.Values.evaluate/1` evaluates stylesheet text in memory and
+  returns the same result as `read/1`. Pass the full text, including the
+  shipped defaults. `read/1` now reads the files and calls it; its behaviour
+  does not change.
+
+### Security
+
+- Update the locked `plug_crypto` from 2.2.0 to 2.2.1, which fixes
+  EEF-CVE-2026-105963 (GHSA-ffw9-w85g-f2vh), reported by `mix hex.audit`.
+
 ## [0.2.4] - 2026-10-23
 
 No change breaks the public surface: only the layout of a brand that has a
