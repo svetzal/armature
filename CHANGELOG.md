@@ -8,6 +8,17 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Fixed
+
+- `theme_switch`'s focus ring now sits at the standard `--armature-focus-offset`
+  around the focused choice. In 0.3.1 it sat one pixel off the thumb, so on its
+  inner side it touched the thumb's control border. A consumer whose focus
+  colour is close to its control border got a ring well under 3:1 there. The
+  gap now shows the track, a pair the contrast contract already checks.
+- The track has no inner shadow, and the thumb's shadow is a crisp one-pixel
+  edge with no blur. Both had darkened the gap the focus ring is judged
+  against.
+
 ## [0.3.1] - 2026-10-24
 
 No markup, attribute, event or script change: only the

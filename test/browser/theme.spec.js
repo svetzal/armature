@@ -173,6 +173,23 @@ test('at a narrow width each choice keeps the 44px target inside the track', asy
   }
 });
 
+test('the focus ring keeps the standard offset clear of the thumb border', async ({ page }) => {
+  await page.goto('/fixtures');
+  await page.keyboard.press('Tab');
+  await expect(choice(page, 'theme-one', 'auto')).toBeFocused();
+  const ring = await page.locator('label:has(> #theme-one-auto)').evaluate(el => {
+    const s = getComputedStyle(el);
+    return {
+      offset: parseFloat(s.outlineOffset),
+      token: parseFloat(s.getPropertyValue('--armature-focus-offset')),
+      style: s.outlineStyle
+    };
+  });
+  expect(ring.style).toBe('solid');
+  expect(ring.offset).toBe(ring.token);
+  expect(ring.offset).toBeGreaterThan(0);
+});
+
 test('choosing moves the thumb without moving any icon', async ({ page }) => {
   await page.goto('/fixtures');
   const icons = () => page.locator('#theme-one .armature-icon').evaluateAll(els =>
