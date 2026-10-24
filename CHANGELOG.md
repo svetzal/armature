@@ -8,6 +8,11 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-10-23
+
+No change breaks the public surface: only the layout of a brand that has a
+mark changes.
+
 ### Fixed
 
 - When the side navigation brand has a mark, its subtitle now starts under
@@ -242,7 +247,8 @@ First release. The public surface can change in minor versions until 1.0.0.
   organisms, never themselves. Layouts use atoms only. Tokens are CSS custom
   properties, not registry nodes.
 
-[Unreleased]: https://github.com/svetzal/armature/compare/v0.2.3...HEAD
+[Unreleased]: https://github.com/svetzal/armature/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/svetzal/armature/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/svetzal/armature/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/svetzal/armature/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/svetzal/armature/compare/v0.2.0...v0.2.1
