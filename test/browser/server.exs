@@ -52,6 +52,7 @@ defmodule Armature.Browser.Fixtures do
         heading_id="heading"
         context="Library"
         title="Library"
+        subtitle="Example application"
         home_patch="/fixtures"
         items={[%{label: "Overview", href: "/fixtures", current: true}]}
       >
@@ -101,6 +102,13 @@ defmodule Armature.Browser.Fixtures do
       <:col :let={row} label="Count" numeric>{row.count}</:col>
     </C.data_table>
     <C.inspector id="details" title="Record details">Choose a record</C.inspector>
+    <C.side_nav
+      id="plain-brand"
+      title="Library"
+      subtitle="Example application"
+      label="Plain brand sections"
+      items={[%{label: "Overview", href: "/fixtures"}]}
+    />
     """
   end
 end
