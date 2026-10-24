@@ -50,6 +50,8 @@
     --armature-selected: #e2ecd9;
     --armature-selected-cue: #245e49;
     --armature-image-backdrop: #fafaf8;
+    --armature-recessed: #ebe9df;
+    --armature-shadow: color-mix(in srgb, var(--armature-ink) 24%, transparent);
     --armature-font-sans: "Barlow", system-ui, sans-serif;
     --armature-font-mono: ui-monospace, monospace;
     --armature-text-small: 0.75rem;
@@ -84,6 +86,7 @@
     --armature-text-micro: 0.6875rem;
     --armature-text-control: 0.8125rem;
     --armature-radius-panel: 0.375rem;
+    --armature-radius-pill: 999px;
     --armature-space-half: 0.125rem;
     --armature-space-control: 0.375rem;
     --armature-space-input: 0.4375rem;
@@ -158,6 +161,8 @@
       --armature-selected: #365c43;
       --armature-selected-cue: #a8d3b4;
       --armature-image-backdrop: #1c3229;
+      --armature-recessed: #142620;
+      --armature-shadow: color-mix(in srgb, var(--armature-recessed) 90%, transparent);
       --armature-font-sans: "Barlow", system-ui, sans-serif;
       --armature-font-mono: ui-monospace, monospace;
       --armature-text-small: 0.75rem;
@@ -192,6 +197,7 @@
       --armature-text-micro: 0.6875rem;
       --armature-text-control: 0.8125rem;
       --armature-radius-panel: 0.375rem;
+      --armature-radius-pill: 999px;
       --armature-space-half: 0.125rem;
       --armature-space-control: 0.375rem;
       --armature-space-input: 0.4375rem;
@@ -265,6 +271,8 @@
     --armature-selected: #365c43;
     --armature-selected-cue: #a8d3b4;
     --armature-image-backdrop: #1c3229;
+    --armature-recessed: #142620;
+    --armature-shadow: color-mix(in srgb, var(--armature-recessed) 90%, transparent);
     --armature-font-sans: "Barlow", system-ui, sans-serif;
     --armature-font-mono: ui-monospace, monospace;
     --armature-text-small: 0.75rem;
@@ -299,6 +307,7 @@
     --armature-text-micro: 0.6875rem;
     --armature-text-control: 0.8125rem;
     --armature-radius-panel: 0.375rem;
+    --armature-radius-pill: 999px;
     --armature-space-half: 0.125rem;
     --armature-space-control: 0.375rem;
     --armature-space-input: 0.4375rem;
@@ -372,6 +381,8 @@
     --armature-selected: #e2ecd9;
     --armature-selected-cue: #245e49;
     --armature-image-backdrop: #fafaf8;
+    --armature-recessed: #ebe9df;
+    --armature-shadow: color-mix(in srgb, var(--armature-ink) 24%, transparent);
     --armature-font-sans: "Barlow", system-ui, sans-serif;
     --armature-font-mono: ui-monospace, monospace;
     --armature-text-small: 0.75rem;
@@ -406,6 +417,7 @@
     --armature-text-micro: 0.6875rem;
     --armature-text-control: 0.8125rem;
     --armature-radius-panel: 0.375rem;
+    --armature-radius-pill: 999px;
     --armature-space-half: 0.125rem;
     --armature-space-control: 0.375rem;
     --armature-space-input: 0.4375rem;
@@ -475,6 +487,7 @@
       --armature-selected: Canvas;
       --armature-selected-cue: Highlight;
       --armature-image-backdrop: Canvas;
+      --armature-recessed: Canvas;
     }
   }
 }
@@ -568,27 +581,35 @@
   .armature-theme-switch fieldset { display: flex; flex-wrap: wrap; align-items: center; gap: var(--armature-space-2); min-inline-size: var(--armature-space-zero); margin: var(--armature-space-zero); padding: var(--armature-space-zero); border: none; }
   /* A floated legend is not drawn into the fieldset border; it joins the row. */
   .armature-theme-switch legend { float: inline-start; padding: var(--armature-space-zero); }
-  .armature-theme-switch-options { display: inline-flex; }
-  /* Adjacent segments share one border. Each is a full control-height square,
-     so the group lines up with buttons and inputs in a bar. */
+  /* A pill track holds the three choices. The track is one compact control
+     tall on a fine pointer: a target-size thumb inside a small inset. */
+  .armature-theme-switch-options {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--armature-space-half);
+    box-sizing: border-box;
+    padding: calc(var(--armature-space-1) - var(--armature-border-width));
+    border: var(--armature-border-width) solid var(--armature-recessed);
+    border-radius: var(--armature-radius-pill);
+    background: var(--armature-recessed);
+    box-shadow: inset var(--armature-space-zero) var(--armature-border-width) calc(var(--armature-border-width) * 2) var(--armature-shadow);
+  }
+  /* Each choice is a pill a little wider than tall, at least the target size.
+     Its icon sits on the track, muted, until the choice is current. */
   .armature-theme-switch-option {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    min-width: max(var(--armature-control-height), var(--armature-target-size));
-    min-height: max(var(--armature-control-height), var(--armature-target-size));
-    border: var(--armature-border-width) solid var(--armature-control-border);
-    background: var(--armature-paper);
+    min-width: calc(var(--armature-target-size) + var(--armature-space-3));
+    min-height: var(--armature-target-size);
+    border-radius: var(--armature-radius-pill);
     color: var(--armature-muted);
     cursor: pointer;
   }
-  .armature-theme-switch-option + .armature-theme-switch-option { margin-inline-start: calc(var(--armature-border-width) * -1); }
-  .armature-theme-switch-option:first-child { border-start-start-radius: var(--armature-radius-base); border-end-start-radius: var(--armature-radius-base); }
-  .armature-theme-switch-option:last-child { border-start-end-radius: var(--armature-radius-base); border-end-end-radius: var(--armature-radius-base); }
-  /* The radio covers the whole segment, border included, so the segment is
-     its pointer target. The segment draws its state and focus instead. */
+  /* The radio covers the whole choice, border included, so the choice is its
+     pointer target. The choice draws its state and focus instead. */
   .armature-theme-switch-option > input {
     position: absolute;
     inset: calc(var(--armature-border-width) * -1);
@@ -598,26 +619,35 @@
     cursor: inherit;
   }
   .armature-theme-switch-option > input:focus-visible { outline: none; }
-  .armature-theme-switch-option:hover { background: var(--armature-hover); color: var(--armature-ink); }
-  .armature-theme-switch-option:active { transform: translateY(var(--armature-press-offset)); }
-  /* The current choice is pressed: a selected surface, ink icon and a
-     double-weight cue border, so it does not rest on colour alone. */
-  .armature-theme-switch-option:has(> input:checked) {
-    z-index: 1;
-    background: var(--armature-selected);
+  /* Only pointing eases in. A choice the page or keyboard makes, and a
+     target that grows on a coarse pointer, change at once. */
+  .armature-theme-switch-option:not(:has(> input:checked)):hover {
+    transition: all var(--armature-duration-fast) var(--armature-easing);
+    background: color-mix(in srgb, var(--armature-recessed), var(--armature-ink) var(--armature-hover-mix));
     color: var(--armature-ink);
-    border-color: var(--armature-selected-cue);
-    box-shadow: inset var(--armature-space-zero) var(--armature-space-zero) var(--armature-space-zero) var(--armature-border-width) var(--armature-selected-cue);
   }
+  /* The current choice is a raised thumb: a paper surface inside a control
+     boundary, with a soft shadow and an ink icon, so it does not rest on
+     colour alone. The border sits inside the fixed box, so nothing moves. */
+  .armature-theme-switch-option:has(> input:checked) {
+    border: var(--armature-border-width) solid var(--armature-control-border);
+    background: var(--armature-paper);
+    color: var(--armature-ink);
+    box-shadow: var(--armature-space-zero) var(--armature-border-width) calc(var(--armature-border-width) * 3) var(--armature-shadow);
+  }
+  /* The focus ring follows the pill and fills the track's inset, so it sits
+     on the track surface and does not spill past the track's edge. */
   .armature-theme-switch-option:has(> input:focus-visible) {
-    z-index: 2;
+    z-index: 1;
     outline: var(--armature-focus-width) solid var(--armature-focus);
-    outline-offset: var(--armature-focus-offset);
+    outline-offset: calc(var(--armature-space-1) - var(--armature-focus-width));
   }
-  /* Forced colours drop the surface and inset shadow, and focus and selection
+  /* Forced colours drop the surfaces and shadows, and focus and selection
      share one system colour, so they differ by shape as elsewhere: the choice
-     is a solid ring inside, focus a ring outside, a focused choice a double ring. */
+     is a solid ring inside, focus a ring outside, a focused choice a double
+     ring. The track keeps a visible boundary. */
   @media (forced-colors: active) {
+    .armature-theme-switch-options { border-color: var(--armature-control-border); }
     .armature-theme-switch-option:has(> input:checked) {
       outline: var(--armature-focus-width) solid var(--armature-selected-cue);
       outline-offset: calc(var(--armature-focus-width) * -1);

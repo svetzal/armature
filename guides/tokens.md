@@ -18,6 +18,12 @@ use the offset token to sit on the surrounding surface, including when a
 control has an accent fill. If a consumer adds another surface or places text
 on a decorative line, it must check that additional pairing itself.
 
+`--armature-recessed` is a content surface: a sunken track behind a group of
+choices, such as the theme switch. Text, control boundaries and focus meet the
+same ratios on it as on paper. `--armature-shadow` is a translucent colour for
+the shadow under a raised surface. A shadow never marks state alone: the
+surface it lifts also has a control boundary.
+
 Success, warning and error defaults use muted hues (sage, sand and blush
 surfaces with forest, ochre and brick text) so they sit quietly beside the
 green and paper tones. Colour is a second cue, never the only one: always provide a
@@ -117,6 +123,7 @@ uses the contract directly, and its samples follow the catalogue theme control.
 | `--armature-text-micro` | typography | Size of table headings, cell metadata and status chips. |  |
 | `--armature-text-control` | typography | Size of controls, table cells and notices. |  |
 | `--armature-radius-panel` | shape | Corner radius of content panels. |  |
+| `--armature-radius-pill` | shape | Corner radius that fully rounds the ends of a pill. |  |
 | `--armature-space-half` | space | Smallest chip inset. |  |
 | `--armature-space-control` | space | Button inset and icon gap. |  |
 | `--armature-space-input` | space | Input and chip inset. |  |
@@ -139,16 +146,16 @@ uses the contract directly, and its samples follow the catalogue theme control.
 | `--armature-opacity-full` | shape | Opacity of an active affordance. |  |
 | `--armature-press-offset` | shape | Displacement of a pressed action. |  |
 | `--armature-layout-min-width` | space | Minimum item width before grid and split regions stack. |  |
-| `--armature-ink` | colour | Primary text on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1 |
-| `--armature-muted` | colour | Secondary text that remains readable on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1 |
-| `--armature-accent` | colour | Emphasised text and links on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1 |
+| `--armature-ink` | colour | Primary text on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1, `--armature-recessed` 4.5:1 |
+| `--armature-muted` | colour | Secondary text that remains readable on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1, `--armature-recessed` 4.5:1 |
+| `--armature-accent` | colour | Emphasised text and links on content surfaces. | `--armature-paper` 4.5:1, `--armature-canvas` 4.5:1, `--armature-stripe` 4.5:1, `--armature-hover` 4.5:1, `--armature-selected` 4.5:1, `--armature-image-backdrop` 4.5:1, `--armature-success-bg` 4.5:1, `--armature-warning-bg` 4.5:1, `--armature-error-bg` 4.5:1, `--armature-recessed` 4.5:1 |
 | `--armature-on-accent` | colour | Text on an accent-filled control. | `--armature-accent` 4.5:1 |
 | `--armature-paper` | colour | Primary content surface. |  |
 | `--armature-canvas` | colour | Page surface behind content. |  |
 | `--armature-line` | colour | Decorative separators that do not convey state. |  |
-| `--armature-control-border` | colour | Boundary of an interactive control. | `--armature-paper` 3:1, `--armature-canvas` 3:1, `--armature-stripe` 3:1, `--armature-hover` 3:1, `--armature-selected` 3:1, `--armature-image-backdrop` 3:1, `--armature-success-bg` 3:1, `--armature-warning-bg` 3:1, `--armature-error-bg` 3:1 |
-| `--armature-input-border` | colour | Boundary of an editable input. | `--armature-paper` 3:1, `--armature-canvas` 3:1, `--armature-stripe` 3:1, `--armature-hover` 3:1, `--armature-selected` 3:1, `--armature-image-backdrop` 3:1, `--armature-success-bg` 3:1, `--armature-warning-bg` 3:1, `--armature-error-bg` 3:1 |
-| `--armature-focus` | colour | Visible keyboard focus ring. | `--armature-paper` 3:1, `--armature-canvas` 3:1, `--armature-stripe` 3:1, `--armature-hover` 3:1, `--armature-selected` 3:1, `--armature-image-backdrop` 3:1, `--armature-success-bg` 3:1, `--armature-warning-bg` 3:1, `--armature-error-bg` 3:1 |
+| `--armature-control-border` | colour | Boundary of an interactive control. | `--armature-paper` 3:1, `--armature-canvas` 3:1, `--armature-stripe` 3:1, `--armature-hover` 3:1, `--armature-selected` 3:1, `--armature-image-backdrop` 3:1, `--armature-success-bg` 3:1, `--armature-warning-bg` 3:1, `--armature-error-bg` 3:1, `--armature-recessed` 3:1 |
+| `--armature-input-border` | colour | Boundary of an editable input. | `--armature-paper` 3:1, `--armature-canvas` 3:1, `--armature-stripe` 3:1, `--armature-hover` 3:1, `--armature-selected` 3:1, `--armature-image-backdrop` 3:1, `--armature-success-bg` 3:1, `--armature-warning-bg` 3:1, `--armature-error-bg` 3:1, `--armature-recessed` 3:1 |
+| `--armature-focus` | colour | Visible keyboard focus ring. | `--armature-paper` 3:1, `--armature-canvas` 3:1, `--armature-stripe` 3:1, `--armature-hover` 3:1, `--armature-selected` 3:1, `--armature-image-backdrop` 3:1, `--armature-success-bg` 3:1, `--armature-warning-bg` 3:1, `--armature-error-bg` 3:1, `--armature-recessed` 3:1 |
 | `--armature-success-bg` | colour | Surface for success feedback accompanied by a text label. |  |
 | `--armature-warning-bg` | colour | Surface for warning feedback accompanied by a text label. |  |
 | `--armature-error-bg` | colour | Surface for error feedback accompanied by a text label. |  |
@@ -158,8 +165,10 @@ uses the contract directly, and its samples follow the catalogue theme control.
 | `--armature-stripe` | colour | Alternating row surface. |  |
 | `--armature-hover` | colour | Surface of a hovered item. |  |
 | `--armature-selected` | colour | Surface of a selected item. |  |
-| `--armature-selected-cue` | colour | Non-text outline or marker identifying a selected item. | `--armature-paper` 3:1, `--armature-canvas` 3:1, `--armature-stripe` 3:1, `--armature-hover` 3:1, `--armature-selected` 3:1, `--armature-image-backdrop` 3:1, `--armature-success-bg` 3:1, `--armature-warning-bg` 3:1, `--armature-error-bg` 3:1 |
+| `--armature-selected-cue` | colour | Non-text outline or marker identifying a selected item. | `--armature-paper` 3:1, `--armature-canvas` 3:1, `--armature-stripe` 3:1, `--armature-hover` 3:1, `--armature-selected` 3:1, `--armature-image-backdrop` 3:1, `--armature-success-bg` 3:1, `--armature-warning-bg` 3:1, `--armature-error-bg` 3:1, `--armature-recessed` 3:1 |
 | `--armature-image-backdrop` | colour | Surface behind an image or its placeholder. |  |
+| `--armature-recessed` | colour | Sunken surface behind a group of choices, such as a toggle track. |  |
+| `--armature-shadow` | colour | Translucent shadow beneath a raised surface; it never marks state alone. |  |
 | `--armature-font-sans` | typography | Font family for prose and controls. |  |
 | `--armature-font-mono` | typography | Font family for code and aligned numeric content. |  |
 | `--armature-text-small` | typography | Size of supporting text. |  |

@@ -8,6 +8,34 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+Proposed as 0.3.1. No markup, attribute, event or script change: only the
+look of `theme_switch`, and three new tokens.
+
+### Changed
+
+- `theme_switch` is restyled as a pill toggle, not boxed segments. The three
+  choices sit in a rounded track on a recessed fill, with no borders between
+  them. The checked choice is a raised thumb: a paper surface inside a
+  control border, with a soft shadow and an ink icon. The other icons sit on
+  the track, muted, and turn to ink with a faint fill on hover. On a fine
+  pointer the track is `--armature-control-height-compact` (32px) tall
+  around 24px thumbs; under a coarse pointer or a narrow viewport each choice
+  is at least 44px and the track grows with it. The focus ring follows the
+  pill and fits the track's inset. Forced colours keep the inner ring for the
+  choice and the outer double ring for a focused choice, and now draw the
+  track's border. The pressed offset on `:active` is gone.
+- `--armature-recessed` joins the content surfaces in the contrast contract.
+  Ink, muted and accent text need 4.5:1 on it, and control borders, input
+  borders, focus and the selected cue need 3:1. A consumer that overrides
+  those colours is now checked against the recessed surface too.
+
+### Added
+
+- `--armature-recessed`, the sunken surface behind a group of choices.
+- `--armature-shadow`, a translucent shadow colour for a raised surface,
+  mixed from `--armature-ink` in light and `--armature-recessed` in dark.
+- `--armature-radius-pill`, a radius that fully rounds a pill.
+
 ## [0.3.0] - 2026-10-24
 
 `theme_switch` changes its markup. Code that selects its parts breaks; see

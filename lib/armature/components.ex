@@ -167,13 +167,14 @@ defmodule Armature.Components do
   end
 
   @doc """
-  A three-way segmented System/Light/Dark choice built from native radios.
+  A three-way System/Light/Dark pill toggle built from native radios.
 
   A fieldset whose legend carries `label` (default "Theme") groups three
   radios named `theme` with the values `"auto"`, `"light"` and `"dark"`. Each
-  segment shows an icon (a monitor, a sun, a moon) and has a name in words:
-  "System", "Light" and "Dark". The radio that matches `value` is checked, and
-  its segment is pressed: a selected surface inside a double-weight border.
+  choice shows an icon (a monitor, a sun, a moon) and has a name in words:
+  "System", "Light" and "Dark". The choices sit in a rounded track. The radio
+  that matches `value` is checked, and its choice is a raised thumb: a paper
+  surface inside a control border, with a soft shadow and an ink icon.
   Native radios give one tab stop and arrow-key movement. The legend is
   visually hidden unless `label_visible` is true; it still names the group
   for assistive technology.
@@ -229,7 +230,7 @@ defmodule Armature.Components do
   attr(:checked, :boolean, required: true)
   slot(:inner_block, required: true)
 
-  # The radio covers its whole segment, so the segment is its target; the
+  # The radio covers its whole choice, so the choice is its target; the
   # name in words is the radio's label and the icon is decoration.
   defp theme_choice(assigns) do
     ~H"""
