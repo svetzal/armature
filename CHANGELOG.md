@@ -8,6 +8,8 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-24
+
 `theme_switch` changes its markup. Code that selects its parts breaks; see
 Changed for what to select instead. Its attributes, slot and event payload
 do not change.
@@ -293,7 +295,8 @@ First release. The public surface can change in minor versions until 1.0.0.
   organisms, never themselves. Layouts use atoms only. Tokens are CSS custom
   properties, not registry nodes.
 
-[Unreleased]: https://github.com/svetzal/armature/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/svetzal/armature/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/svetzal/armature/compare/v0.2.4...v0.3.0
 [0.2.4]: https://github.com/svetzal/armature/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/svetzal/armature/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/svetzal/armature/compare/v0.2.1...v0.2.2
