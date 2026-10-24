@@ -15,7 +15,7 @@ defmodule Armature.Tokens do
   @content_surfaces ~w(
     --armature-paper --armature-canvas --armature-stripe --armature-hover
     --armature-selected --armature-image-backdrop --armature-success-bg
-    --armature-warning-bg --armature-error-bg
+    --armature-warning-bg --armature-error-bg --armature-recessed
   )
   @text_contrast Enum.map(@content_surfaces, &%{background: &1, ratio: 4.5})
   @cue_contrast Enum.map(@content_surfaces, &%{background: &1, ratio: 3})
@@ -122,6 +122,11 @@ defmodule Armature.Tokens do
       role: "Size of controls, table cells and notices."
     },
     %{name: "--armature-radius-panel", group: :shape, role: "Corner radius of content panels."},
+    %{
+      name: "--armature-radius-pill",
+      group: :shape,
+      role: "Corner radius that fully rounds the ends of a pill."
+    },
     %{name: "--armature-space-half", group: :space, role: "Smallest chip inset."},
     %{name: "--armature-space-control", group: :space, role: "Button inset and icon gap."},
     %{name: "--armature-space-input", group: :space, role: "Input and chip inset."},
@@ -305,6 +310,18 @@ defmodule Armature.Tokens do
       name: "--armature-image-backdrop",
       group: :colour,
       role: "Surface behind an image or its placeholder.",
+      contrast: []
+    },
+    %{
+      name: "--armature-recessed",
+      group: :colour,
+      role: "Sunken surface behind a group of choices, such as a toggle track.",
+      contrast: []
+    },
+    %{
+      name: "--armature-shadow",
+      group: :colour,
+      role: "Translucent shadow beneath a raised surface; it never marks state alone.",
       contrast: []
     },
     %{

@@ -147,10 +147,63 @@ test('a visible legend sits on the same row as its segments', async ({ page }) =
   expect(text.y + text.height / 2).toBeLessThan(segments.y + segments.height);
 });
 
-test('the switch lines up in height with buttons and inputs', async ({ page }) => {
+const box = (page, selector) => page.locator(selector).boundingBox();
+const choiceBox = (page, theme) => box(page, `label:has(> #theme-one-${theme})`);
+
+test('on a fine pointer the track is one compact control tall around target-size pills', async ({ page }) => {
   await page.goto('/fixtures');
-  const segment = await page.locator('#theme-one .armature-theme-switch-option').first().boundingBox();
-  const input = await page.locator('#valid').boundingBox();
-  expect(segment.height).toBeCloseTo(input.height, 0);
-  expect(segment.width).toBeCloseTo(segment.height, 0);
+  const track = await box(page, '#theme-one .armature-theme-switch-options');
+  expect(track.height).toBeCloseTo(32, 0);
+  for (const theme of Object.keys(NAMES)) {
+    const pill = await choiceBox(page, theme);
+    expect(pill.height).toBeCloseTo(24, 0);
+    expect(pill.width).toBeGreaterThan(pill.height);
+  }
+});
+
+test('at a narrow width each choice keeps the 44px target inside the track', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 });
+  await page.goto('/fixtures');
+  const track = await box(page, '#theme-one .armature-theme-switch-options');
+  for (const theme of Object.keys(NAMES)) {
+    const pill = await choiceBox(page, theme);
+    expect(pill.height).toBeGreaterThanOrEqual(44);
+    expect(pill.width).toBeGreaterThan(pill.height);
+    expect(track.height).toBeGreaterThan(pill.height);
+  }
+});
+
+test('choosing moves the thumb without moving any icon', async ({ page }) => {
+  await page.goto('/fixtures');
+  const icons = () => page.locator('#theme-one .armature-icon').evaluateAll(els =>
+    els.map(el => { const r = el.getBoundingClientRect(); return [r.x, r.y]; }));
+  const before = await icons();
+  await choice(page, 'theme-one', 'dark').check();
+  expect(await icons()).toEqual(before);
+});
+
+test('the track is a filled pill with no borders between choices', async ({ page }) => {
+  await page.goto('/fixtures?theme=light');
+  const style = await page.locator('#theme-one .armature-theme-switch-options').evaluate(el => {
+    const s = getComputedStyle(el);
+    return { radius: parseFloat(s.borderTopLeftRadius), background: s.backgroundColor };
+  });
+  const track = await box(page, '#theme-one .armature-theme-switch-options');
+  expect(style.radius).toBeGreaterThanOrEqual(track.height / 2);
+  expect(style.background).not.toBe('rgba(0, 0, 0, 0)');
+  const unchecked = await page.locator('label:has(> #theme-one-dark)').evaluate(el => getComputedStyle(el).borderStyle);
+  expect(unchecked).toBe('none');
+});
+
+test('forced colours keep a visible track boundary', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto('/fixtures');
+  const border = await page.locator('#theme-one .armature-theme-switch-options').evaluate(el => {
+    const s = getComputedStyle(el);
+    return { style: s.borderTopStyle, width: parseFloat(s.borderTopWidth), colour: s.borderTopColor };
+  });
+  expect(border.style).toBe('solid');
+  expect(border.width).toBeGreaterThan(0);
+  const canvas = await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(border.colour).not.toBe(canvas);
 });

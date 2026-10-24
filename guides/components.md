@@ -109,15 +109,23 @@ select. Its description warns that choosing an option opens its page. The select
 supplied destinations before calling `push_patch` or `push_navigate`. Its optional
 content slot can supply guidance. Keep current selection in caller state.
 
-`theme_switch` is a three-way segmented control: a `fieldset` whose `legend`
+`theme_switch` is a three-way pill toggle: a `fieldset` whose `legend`
 carries `label` (default "Theme"), and three native radios named `theme` with
-the values `"auto"`, `"light"` and `"dark"`. Their segments show a monitor, a
+the values `"auto"`, `"light"` and `"dark"`. Their choices show a monitor, a
 sun and a moon, and their names in words are "System", "Light" and "Dark".
 "System" is the name of `"auto"`: that choice follows the operating system or
-browser preference, and the icon shows a screen. The checked segment is
-pressed: a selected surface inside a double-weight border, never colour alone.
-The legend is visually hidden by default; set `label_visible` to show it
-beside the segments. Native radios give one tab stop and arrow-key movement.
+browser preference, and the icon shows a screen. The choices sit in a rounded
+track on the `--armature-recessed` surface, with no borders between them. The
+checked choice is a raised thumb: a `--armature-paper` surface inside a
+`--armature-control-border` boundary, with a `--armature-shadow` and an ink
+icon. The other icons are muted and turn to ink on hover. State never rests
+on colour alone. On a fine pointer the track is one
+`--armature-control-height-compact` tall, so it fits a top bar; each choice is
+at least `--armature-target-size` tall and a little wider, and grows to 44px
+under a coarse pointer or a narrow viewport. In forced colours the track keeps
+a border, the choice is a solid ring inside, and a focused choice is a double
+ring outside. The legend is visually hidden by default; set `label_visible`
+to show it beside the choices. Native radios give one tab stop and arrow-key movement.
 Each radio has the id `<id>-auto`, `<id>-light` or `<id>-dark`.
 In a LiveView it emits `theme` on `event`; the caller applies it.
 On a page without LiveView, omit `event` and load `armature-theme.js` (see

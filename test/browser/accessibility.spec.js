@@ -62,13 +62,16 @@ for (const theme of ['light', 'dark']) {
     const valid = await styles(page.locator('#valid'));
     expect(invalid.shadow).not.toBe('none');
     expect(invalid.borderColor).not.toBe(valid.borderColor);
-    // The chosen theme segment is pressed: a second border stroke, not only a colour.
+    // The chosen theme is a raised thumb: a bordered paper surface with a
+    // shadow, while the other choices sit unbordered on the track.
     const chosen = await styles(page.locator(`label:has(> #theme-one-${theme})`));
     const other = await styles(page.locator('label:has(> #theme-one-auto)'));
+    expect(chosen.border).toBe('solid');
+    expect(other.border).toBe('none');
     expect(chosen.shadow).not.toBe('none');
     expect(other.shadow).toBe('none');
     expect(chosen.background).not.toBe(other.background);
-    expect(chosen.borderColor).not.toBe(other.borderColor);
+    expect(chosen.color).not.toBe(other.color);
     await expect(page.locator('#records-r1 button')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#records-r2 button')).toHaveAttribute('aria-pressed', 'false');
     expect((await styles(page.locator('#records-r1 td').first())).shadow).not.toBe('none');
