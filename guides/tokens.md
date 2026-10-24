@@ -61,6 +61,8 @@ explicit theme while the system prefers the other scheme, where preference
 media queries still apply). Each contains `:values` (resolved CSS custom
 properties) and `:pairs` (foreground, background, ratio, minimum, `pass?`
 and error).
+`Armature.Tokens.Values.evaluate/1` accepts the full stylesheet text,
+including the defaults, for tests that build CSS in memory.
 
 The evaluator supports token declarations on `:root`, the default automatic
 dark selector `:root:where(:not([data-armature-theme="light"]))`,
