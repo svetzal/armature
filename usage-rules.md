@@ -20,7 +20,10 @@ and register what you add. Full guides: `deps/armature/README.md` and
   `aria-invalid`. Pass `translate_error` to use the application's Gettext.
 - Application frame: build page frames from `app_shell`, `side_nav`, `top_bar`,
   `page_heading` and `grouped_nav`. Use `theme_switch` for light, dark and
-  automatic themes.
+  automatic themes. It renders three radios named "theme" with the values
+  "auto", "light" and "dark" and the ids "<id>-auto", "<id>-light" and
+  "<id>-dark", not a select. Its legend is hidden unless `label_visible` is
+  set.
 - `icon` wraps your own inline SVG as decoration only. Put the accessible name
   on the control, never on the icon.
 - Do not put Tailwind or other utility classes on Armature components or copy

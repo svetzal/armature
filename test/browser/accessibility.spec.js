@@ -13,9 +13,10 @@ async function styles(locator, pseudo = null) {
   }, pseudo);
 }
 
-async function visibleFocus(locator) {
+// A theme radio covers its segment and the segment draws the ring.
+async function visibleFocus(locator, ring = locator) {
   await expect(locator).toBeFocused();
-  const focus = await styles(locator);
+  const focus = await styles(ring);
   expect(focus.outline).not.toBe('none');
   expect(focus.width).toBeGreaterThanOrEqual(2);
   expect(focus.outlineColor).not.toBe('rgba(0, 0, 0, 0)');
@@ -29,12 +30,16 @@ async function visibleFocus(locator) {
 for (const theme of ['light', 'dark']) {
   test(`keyboard reaches named controls with visible unobscured focus (${theme})`, async ({ page }) => {
     await page.goto(`/fixtures?theme=${theme}`);
-    const controls = ['#theme-one-choice', '#theme-one button', '#theme-two-choice',
+    // The script checks the radio for the page's theme, the group's one tab stop.
+    const controls = [`#theme-one-${theme}`, '#theme-one button', `#theme-two-${theme}`,
       '.armature-skip-link', '#shell-rail .armature-side-nav-brand > a', '#shell-rail nav a', '#navigation a', '#open-example', '#enabled', '#valid', '#invalid'];
     for (const selector of controls) {
       await page.keyboard.press('Tab');
-      await visibleFocus(page.locator(selector));
+      const ring = selector.startsWith('#theme-') && !selector.endsWith('button')
+        ? page.locator(`label:has(> ${selector})`) : page.locator(selector);
+      await visibleFocus(page.locator(selector), ring);
     }
+    await expect(page.locator(`#theme-one-${theme}`)).toHaveAccessibleName(theme === 'dark' ? 'Dark' : 'Light');
     await expect(page.locator('#enabled')).toHaveAccessibleName('Save');
     await expect(page.locator('#valid')).toHaveAccessibleName('Name');
     await expect(page.locator('#invalid')).toHaveAccessibleName('Required name');
@@ -57,6 +62,13 @@ for (const theme of ['light', 'dark']) {
     const valid = await styles(page.locator('#valid'));
     expect(invalid.shadow).not.toBe('none');
     expect(invalid.borderColor).not.toBe(valid.borderColor);
+    // The chosen theme segment is pressed: a second border stroke, not only a colour.
+    const chosen = await styles(page.locator(`label:has(> #theme-one-${theme})`));
+    const other = await styles(page.locator('label:has(> #theme-one-auto)'));
+    expect(chosen.shadow).not.toBe('none');
+    expect(other.shadow).toBe('none');
+    expect(chosen.background).not.toBe(other.background);
+    expect(chosen.borderColor).not.toBe(other.borderColor);
     await expect(page.locator('#records-r1 button')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#records-r2 button')).toHaveAttribute('aria-pressed', 'false');
     expect((await styles(page.locator('#records-r1 td').first())).shadow).not.toBe('none');
@@ -113,7 +125,7 @@ for (const theme of ['light', 'dark']) {
     await page.goto(`/fixtures?theme=${theme}`);
     for (const width of [1280, 320]) {
       await page.setViewportSize({ width, height: 900 });
-      for (const selector of ['#enabled', '#valid', '#invalid', '#theme-one-choice',
+      for (const selector of ['#enabled', '#valid', '#invalid', '#theme-one-auto', '#theme-one-dark',
         '#records .armature-sort', '#records-r1 button', '#shell-rail nav a']) {
         const r = await page.locator(selector).boundingBox();
         const minimum = width === 320 || selector === '#shell-rail nav a' ? 44 : 24;
@@ -157,17 +169,27 @@ for (const theme of ['light', 'dark']) {
     expect((await styles(invalid)).outline).toBe('solid');
     expect((await styles(page.locator('#disabled'))).border).toBe('dashed');
     expect((await styles(page.locator('#shell-rail nav a'))).border).toBe('solid');
-    expect((await styles(page.locator('#theme-one-choice'))).appearance).toBe('auto');
-    const wrapper = page.locator('#theme-one .armature-select-wrap');
+    expect((await styles(page.locator('#single'))).appearance).toBe('auto');
+    const wrapper = page.locator('.armature-select-wrap').filter({ has: page.locator('#single') });
     expect((await styles(wrapper, '::after')).content).toBe('none');
+    const chosen = page.locator(`label:has(> #theme-one-${theme})`);
+    expect((await styles(chosen)).outline).toBe('solid');
+    expect((await styles(chosen)).offset).toBeLessThan(0);
+    expect((await styles(page.locator('label:has(> #theme-one-auto)'))).outline).toBe('none');
+    await page.locator(`#theme-one-${theme}`).focus();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Shift+Tab');
+    await visibleFocus(page.locator(`#theme-one-${theme}`), chosen);
+    expect((await styles(chosen)).outline).toBe('double');
+    expect((await styles(chosen)).offset).toBeGreaterThan(0);
   });
 }
 
 test('native single and multiple selects and checkbox retain usable geometry', async ({ page }) => {
   await page.goto('/fixtures');
-  const choice = page.locator('#theme-one-choice');
+  const choice = page.locator('#single');
   expect((await styles(choice)).appearance).toBe('none');
-  const chevron = await styles(page.locator('#theme-one .armature-select-wrap'), '::after');
+  const chevron = await styles(page.locator('.armature-select-wrap').filter({ has: choice }), '::after');
   expect(chevron.content).toBe('""');
   expect(chevron.borderColor).not.toBe('rgba(0, 0, 0, 0)');
   expect((await styles(page.locator('#list'))).appearance).toBe('auto');
@@ -184,7 +206,7 @@ test.describe('coarse pointer', () => {
   test.use({ hasTouch: true });
   test('controls grow to 44px without a narrow viewport', async ({ page }) => {
     await page.goto('/fixtures');
-    for (const selector of ['#enabled', '#valid', '#theme-one-choice', '#records-r1 button']) {
+    for (const selector of ['#enabled', '#valid', '#theme-one-auto', '#records-r1 button']) {
       const r = await page.locator(selector).boundingBox();
       expect(r.width).toBeGreaterThanOrEqual(44);
       expect(r.height).toBeGreaterThanOrEqual(44);
@@ -196,7 +218,7 @@ for (const theme of ['light', 'dark']) {
   test(`compact tables reduce cell padding while keeping named row actions (${theme})`, async ({ page }) => {
     await page.goto('/ui?node=data_table');
     await expect(page.locator('[data-phx-main]')).toHaveClass(/phx-connected/);
-    await page.locator('#catalogue-theme-choice').selectOption(theme);
+    await page.locator(`#catalogue-theme-${theme}`).check();
     const compact = page.locator('#example-table tbody tr').first();
     const regular = page.locator('#example-table-default tbody tr').first();
     expect((await compact.boundingBox()).height).toBeLessThan((await regular.boundingBox()).height);

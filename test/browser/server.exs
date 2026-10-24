@@ -82,6 +82,8 @@ defmodule Armature.Browser.Fixtures do
       <label for="disabled-input">Unavailable name</label><C.input id="disabled-input" disabled />
       <C.field id="check" type="checkbox" label="Include record" />
       <label for="list">Options</label><C.select id="list" multiple options={[{"First", "first"}]} />
+      <label for="single">Choice</label>
+      <C.select id="single" options={[{"First", "first"}, {"Second", "second"}]} />
       <div role="tablist" aria-label="Record views">
         <C.button id="selected" role="tab" aria-selected="true" aria-controls="selected-panel">Selected record</C.button>
       </div>
@@ -109,6 +111,7 @@ defmodule Armature.Browser.Fixtures do
       label="Plain brand sections"
       items={[%{label: "Overview", href: "/fixtures"}]}
     />
+    <C.theme_switch id="theme-three" label="Colour scheme" label_visible />
     """
   end
 end

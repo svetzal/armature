@@ -167,10 +167,20 @@ defmodule Armature.Components do
   end
 
   @doc """
-  A labelled native Light/Dark/Auto choice that announces the current selection.
+  A three-way segmented System/Light/Dark choice built from native radios.
 
-  In a LiveView, `event` receives `theme` and the consumer applies its chosen
-  theme. Auto must remove the theme attribute to inherit consumer tokens
+  A fieldset whose legend carries `label` (default "Theme") groups three
+  radios named `theme` with the values `"auto"`, `"light"` and `"dark"`. Each
+  segment shows an icon (a monitor, a sun, a moon) and has a name in words:
+  "System", "Light" and "Dark". The radio that matches `value` is checked, and
+  its segment is pressed: a selected surface inside a double-weight border.
+  Native radios give one tab stop and arrow-key movement. The legend is
+  visually hidden unless `label_visible` is true; it still names the group
+  for assistive technology.
+
+  In a LiveView, `event` receives `%{"theme" => value}` on change and submit,
+  and the consumer applies its chosen theme. `"auto"` follows the system
+  preference: the consumer removes the theme attribute to inherit its tokens
   without overwriting them. On a page without a LiveView socket, omit `event`
   and load `armature-theme.js`: it finds the form by its
   `data-armature-theme-switch` attribute, applies and remembers the choice on
@@ -180,6 +190,7 @@ defmodule Armature.Components do
   attr(:id, :string, required: true)
   attr(:value, :string, default: "auto", values: ~w(auto light dark))
   attr(:label, :string, default: "Theme")
+  attr(:label_visible, :boolean, default: false)
   attr(:event, :string, default: nil)
   slot(:inner_block)
 
@@ -192,15 +203,52 @@ defmodule Armature.Components do
       phx-change={@event}
       phx-submit={@event}
     >
-      <label for={@id <> "-choice"}>{@label}</label>
-      <.select
-        id={@id <> "-choice"}
-        name="theme"
-        value={@value}
-        options={[{"Auto", "auto"}, {"Light", "light"}, {"Dark", "dark"}]}
-      />
+      <fieldset>
+        <legend class={[!@label_visible && "armature-sr-only"]}>{@label}</legend>
+        <span class={["armature-theme-switch-options"]}>
+          <.theme_choice id={@id} value="auto" name="System" checked={@value == "auto"}>
+            <rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" />
+          </.theme_choice>
+          <.theme_choice id={@id} value="light" name="Light" checked={@value == "light"}>
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+          </.theme_choice>
+          <.theme_choice id={@id} value="dark" name="Dark" checked={@value == "dark"}>
+            <path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z" />
+          </.theme_choice>
+        </span>
+      </fieldset>
       {render_slot(@inner_block)}
     </form>
+    """
+  end
+
+  attr(:id, :string, required: true)
+  attr(:value, :string, required: true)
+  attr(:name, :string, required: true)
+  attr(:checked, :boolean, required: true)
+  slot(:inner_block, required: true)
+
+  # The radio covers its whole segment, so the segment is its target; the
+  # name in words is the radio's label and the icon is decoration.
+  defp theme_choice(assigns) do
+    ~H"""
+    <label class={["armature-theme-switch-option"]} title={@name}>
+      <input type="radio" id={@id <> "-" <> @value} name="theme" value={@value} checked={@checked} />
+      <.icon>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          {render_slot(@inner_block)}
+        </svg>
+      </.icon>
+      <span class={["armature-sr-only"]}>{@name}</span>
+    </label>
     """
   end
 

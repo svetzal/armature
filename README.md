@@ -116,7 +116,8 @@ before the page paints:
 <script src="/armature/armature-theme.js"></script>
 ```
 
-Omit the switch's `event` on these pages. The script finds every theme switch
+Omit the switch's `event` on these pages. The switch is three native radios
+named `theme`. The script finds every theme switch
 outside a LiveView, sets or removes `data-armature-theme` on the `html`
 element, remembers the choice in `localStorage` (and carries on without it
 when storage is blocked) and announces the change politely. It uses no inline
