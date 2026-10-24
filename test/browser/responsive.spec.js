@@ -116,7 +116,23 @@ for (const theme of ['light', 'dark']) {
       expect(markBox.x).toBeCloseTo(linkBox.x, 0);
       expect(title.x).toBeGreaterThan(markBox.x + markBox.width);
       expect(Math.abs(title.middle - (markBox.y + markBox.height / 2))).toBeLessThan(2);
+      const subtitle = page.locator('#shell-rail .armature-side-nav-brand small');
+      if (width > 520) expect(Math.abs((await subtitle.boundingBox()).x - title.x)).toBeLessThanOrEqual(1);
+      else await expect(subtitle).toBeHidden();
     }
     await expect(link).toHaveAccessibleName('Library home');
+  });
+
+  test(`a brand without a mark keeps its subtitle at the brand's content edge (${theme})`, async ({ page }) => {
+    await page.goto(`/fixtures?theme=${theme}`);
+    const brand = page.locator('#plain-brand .armature-side-nav-brand');
+    const contentLeft = await brand.evaluate(element => {
+      const style = getComputedStyle(element);
+      return element.getBoundingClientRect().left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft);
+    });
+    const subtitle = await brand.locator('small').boundingBox();
+    const title = await brand.locator('> span').boundingBox();
+    expect(Math.abs(subtitle.x - contentLeft)).toBeLessThanOrEqual(1);
+    expect(Math.abs(title.x - contentLeft)).toBeLessThanOrEqual(1);
   });
 }

@@ -8,6 +8,13 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Fixed
+
+- When the side navigation brand has a mark, its subtitle now starts under
+  the first letter of the title, not under the mark. The brand becomes a
+  two-column grid and the title link or span a subgrid across it; a brand
+  without a mark lays out exactly as before.
+
 ## [0.2.3] - 2026-10-23
 
 No change breaks the public surface: the new slot and token are optional,

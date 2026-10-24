@@ -545,6 +545,9 @@
   .armature-side-nav-brand > span { display: flex; align-items: center; gap: var(--armature-space-2); }
   .armature-side-nav-mark { display: flex; flex: none; align-items: center; height: var(--armature-brand-mark-size); }
   .armature-side-nav-mark > * { display: block; width: auto; height: 100%; max-width: none; }
+  .armature-side-nav-brand:has(.armature-side-nav-mark) { display: grid; grid-template-columns: auto 1fr; column-gap: var(--armature-space-2); }
+  .armature-side-nav-brand:has(.armature-side-nav-mark) > :is(a, span) { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; }
+  .armature-side-nav-brand:has(.armature-side-nav-mark) small { grid-column: 2; }
   .armature-side-nav-brand small { display: block; font-size: var(--armature-text-small); font-weight: var(--armature-weight-normal); letter-spacing: normal; color: var(--armature-rail-muted); }
   .armature-side-nav > .armature-eyebrow { color: var(--armature-rail-muted); padding: var(--armature-space-detail) var(--armature-space-3); }
   .armature-side-nav nav { display: flex; flex-direction: column; gap: var(--armature-space-rail-gap); }
