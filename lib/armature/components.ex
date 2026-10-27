@@ -11,6 +11,34 @@ defmodule Armature.Components do
   import Phoenix.Component, except: [link: 1]
 
   @tones ~w(neutral success warning error)
+  @themes ~w(auto light dark)
+
+  @input_attributes ~w(accept autocomplete capture checked disabled form list max maxlength min minlength multiple pattern placeholder readonly required size step)
+  @select_attributes ~w(autocomplete disabled form required size)
+  @textarea_attributes ~w(autocomplete cols disabled form maxlength minlength placeholder readonly required rows wrap)
+  # field/1 declares `multiple` itself, so it is not forwarded through `rest`.
+  @field_attributes Enum.uniq(@input_attributes ++ @select_attributes ++ @textarea_attributes) --
+                      ~w(multiple)
+
+  @column_attributes [
+    {:label, :string, [required: true]},
+    {:numeric, :boolean, []},
+    {:sort_key, :string, []},
+    {:row_label, :boolean, []},
+    {:interactive, :boolean, []}
+  ]
+
+  @paging_attributes [
+    {:page, :integer, [required: true]},
+    {:pages, :integer, [required: true]},
+    {:first, :integer, [required: true]},
+    {:last, :integer, [required: true]},
+    {:total, :integer, [required: true]},
+    {:page_event, :string, [required: true]},
+    {:page_size, :integer, [default: 25]},
+    {:page_sizes, :list, [default: []]},
+    {:size_event, :string, [default: nil]}
+  ]
 
   @doc "An uppercase contextual label. It supplements a heading, rather than replacing it."
   attr(:rest, :global)
@@ -189,7 +217,7 @@ defmodule Armature.Components do
   inside a LiveView.
   """
   attr(:id, :string, required: true)
-  attr(:value, :string, default: "auto", values: ~w(auto light dark))
+  attr(:value, :string, default: "auto", values: @themes)
   attr(:label, :string, default: "Theme")
   attr(:label_visible, :boolean, default: false)
   attr(:event, :string, default: nil)
@@ -223,6 +251,20 @@ defmodule Armature.Components do
     </form>
     """
   end
+
+  @doc "The themes `theme_switch/1` offers and sends, in order. Use it to validate the event value."
+  @spec themes() :: [String.t()]
+  def themes, do: @themes
+
+  @doc """
+  The `data-armature-theme` value for a theme chosen with `theme_switch/1`.
+
+  Returns `nil` for `"auto"`: the consumer then omits `data-armature-theme`, so
+  its root tokens and the system preference apply. Other themes return themselves.
+  """
+  @spec theme_attribute(String.t()) :: String.t() | nil
+  def theme_attribute("auto"), do: nil
+  def theme_attribute(theme), do: theme
 
   attr(:id, :string, required: true)
   attr(:value, :string, required: true)
@@ -407,10 +449,7 @@ defmodule Armature.Components do
   attr(:value, :any, default: nil)
   attr(:type, :string, default: "text")
 
-  attr(:rest, :global,
-    include:
-      ~w(accept autocomplete capture checked disabled form list max maxlength min minlength multiple pattern placeholder readonly required size step)
-  )
+  attr(:rest, :global, include: @input_attributes)
 
   def input(assigns) do
     ~H"""
@@ -434,7 +473,7 @@ defmodule Armature.Components do
   attr(:options, :list, default: [])
   attr(:prompt, :string, default: nil)
   attr(:multiple, :boolean, default: false)
-  attr(:rest, :global, include: ~w(autocomplete disabled form required size))
+  attr(:rest, :global, include: @select_attributes)
 
   def select(assigns) do
     ~H"""
@@ -453,10 +492,7 @@ defmodule Armature.Components do
   attr(:name, :string, default: nil)
   attr(:value, :any, default: nil)
 
-  attr(:rest, :global,
-    include:
-      ~w(autocomplete cols disabled form maxlength minlength placeholder readonly required rows wrap)
-  )
+  attr(:rest, :global, include: @textarea_attributes)
 
   def textarea(assigns) do
     ~H"""
@@ -498,10 +534,7 @@ defmodule Armature.Components do
   attr(:prompt, :string, default: nil)
   attr(:multiple, :boolean, default: false)
 
-  attr(:rest, :global,
-    include:
-      ~w(accept autocomplete capture checked cols disabled form list max maxlength min minlength pattern placeholder readonly required rows size step)
-  )
+  attr(:rest, :global, include: @field_attributes)
 
   def field(assigns) do
     assigns = prepare_field(assigns)
@@ -676,11 +709,7 @@ defmodule Armature.Components do
   attr(:inspector_id, :string, default: nil)
 
   slot :col, required: true do
-    attr(:label, :string, required: true)
-    attr(:numeric, :boolean)
-    attr(:sort_key, :string)
-    attr(:row_label, :boolean)
-    attr(:interactive, :boolean)
+    for {name, type, opts} <- @column_attributes, do: attr(name, type, opts)
   end
 
   def data_table(assigns) do
@@ -826,15 +855,7 @@ defmodule Armature.Components do
   Supplying `page_sizes` and `size_event` adds a labelled select sending `page_size`.
   """
   attr(:id, :string, required: true)
-  attr(:page, :integer, required: true)
-  attr(:pages, :integer, required: true)
-  attr(:first, :integer, required: true)
-  attr(:last, :integer, required: true)
-  attr(:total, :integer, required: true)
-  attr(:page_event, :string, required: true)
-  attr(:page_size, :integer, default: 25)
-  attr(:page_sizes, :list, default: [])
-  attr(:size_event, :string, default: nil)
+  for {name, type, opts} <- @paging_attributes, do: attr(name, type, opts)
 
   def pagination(assigns) do
     ~H"""
@@ -927,22 +948,10 @@ defmodule Armature.Components do
   attr(:selected_id, :any, default: nil)
   attr(:selection_label, :string, default: "No record selected.")
   attr(:inspector_title, :string, default: "Record details")
-  attr(:page, :integer, required: true)
-  attr(:pages, :integer, required: true)
-  attr(:first, :integer, required: true)
-  attr(:last, :integer, required: true)
-  attr(:total, :integer, required: true)
-  attr(:page_event, :string, required: true)
-  attr(:page_size, :integer, default: 25)
-  attr(:page_sizes, :list, default: [])
-  attr(:size_event, :string, default: nil)
+  for {name, type, opts} <- @paging_attributes, do: attr(name, type, opts)
 
   slot :col, required: true do
-    attr(:label, :string, required: true)
-    attr(:numeric, :boolean)
-    attr(:sort_key, :string)
-    attr(:row_label, :boolean)
-    attr(:interactive, :boolean)
+    for {name, type, opts} <- @column_attributes, do: attr(name, type, opts)
   end
 
   slot(:actions)

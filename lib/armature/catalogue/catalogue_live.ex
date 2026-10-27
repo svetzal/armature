@@ -8,6 +8,7 @@ defmodule Armature.Catalogue.CatalogueLive do
   @external_resource "priv/static/armature.css"
   @stylesheet File.read!(@external_resource)
   @preview_widths ~w(wide 800 520 375)
+  @themes Armature.Components.themes()
 
   def on_mount({registry, examples, token_stylesheets, title}, _params, _session, socket) do
     Code.ensure_loaded!(examples)
@@ -52,7 +53,7 @@ defmodule Armature.Catalogue.CatalogueLive do
   end
 
   def handle_event("catalogue:theme", %{"theme" => theme}, socket)
-      when theme in ~w(auto light dark),
+      when theme in @themes,
       do: {:noreply, assign(socket, theme: theme)}
 
   def handle_event("catalogue:width", %{"width" => width}, socket)
@@ -94,7 +95,7 @@ defmodule Armature.Catalogue.CatalogueLive do
       heading_id={@heading_id}
       heading_rest={%{"phx-mounted" => JS.focus()}}
       eyebrow={@eyebrow}
-      data-armature-theme={if @theme != "auto", do: @theme}
+      data-armature-theme={A.theme_attribute(@theme)}
     >
       <:footnote>Live components · Synthetic examples · Refresh resets examples</:footnote>
       <:top_actions>
@@ -233,7 +234,7 @@ defmodule Armature.Catalogue.CatalogueLive do
       Enum.map(Armature.Registry.levels(), fn item ->
         %{
           id: "catalogue-level-#{item}",
-          label: Page.level_name(item),
+          label: Armature.Registry.level_name(item),
           patch: path <> "?level=#{item}",
           current: !tokens? && level == item
         }
@@ -245,7 +246,7 @@ defmodule Armature.Catalogue.CatalogueLive do
 
     Enum.map(levels, fn item ->
       %{
-        label: Page.level_name(item),
+        label: Armature.Registry.level_name(item),
         level: item,
         items:
           nodes

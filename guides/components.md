@@ -132,7 +132,10 @@ On a page without LiveView, omit `event` and load `armature-theme.js` (see
 the README), which applies, remembers and announces the choice, for example
 "Theme: Dark". The form carries `data-armature-theme-switch` for the script;
 the script skips any switch inside a LiveView. `"auto"` removes the theme
-attribute, inheriting consumer tokens. Its optional content slot can explain
+attribute, inheriting consumer tokens. In a handler, check the value against
+`Armature.Components.themes/0` and set `data-armature-theme` to
+`Armature.Components.theme_attribute/1`, which is `nil` for `"auto"` so the
+attribute is omitted. Its optional content slot can explain
 the choice or hold a submit button.
 
 The rail is 210px wide, 155px below 800px, and becomes wrapping links below

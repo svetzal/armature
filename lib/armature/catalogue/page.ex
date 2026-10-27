@@ -46,9 +46,6 @@ defmodule Armature.Catalogue.Page do
     end
   end
 
-  @spec level_name(Armature.Registry.level()) :: String.t()
-  def level_name(level), do: level |> to_string() |> String.capitalize() |> Kernel.<>("s")
-
   @spec node_path(String.t(), Node.t()) :: String.t()
   def node_path(path, node), do: path <> "?" <> URI.encode_query(%{"node" => node.id})
 
@@ -65,8 +62,12 @@ defmodule Armature.Catalogue.Page do
 
   defp titles(true, _node, _level), do: {"Tokens", "tokens", "Tokens"}
   defp titles(false, nil, nil), do: {"Component catalogue", "index", "Catalogue"}
-  defp titles(false, nil, level), do: {"Component catalogue", "index", level_name(level)}
-  defp titles(false, node, level), do: {to_string(node.id), node.id, level_name(level)}
+
+  defp titles(false, nil, level),
+    do: {"Component catalogue", "index", Armature.Registry.level_name(level)}
+
+  defp titles(false, node, level),
+    do: {to_string(node.id), node.id, Armature.Registry.level_name(level)}
 
   defp uses(_nodes, nil), do: []
   defp uses(nodes, node), do: Enum.filter(nodes, &(&1.id in node.uses))

@@ -8,6 +8,20 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Added
+
+- `Armature.Components.themes/0` lists the themes `theme_switch` sends, and
+  `Armature.Components.theme_attribute/1` gives the `data-armature-theme`
+  value for one: `nil` for `"auto"`, so the attribute is omitted.
+- `Armature.Registry.level_name/1` gives a level's plural heading, such as
+  `"Atoms"`. The catalogue and the registry's guide check both use it.
+
+### Fixed
+
+- `field type="textarea"` now forwards `wrap` to its textarea. `field`'s
+  forwarded attributes now come from those of `input`, `select` and `textarea`,
+  so they cannot drift apart again.
+
 ## [0.3.2] - 2026-10-24
 
 No markup, attribute, event or script change.

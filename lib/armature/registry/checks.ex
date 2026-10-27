@@ -153,7 +153,7 @@ defmodule Armature.Registry.Checks do
       level =
         Enum.find(
           Registry.levels(),
-          &(String.capitalize(Atom.to_string(&1)) <> "s" == String.trim(heading))
+          &(Registry.level_name(&1) == String.trim(heading))
         )
 
       if level, do: table_rows(lines, level), else: []
