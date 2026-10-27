@@ -18,6 +18,10 @@ defmodule Armature.Registry do
   @spec levels() :: [level()]
   def levels, do: [:atom, :layout, :molecule, :organism, :template]
 
+  @doc "The plural heading for a level, such as `\"Atoms\"`."
+  @spec level_name(level()) :: String.t()
+  def level_name(level), do: level |> to_string() |> String.capitalize() |> Kernel.<>("s")
+
   @doc "Returns the registry's nodes at a level, preserving declaration order."
   @spec at_level(module(), level()) :: [Node.t()]
   def at_level(registry, level), do: Enum.filter(registry.nodes(), &(&1.level == level))

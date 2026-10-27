@@ -1095,6 +1095,34 @@ defmodule Armature.ComponentsTest do
     test "inspector is not a live region", %{doc: doc} do
       refute present?(doc, "aside[aria-live]")
     end
+
+    test "declares the same col slot attributes as data_table" do
+      assert slot_attrs(:table_inspector, :col) == slot_attrs(:data_table, :col)
+    end
+
+    test "declares the paging attributes as pagination does" do
+      paging = ~w(page pages first last total page_event page_size page_sizes size_event)a
+
+      assert declared_attrs(:table_inspector, paging) == declared_attrs(:pagination, paging)
+    end
+  end
+
+  describe "field forwarding" do
+    test "a textarea field forwards wrap" do
+      doc =
+        document(fn assigns ->
+          ~H|<C.field id="notes" name="notes" label="Notes" type="textarea" wrap="off" />|
+        end)
+
+      assert present?(doc, "textarea#notes[wrap=off]")
+    end
+
+    test "forwards every attribute its controls accept except multiple" do
+      controls = Enum.flat_map([:input, :select, :textarea], &rest_include/1)
+
+      assert Enum.sort(rest_include(:field)) ==
+               controls |> Enum.uniq() |> List.delete("multiple") |> Enum.sort()
+    end
   end
 
   test "facts associate each visible label with its value" do
@@ -1473,6 +1501,43 @@ defmodule Armature.ComponentsTest do
 
       assert text(doc, "#theme legend:not(.armature-sr-only)") == "Appearance"
     end
+
+    test "themes/0 lists the values theme_switch accepts" do
+      value = Enum.find(C.__components__().theme_switch.attrs, &(&1.name == :value))
+      assert C.themes() == Keyword.fetch!(value.opts, :values)
+    end
+
+    test "theme_attribute/1 omits the attribute for auto" do
+      assert C.theme_attribute("auto") == nil
+    end
+
+    test "theme_attribute/1 names an explicit theme" do
+      assert C.theme_attribute("dark") == "dark"
+    end
+  end
+
+  defp slot_attrs(component, slot) do
+    C.__components__()
+    |> Map.fetch!(component)
+    |> Map.fetch!(:slots)
+    |> Enum.find(&(&1.name == slot))
+    |> Map.fetch!(:attrs)
+    |> Enum.map(&{&1.name, &1.type, &1.required})
+  end
+
+  defp declared_attrs(component, names) do
+    for attr <- C.__components__() |> Map.fetch!(component) |> Map.fetch!(:attrs),
+        attr.name in names,
+        do: {attr.name, attr.type, attr.required, Keyword.get(attr.opts, :default)}
+  end
+
+  defp rest_include(component) do
+    C.__components__()
+    |> Map.fetch!(component)
+    |> Map.fetch!(:attrs)
+    |> Enum.find(&(&1.name == :rest))
+    |> Map.fetch!(:opts)
+    |> Keyword.fetch!(:include)
   end
 
   defp document(component, assigns \\ %{}) do

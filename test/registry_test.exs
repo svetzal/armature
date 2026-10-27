@@ -15,6 +15,11 @@ defmodule Armature.RegistryTest do
     assert Registry.levels() == [:atom, :layout, :molecule, :organism, :template]
   end
 
+  test "level_name/1 names a level in the plural" do
+    assert Registry.level_name(:atom) == "Atoms"
+    assert Registry.level_name(:organism) == "Organisms"
+  end
+
   test "nodes are listed level by level in declaration order" do
     assert Enum.flat_map(Registry.levels(), &Registry.at_level(Fixture, &1)) == Fixture.nodes()
     assert Registry.at_level(Fixture, :layout) |> Enum.map(& &1.id) == [:row]

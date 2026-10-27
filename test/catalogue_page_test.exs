@@ -96,10 +96,6 @@ defmodule Armature.Catalogue.PageTest do
     end
   end
 
-  test "level_name/1 names a level in the plural" do
-    assert Page.level_name(:atom) == "Atoms"
-  end
-
   test "node_path/2 links to a node under the catalogue path" do
     assert Page.node_path("/ui", @button) == "/ui?node=button"
   end

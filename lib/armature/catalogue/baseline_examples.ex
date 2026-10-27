@@ -5,6 +5,8 @@ defmodule Armature.Catalogue.BaselineExamples do
   alias Armature.Components, as: A
   alias Armature.Catalogue.Records
 
+  @themes A.themes()
+
   @impl true
   def examples(id) do
     if Enum.any?(Armature.UI.Registry.nodes(), &(&1.id == id)) do
@@ -42,7 +44,7 @@ defmodule Armature.Catalogue.BaselineExamples do
   end
 
   @impl true
-  def handle_event("example:theme", %{"theme" => theme}, state) when theme in ~w(auto light dark),
+  def handle_event("example:theme", %{"theme" => theme}, state) when theme in @themes,
     do: %{state | theme: theme}
 
   def handle_event("example:choose", %{"destination" => destination}, state),

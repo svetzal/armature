@@ -39,9 +39,12 @@ defmodule Armature.Catalogue.Preview do
 
   @spec document(String.t(), String.t(), String.t()) :: String.t()
   def document(html, theme, stylesheet) do
-    theme = if theme == "auto", do: "", else: ~s(data-armature-theme="#{theme}")
+    {:safe, theme} =
+      Phoenix.HTML.attributes_escape([
+        {"data-armature-theme", Armature.Components.theme_attribute(theme)}
+      ])
 
-    ~s(<!doctype html><html lang="en" #{theme}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>) <>
+    ~s(<!doctype html><html lang="en"#{theme}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>) <>
       stylesheet <>
       "body { margin: var(--armature-space-zero); }</style></head><body>" <>
       html <> "</body></html>"
