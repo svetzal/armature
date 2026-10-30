@@ -270,8 +270,9 @@ use Armature.RegistryCase,
 The docs check reads tables beneath `## Atoms`, `## Layouts`, `## Molecules`,
 `## Organisms`, and `## Templates`. First-column backticks name node ids.
 A second column can list backticked use ids separated by commas, or `—` for
-no dependencies. A prose purpose column can be used instead; then only ids
-and levels are checked. For example:
+no dependencies. A prose second column, or a third column, is a purpose
+column. Its text must match the node's `purpose`, so the guide and the
+registry cannot drift apart. For example:
 
 ```markdown
 ## Atoms

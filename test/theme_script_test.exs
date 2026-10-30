@@ -4,7 +4,7 @@ defmodule Armature.ThemeScriptTest do
   # looks for and the package that ships it.
   use ExUnit.Case, async: true
   use Phoenix.Component
-  import Phoenix.LiveViewTest
+  import Armature.MarkupHelpers
   alias Armature.Components, as: C
 
   @script_path Path.expand("../priv/static/armature-theme.js", __DIR__)
@@ -42,10 +42,4 @@ defmodule Armature.ThemeScriptTest do
              "form#theme[data-armature-theme-switch][phx-change=theme][phx-submit=theme]"
            )
   end
-
-  defp document(component) do
-    component |> render_component(%{}) |> LazyHTML.from_fragment()
-  end
-
-  defp present?(doc, selector), do: doc |> LazyHTML.query(selector) |> LazyHTML.to_tree() != []
 end

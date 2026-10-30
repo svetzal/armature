@@ -173,9 +173,42 @@ defmodule Armature.RegistryTest do
 
   test "documentation rows may carry a purpose column", %{snapshot: snapshot} do
     source =
-      String.replace(docs(snapshot.nodes), "| `text` | — |", "| `text` | Plain text purpose |")
+      String.replace(
+        docs(snapshot.nodes),
+        "| `text` | — |",
+        "| `text` | #{purpose(snapshot, :text)} |"
+      )
 
     assert Checks.docs(%{snapshot | docs: source}) == []
+  end
+
+  test "a documented purpose mismatch is reported", %{snapshot: snapshot} do
+    source =
+      String.replace(docs(snapshot.nodes), "| `text` | — |", "| `text` | Plain text purpose |")
+
+    assert Checks.docs(%{snapshot | docs: source}) == [
+             {:docs_purpose_mismatch, :text, purpose(snapshot, :text), "Plain text purpose"}
+           ]
+  end
+
+  test "documentation rows may carry a purpose third column", %{snapshot: snapshot} do
+    source =
+      String.replace(
+        docs(snapshot.nodes),
+        "| `text` | — |",
+        "| `text` | — | #{purpose(snapshot, :text)} |"
+      )
+
+    assert Checks.docs(%{snapshot | docs: source}) == []
+  end
+
+  test "a purpose third column mismatch is reported", %{snapshot: snapshot} do
+    source =
+      String.replace(docs(snapshot.nodes), "| `text` | — |", "| `text` | — | Wrong purpose. |")
+
+    assert Checks.docs(%{snapshot | docs: source}) == [
+             {:docs_purpose_mismatch, :text, purpose(snapshot, :text), "Wrong purpose."}
+           ]
   end
 
   test "repeated documentation rows are reported", %{snapshot: snapshot} do
@@ -292,6 +325,8 @@ defmodule Armature.RegistryTest do
     extra = %{node | id: :extra, module: module, function: function}
     %{snapshot | nodes: snapshot.nodes ++ [extra]}
   end
+
+  defp purpose(snapshot, id), do: Enum.find(snapshot.nodes, &(&1.id == id)).purpose
 
   defp docs(nodes) do
     Enum.map_join(Registry.levels(), "\n", fn level ->
