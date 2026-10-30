@@ -86,23 +86,18 @@ defmodule Armature.Registry.Checks do
   Checks Markdown tables under `## Atoms`, `## Layouts`, `## Molecules`,
   `## Organisms`, and `## Templates`. First-column backticks name registry ids;
   an optional second column lists backticked use ids or `—` for no uses.
-  A prose second column is treated as a purpose column, not a uses declaration.
+  A prose second column, or a third column, is a purpose column and is
+  checked against the node's `purpose`.
   """
   def docs(%{docs: nil}), do: []
 
   def docs(%{docs: source, nodes: nodes}) do
     documented = documented_nodes(source)
     expected = Enum.map(nodes, &{&1.level, Atom.to_string(&1.id)}) |> Enum.sort()
-    listed = Enum.map(documented, fn {level, id, _} -> {level, id} end) |> Enum.sort()
+    listed = Enum.map(documented, fn {level, id, _, _} -> {level, id} end) |> Enum.sort()
     errors = if expected == listed, do: [], else: [{:docs_mismatch, expected, listed}]
 
-    errors ++
-      for {level, id, uses} <- documented,
-          is_list(uses),
-          node = Enum.find(nodes, &(&1.level == level and Atom.to_string(&1.id) == id)),
-          expected_uses = Enum.map(node.uses, &Atom.to_string/1) |> Enum.sort(),
-          Enum.sort(uses) != expected_uses,
-          do: {:docs_uses_mismatch, node.id, expected_uses, Enum.sort(uses)}
+    errors ++ uses_errors(documented, nodes) ++ purpose_errors(documented, nodes)
   end
 
   @doc """
@@ -117,6 +112,27 @@ defmodule Armature.Registry.Checks do
         {node.module, node.function} not in identities,
         do: {:untested_component, node.id}
   end
+
+  defp uses_errors(documented, nodes) do
+    for {level, id, uses, _} <- documented,
+        is_list(uses),
+        node = documented_node(nodes, level, id),
+        expected_uses = Enum.map(node.uses, &Atom.to_string/1) |> Enum.sort(),
+        Enum.sort(uses) != expected_uses,
+        do: {:docs_uses_mismatch, node.id, expected_uses, Enum.sort(uses)}
+  end
+
+  defp purpose_errors(documented, nodes) do
+    for {level, id, _, purpose} <- documented,
+        is_binary(purpose),
+        node = documented_node(nodes, level, id),
+        expected = String.trim(node.purpose || ""),
+        purpose != expected,
+        do: {:docs_purpose_mismatch, node.id, expected, purpose}
+  end
+
+  defp documented_node(nodes, level, id),
+    do: Enum.find(nodes, &(&1.level == level and Atom.to_string(&1.id) == id))
 
   defp purpose?(purpose) when is_binary(purpose), do: String.trim(purpose) != ""
   defp purpose?(_), do: false
@@ -165,8 +181,19 @@ defmodule Armature.Registry.Checks do
         String.starts_with?(String.trim(line), "| `"),
         [names | remaining] = line |> String.split("|", trim: true) |> Enum.map(&String.trim/1),
         id <- backticked(names),
-        do: {level, id, cell_uses(List.first(remaining))}
+        do: table_row(level, id, remaining)
   end
+
+  defp table_row(level, id, [second, purpose | _]), do: {level, id, cell_uses(second), purpose}
+
+  defp table_row(level, id, [second]) do
+    case cell_uses(second) do
+      nil -> {level, id, nil, second}
+      uses -> {level, id, uses, nil}
+    end
+  end
+
+  defp table_row(level, id, []), do: {level, id, nil, nil}
 
   defp cell_uses("—"), do: []
   defp cell_uses(nil), do: nil

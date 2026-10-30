@@ -16,7 +16,18 @@ Until 1.0.0, a minor version can change the public surface.
 - `Armature.Registry.level_name/1` gives a level's plural heading, such as
   `"Atoms"`. The catalogue and the registry's guide check both use it.
 
+### Changed
+
+- The registry docs check now compares a purpose column (a prose second
+  column, or a third column) with each node's `purpose` and reports
+  `{:docs_purpose_mismatch, id, registry_purpose, documented_purpose}`, so a
+  guide and its registry cannot drift apart. To migrate, make each documented
+  purpose match the registry's `purpose`, or drop the purpose column.
+
 ### Fixed
+
+- The components guide now gives `facts` the same purpose as the registry:
+  "Labelled record facts in a description list."
 
 - `field type="textarea"` now forwards `wrap` to its textarea. `field`'s
   forwarded attributes now come from those of `input`, `select` and `textarea`,

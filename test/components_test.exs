@@ -23,6 +23,7 @@ defmodule Armature.ComponentsTest do
   use ExUnit.Case, async: true
   use Phoenix.Component
   import Phoenix.LiveViewTest
+  import Armature.MarkupHelpers
   alias Armature.Components, as: C
 
   test "the documented consumer imports render the example form" do
@@ -1540,10 +1541,6 @@ defmodule Armature.ComponentsTest do
     |> Keyword.fetch!(:include)
   end
 
-  defp document(component, assigns \\ %{}) do
-    component |> render_component(assigns) |> LazyHTML.from_fragment()
-  end
-
   defp shell_document do
     document(fn assigns ->
       ~H"""
@@ -1619,8 +1616,6 @@ defmodule Armature.ComponentsTest do
       size_event: "size"
     })
   end
-
-  defp present?(doc, selector), do: doc |> LazyHTML.query(selector) |> LazyHTML.to_tree() != []
 
   defp text(doc, selector),
     do: doc |> LazyHTML.query(selector) |> LazyHTML.text() |> String.trim()

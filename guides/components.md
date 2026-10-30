@@ -33,7 +33,7 @@ and override its tokens in your own CSS. Components share light and dark token v
 | `theme_switch` | `icon` | A segmented system, light or dark choice of native radios. |
 | `page_heading` | `eyebrow`, `cluster` | A page heading with context and actions. |
 | `field` | `input`, `select`, `textarea` | A labelled control with hint and validation. |
-| `facts` | — | Labelled values in a description list. |
+| `facts` | — | Labelled record facts in a description list. |
 | `notice` | — | Static guidance or reported results with actions. |
 | `table_toolbar` | `input`, `icon`, `button` | A labelled search and announced result count. |
 | `pagination` | `button`, `select` | Named paging controls and an announced range. |
