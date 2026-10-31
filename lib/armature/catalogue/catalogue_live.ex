@@ -6,7 +6,10 @@ defmodule Armature.Catalogue.CatalogueLive do
   alias Armature.Components, as: A
 
   @external_resource "priv/static/armature.css"
-  @stylesheet File.read!(@external_resource)
+  @stylesheet File.read!("priv/static/armature.css")
+  # The catalogue's own presentation travels with the page, so consumers load only armature.css.
+  @external_resource "priv/catalogue/catalogue.css"
+  @catalogue_stylesheet File.read!("priv/catalogue/catalogue.css")
   @preview_widths ~w(wide 800 520 375)
   @themes Armature.Components.themes()
 
@@ -79,9 +82,18 @@ defmodule Armature.Catalogue.CatalogueLive do
   @impl true
   def render(assigns) do
     previews = Enum.map(assigns.examples, &prepare_preview(&1, assigns.example_state))
-    assigns = assign(assigns, previews: previews, preview_widths: @preview_widths)
+
+    assigns =
+      assign(assigns,
+        previews: previews,
+        preview_widths: @preview_widths,
+        catalogue_stylesheet: @catalogue_stylesheet
+      )
 
     ~H"""
+    <style id="armature-catalogue-stylesheet">
+      <%= Phoenix.HTML.raw(@catalogue_stylesheet) %>
+    </style>
     <A.app_shell
       id="armature-catalogue"
       title={@title}
@@ -128,21 +140,23 @@ defmodule Armature.Catalogue.CatalogueLive do
                 <form
                   :if={Enum.any?(@previews, & &1.isolated?)}
                   id="catalogue-preview-form"
-                  class={["armature-theme-switch"]}
                   phx-change="catalogue:width"
                   phx-submit="catalogue:width"
                 >
-                  <label for="catalogue-preview-width">Preview width</label>
-                  <A.select
-                    id="catalogue-preview-width"
-                    name="width"
-                    value={@preview_width}
-                    options={Enum.map(@preview_widths, &{width_label(&1), &1})}
-                    aria-describedby="catalogue-preview-status"
-                  />
-                  <p id="catalogue-preview-status" role="status" aria-live="polite">
-                    Preview width: {width_label(@preview_width)}
-                  </p>
+                  <A.cluster>
+                    <A.field
+                      type="select"
+                      id="catalogue-preview-width"
+                      name="width"
+                      label="Preview width"
+                      value={@preview_width}
+                      options={Enum.map(@preview_widths, &{width_label(&1), &1})}
+                      aria-describedby="catalogue-preview-status"
+                    />
+                    <p id="catalogue-preview-status" role="status" aria-live="polite">
+                      Preview width: {width_label(@preview_width)}
+                    </p>
+                  </A.cluster>
                 </form>
                 <div class={["armature-catalogue-panels"]}>
                   <div class={["armature-catalogue-panel-items"]}>

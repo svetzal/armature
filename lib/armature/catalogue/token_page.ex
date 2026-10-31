@@ -37,29 +37,20 @@ defmodule Armature.Catalogue.TokenPage do
         <p>
           Every contract token, its role and its resolved value in each context. Scroll across for all six contexts.
         </p>
-        <div class={["armature-table-scroll"]} tabindex="0" role="region" aria-label="Token reference">
-          <table class={["armature-table", "armature-token-reference"]}>
-            <caption>Complete token contract and context values</caption>
-            <thead>
-              <tr>
-                <th scope="col">Token</th>
-                <th scope="col">Group</th>
-                <th scope="col">Role</th>
-                <th :for={context <- themes()} scope="col">{theme_name(context)}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr :for={token <- @tokens} id={"token-#{String.trim_leading(token.name, "--")}"}>
-                <th scope="row"><code>{token.name}</code></th>
-                <td>{token.group}</td>
-                <td>{token.role}</td>
-                <td :for={context <- themes()} data-context={context}>
-                  {Map.fetch!(@values[context].values, token.name)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <UI.data_table
+          id="catalogue-token-reference-table"
+          rows={@tokens}
+          row_id={&String.trim_leading(&1.name, "--")}
+          density="compact"
+          caption="Complete token contract and context values"
+        >
+          <:col :let={token} label="Token"><code>{token.name}</code></:col>
+          <:col :let={token} label="Group">{token.group}</:col>
+          <:col :let={token} label="Role">{token.role}</:col>
+          <:col :let={token} :for={context <- themes()} label={theme_name(context)}>
+            {Map.fetch!(@values[context].values, token.name)}
+          </:col>
+        </UI.data_table>
       </UI.panel>
     </div>
     """
@@ -373,36 +364,23 @@ defmodule Armature.Catalogue.TokenPage do
       <p>
         Every required foreground and background pair in every context. Results use your configured token stylesheets. Scroll across for all six contexts.
       </p>
-      <div
-        class={["armature-table-scroll"]}
-        tabindex="0"
-        role="region"
-        aria-label="Required contrast results"
+      <UI.data_table
+        id="catalogue-token-contrast-table"
+        rows={contrast_rows(@values)}
+        row_id={&pair_id/1}
+        density="compact"
+        caption="Required pairs · ratio, minimum and result per context"
       >
-        <table class={["armature-table", "armature-token-pairs"]}>
-          <caption>Required pairs · ratio, minimum and result per context</caption>
-          <thead>
-            <tr>
-              <th scope="col">Pair</th>
-              <th scope="col">Minimum</th>
-              <th :for={context <- themes()} scope="col">{theme_name(context)} · ratio / result</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              :for={pair <- contrast_rows(@values)}
-              data-foreground={pair.foreground}
-              data-background={pair.background}
-            >
-              <th scope="row">{pair.foreground} on {pair.background}</th>
-              <td>{pair.minimum}:1</td>
-              <td :for={{context, result} <- pair.contexts} data-theme={context}>
-                {ratio(result)} · {if result.pass?, do: "Pass", else: "Fail"}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <:col :let={pair} label="Pair">{pair.foreground} on {pair.background}</:col>
+        <:col :let={pair} label="Minimum">{pair.minimum}:1</:col>
+        <:col
+          :let={pair}
+          :for={context <- themes()}
+          label={theme_name(context) <> " · ratio / result"}
+        >
+          {verdict(pair.contexts[context])}
+        </:col>
+      </UI.data_table>
     </UI.panel>
     """
   end
@@ -426,6 +404,13 @@ defmodule Armature.Catalogue.TokenPage do
       Map.put(pair, :contexts, contexts)
     end)
   end
+
+  defp pair_id(pair) do
+    String.trim_leading(pair.foreground, "--") <>
+      "-on-" <> String.trim_leading(pair.background, "--")
+  end
+
+  defp verdict(result), do: "#{ratio(result)} · #{if result.pass?, do: "Pass", else: "Fail"}"
 
   defp themes, do: Enum.map(Armature.Tokens.Values.contexts(), &elem(&1, 0))
   defp theme_name(theme), do: Armature.Tokens.Values.contexts() |> Keyword.fetch!(theme)

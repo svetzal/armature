@@ -55,6 +55,18 @@ defmodule Armature.CatalogueTest do
       assert has_element?(view, ".armature-page-heading .armature-eyebrow", "Library / Atoms")
     end
 
+    test "the catalogue carries its own presentation inline", %{view: view} do
+      assert has_element?(view, "style#armature-catalogue-stylesheet")
+    end
+
+    test "the inline catalogue presentation sits in its own cascade layer", %{view: view} do
+      assert catalogue_stylesheet(view) =~ "@layer armature.catalogue"
+    end
+
+    test "the inline catalogue presentation styles the explorer", %{view: view} do
+      assert catalogue_stylesheet(view) =~ ".armature-catalogue-explorer"
+    end
+
     test "components picker is labelled", %{view: view} do
       assert has_element?(view, "label[for=catalogue-components-choice]", "Components")
     end
@@ -144,6 +156,21 @@ defmodule Armature.CatalogueTest do
                "@container armature-shell (width < 520px)"
     end
 
+    test "the isolated preview carries only the library stylesheet", %{framed: framed} do
+      refute LazyHTML.text(LazyHTML.query(framed, "style")) =~ "armature-catalogue"
+    end
+
+    test "the preview width control is a field", %{view: view} do
+      assert has_element?(
+               view,
+               "#catalogue-preview-form .armature-field label[for='catalogue-preview-width']"
+             )
+    end
+
+    test "the preview width form does not borrow the theme switch", %{view: view} do
+      refute has_element?(view, "#catalogue-preview-form.armature-theme-switch")
+    end
+
     test "the width picker offers a 375px choice", %{view: view} do
       assert has_element?(view, "#catalogue-preview-width option[value='375']", "375px")
     end
@@ -211,30 +238,23 @@ defmodule Armature.CatalogueTest do
 
   test "configured consumer stylesheet changes server contrast results" do
     {:ok, view, _html} = live(build_conn(), "/overrides?section=tokens")
+    ink_on_paper = "#catalogue-token-contrast-table-armature-ink-on-armature-paper"
 
     assert has_element?(
              view,
-             "#catalogue-token-contrast tr[data-foreground='--armature-ink'] td[data-theme='light']",
+             "#{ink_on_paper} td:nth-child(#{contrast_column(:light)})",
              "1.00:1"
            )
 
-    assert has_element?(
-             view,
-             "#catalogue-token-contrast tr[data-foreground='--armature-ink'] td[data-theme='light']",
-             "Fail"
-           )
+    assert has_element?(view, "#{ink_on_paper} td:nth-child(#{contrast_column(:light)})", "Fail")
 
     assert has_element?(
              view,
-             "#catalogue-token-contrast tr[data-foreground='--armature-ink'] td[data-theme='explicit_light']",
+             "#{ink_on_paper} td:nth-child(#{contrast_column(:explicit_light)})",
              "Fail"
            )
 
-    assert has_element?(
-             view,
-             "#catalogue-token-contrast tr[data-foreground='--armature-ink'] td[data-theme='dark']",
-             "Pass"
-           )
+    assert has_element?(view, "#{ink_on_paper} td:nth-child(#{contrast_column(:dark)})", "Pass")
   end
 
   describe "tokens page" do
@@ -282,7 +302,7 @@ defmodule Armature.CatalogueTest do
 
     test "reference table names every token", %{view: view} do
       for token <- Armature.Tokens.all() do
-        assert has_element?(view, "#catalogue-token-reference #{token_row(token)} th", token.name)
+        assert has_element?(view, "#catalogue-token-reference #{token_row(token)} td", token.name)
       end
     end
 
@@ -297,7 +317,7 @@ defmodule Armature.CatalogueTest do
           {context, _label} <- Armature.Tokens.Values.contexts() do
         assert has_element?(
                  view,
-                 "#{token_row(token)} td[data-context='#{context}']",
+                 "#{token_row(token)} td:nth-child(#{reference_column(context)})",
                  values[context].values[token.name]
                )
       end
@@ -315,7 +335,7 @@ defmodule Armature.CatalogueTest do
 
         assert has_element?(
                  view,
-                 contrast_row(pair) <> " td[data-theme='#{context}']",
+                 contrast_row(pair) <> " td:nth-child(#{contrast_column(context)})",
                  expected_ratio
                )
       end
@@ -325,7 +345,7 @@ defmodule Armature.CatalogueTest do
       for {context, _label} <- Armature.Tokens.Values.contexts(), pair <- values[context].pairs do
         assert has_element?(
                  view,
-                 contrast_row(pair) <> " td[data-theme='#{context}']",
+                 contrast_row(pair) <> " td:nth-child(#{contrast_column(context)})",
                  if(pair.pass?, do: "Pass", else: "Fail")
                )
       end
@@ -859,6 +879,14 @@ defmodule Armature.CatalogueTest do
     |> render_change()
   end
 
+  defp catalogue_stylesheet(view) do
+    view
+    |> render()
+    |> LazyHTML.from_fragment()
+    |> LazyHTML.query("style#armature-catalogue-stylesheet")
+    |> LazyHTML.text()
+  end
+
   defp choose_width(view, width) do
     view |> form("#catalogue-preview-form", %{width: width}) |> render_change()
   end
@@ -871,11 +899,23 @@ defmodule Armature.CatalogueTest do
     view |> element("#catalogue-uses a[href='/ui?node=input']") |> render_click()
   end
 
-  defp token_row(token), do: "#token-#{String.trim_leading(token.name, "--")}"
+  defp token_row(token),
+    do: "#catalogue-token-reference-table-#{String.trim_leading(token.name, "--")}"
 
   defp contrast_row(pair) do
-    "#catalogue-token-contrast tr" <>
-      "[data-foreground='#{pair.foreground}'][data-background='#{pair.background}']"
+    "#catalogue-token-contrast-table-" <>
+      String.trim_leading(pair.foreground, "--") <>
+      "-on-" <> String.trim_leading(pair.background, "--")
+  end
+
+  # Token, Group and Role precede the context columns of the reference table.
+  defp reference_column(context), do: context_index(context) + 4
+
+  # Pair and Minimum precede the context columns of the contrast table.
+  defp contrast_column(context), do: context_index(context) + 3
+
+  defp context_index(context) do
+    Armature.Tokens.Values.contexts() |> Keyword.keys() |> Enum.find_index(&(&1 == context))
   end
 
   defp search(view, query) do
