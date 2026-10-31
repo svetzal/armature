@@ -23,6 +23,15 @@ Until 1.0.0, a minor version can change the public surface.
   `{:docs_purpose_mismatch, id, registry_purpose, documented_purpose}`, so a
   guide and its registry cannot drift apart. To migrate, make each documented
   purpose match the registry's `purpose`, or drop the purpose column.
+- `armature.css` no longer carries the development catalogue's rules (the
+  `.armature-catalogue-*`, `.armature-token-*` and `#catalogue-*` selectors).
+  The catalogue renders them itself, inline, in an `armature.catalogue`
+  cascade layer. Migration: none, unless a consumer styled those selectors,
+  which were never part of the token contract.
+- The catalogue's token reference and contrast tables now compose
+  `data_table` with compact density. Their first column is a plain cell, no
+  longer a row header. The preview-width control is now a `field` in a
+  `cluster` instead of borrowing the theme switch's class.
 
 ### Fixed
 

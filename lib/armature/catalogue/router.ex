@@ -5,6 +5,7 @@ defmodule Armature.Catalogue.Router do
   Import this module and call `armature_catalogue/2` inside a scope guarded by
   your application's `:dev_routes` compile-time flag. The routes inherit the
   scope's pipeline and root layout; load Armature's stylesheet in that layout.
+  The catalogue's own styles ship with the page.
   """
 
   @doc """

@@ -675,22 +675,12 @@
      is stacked across a narrow page. Consumers without an app shell can name
      an ancestor armature-nav-layout themselves. */
   .armature-app-shell-content { container: armature-content armature-nav-layout / inline-size; }
-  .armature-catalogue-explorer { display: grid; grid-template-columns: var(--armature-nav-width) minmax(0, 1fr); gap: var(--armature-space-6); }
-  .armature-catalogue-detail { min-width: var(--armature-space-zero); }
-  .armature-catalogue-panels { container: armature-panels / inline-size; }
-  .armature-catalogue-panel-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--armature-space-4); }
   @container armature-shell (width < 800px) {
     .armature-app-shell-grid { grid-template-columns: var(--armature-rail-width-narrow) minmax(0, 1fr); }
   }
   @container armature-nav-layout (width < 760px) {
     .armature-grouped-nav-links { display: none; }
     .armature-grouped-nav-picker { display: grid; gap: var(--armature-space-2); }
-  }
-  @container armature-content (width < 760px) {
-    .armature-catalogue-explorer { grid-template-columns: minmax(0, 1fr); }
-  }
-  @container armature-panels (width < 760px) {
-    .armature-catalogue-panel-items { grid-template-columns: minmax(0, 1fr); }
   }
   @container armature-shell (width < 520px) {
     .armature-app-shell-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
@@ -945,17 +935,6 @@
     flex-basis: calc(var(--armature-layout-min-width) * 2);
   }
 
-  .armature-catalogue-detail { overflow-wrap: anywhere; }
-  .armature-catalogue-detail > section > h2 { font-size: var(--armature-text-large); }
-  .armature-catalogue-detail ul a { min-width: var(--armature-target-size); }
-  .armature-catalogue-panels article { min-width: var(--armature-space-zero); }
-  .armature-catalogue-panels article:only-child { grid-column: 1 / -1; }
-  .armature-catalogue-preview-scroll { overflow: auto; max-width: 100%; }
-  .armature-catalogue-preview { box-sizing: content-box; border: var(--armature-border-width) solid var(--armature-line); height: var(--armature-shell-height); }
-  .armature-catalogue-notes {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
   /* A normalized select with a drawn chevron: two border strokes of a small
      rotated square on the wrapper, in token colours, never covering the control. */
   .armature-select-wrap { position: relative; display: inline-flex; max-width: 100%; }
@@ -987,7 +966,6 @@
   .armature-table[data-density="compact"] td { padding: var(--armature-table-cell-padding-compact); height: var(--armature-table-row-height-compact); }
   .armature-table td small { display: block; color: var(--armature-muted); font-size: var(--armature-text-micro); }
   .armature-table tbody tr.armature-row-selected td:first-child { box-shadow: inset var(--armature-cue-width) var(--armature-space-zero) var(--armature-space-zero) var(--armature-accent); }
-
 
   .armature-sort:hover .armature-sort-hint { opacity: var(--armature-opacity-full); }
   th[aria-sort] .armature-sort { color: var(--armature-ink); }
@@ -1028,7 +1006,6 @@
 
   .armature-table-inspector { container-type: inline-size; border: var(--armature-border-width) solid var(--armature-line); border-radius: var(--armature-radius-panel); background: var(--armature-paper); }
 
-
   .armature-table-inspector > .armature-split > div:first-child { flex: 1 1 calc(var(--armature-layout-min-width) * 2); }
   .armature-table-inspector > .armature-split > div:last-child { flex: 0 1 var(--armature-inspector-width); }
   .armature-table-inspector .armature-inspector { min-height: 100%; box-sizing: border-box; }
@@ -1036,11 +1013,6 @@
   .armature-facts { display: grid; gap: var(--armature-space-detail); font-family: var(--armature-font-sans); font-size: var(--armature-text-base); line-height: var(--armature-line-height); color: var(--armature-ink); }
   .armature-facts dt { font-size: var(--armature-text-small); color: var(--armature-muted); }
   .armature-facts dd { margin: var(--armature-space-zero); font-weight: var(--armature-weight-emphasis); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-  .armature-catalogue-detail ul { list-style: none; padding: var(--armature-space-zero); margin: var(--armature-space-zero); }
-
-  .armature-catalogue-detail h3 { font-size: var(--armature-text-base); font-weight: var(--armature-weight-emphasis); }
-  .armature-catalogue-detail p { overflow-wrap: anywhere; }
-
 
   @media (forced-colors: active) {
     .armature-select { appearance: auto; }
@@ -1064,42 +1036,4 @@
     .armature-table-inspector .armature-inspector { border-inline-start: none; border-top: var(--armature-border-width) solid var(--armature-line); }
   }
 
-  .armature-token-statement { font-size: var(--armature-text-large); font-weight: var(--armature-weight-emphasis); }
-  #catalogue-token-contract > .armature-panel { margin-block-start: var(--armature-space-4); }
-  .armature-token-surface { padding: var(--armature-space-4); border: var(--armature-border-width) solid var(--armature-line); border-radius: var(--armature-radius-panel); background: var(--armature-paper); color: var(--armature-ink); }
-  .armature-token-muted { color: var(--armature-muted); }
-  .armature-token-image { background: var(--armature-image-backdrop); color: var(--armature-muted); padding: var(--armature-space-6); text-align: center; }
-  .armature-token-space { height: var(--armature-space-4); max-width: 100%; background: var(--armature-accent); }
-  .armature-token-type { font-family: var(--armature-font-sans); line-height: var(--armature-line-height); margin-block: var(--armature-space-2); overflow-wrap: anywhere; }
-  .armature-token-label { font-size: var(--armature-text-small); font-weight: var(--armature-weight-normal); overflow-wrap: anywhere; }
-  .armature-token-code { font-family: var(--armature-font-mono); }
-  .armature-token-tabular { font-family: var(--armature-font-sans); font-variant-numeric: tabular-nums; }
-  #catalogue-focus-sample { margin: var(--armature-space-2); outline: var(--armature-focus-width) solid var(--armature-focus); outline-offset: var(--armature-focus-offset); }
-  .armature-token-rail { max-width: 100%; }
-  .armature-token-rail-wide { width: var(--armature-rail-width); }
-  .armature-token-rail-narrow { width: var(--armature-rail-width-narrow); }
-  .armature-token-secondary-nav { width: var(--armature-nav-width); max-width: 100%; padding: var(--armature-space-nav); border: var(--armature-border-width) solid var(--armature-line); }
-  #catalogue-token-pressed { transform: translateY(var(--armature-press-offset)); }
-  #catalogue-token-hover { background: color-mix(in srgb, var(--armature-accent), var(--armature-ink) var(--armature-hover-mix)); }
-  #catalogue-token-target { min-width: var(--armature-target-enhanced); min-height: var(--armature-target-enhanced); }
-  #catalogue-token-control-default { min-height: var(--armature-control-height); }
-  .armature-token-inspector { width: var(--armature-inspector-width); max-width: 100%; }
-  .armature-token-reference, .armature-token-pairs { font-size: var(--armature-text-small); }
-  .armature-token-reference tbody th, .armature-token-pairs tbody th { position: static; min-width: var(--armature-layout-min-width); max-width: var(--armature-layout-min-width); white-space: normal; }
-  .armature-token-reference td, .armature-token-pairs td { font-size: var(--armature-text-small); padding: var(--armature-table-cell-padding-compact); }
-  .armature-token-reference td:nth-child(3) { max-width: var(--armature-inspector-width); white-space: normal; }
-  .armature-token-pairs { min-width: calc(var(--armature-layout-min-width) * 5); }
-  .armature-token-reference th, .armature-token-reference td, .armature-token-pairs th, .armature-token-pairs td { overflow-wrap: anywhere; }
-  .armature-token-reference caption, .armature-token-pairs caption { text-align: start; font-weight: var(--armature-weight-emphasis); }
-  .armature-token-motion-track { padding: var(--armature-space-4); overflow: hidden; }
-  .armature-token-motion-track span { display: inline-block; padding: var(--armature-space-2); background: var(--armature-selected); border-inline-start: var(--armature-cue-width) solid var(--armature-selected-cue); }
-  .armature-token-motion-fast { transition: transform var(--armature-duration-fast) var(--armature-easing); }
-  .armature-token-motion-base { transition: transform var(--armature-duration-base) var(--armature-easing); }
-  #catalogue-motion-demo:is(:hover, :focus-within) .armature-token-motion-track span { transform: translateX(var(--armature-space-8)); animation: armature-token-feedback var(--armature-duration-base) var(--armature-easing) 1; }
-  #catalogue-motion-demo:is(:hover, :focus-within) .armature-token-motion-fast { animation-duration: var(--armature-duration-fast); }
-  @keyframes armature-token-feedback { from { opacity: var(--armature-sort-opacity); } to { opacity: var(--armature-opacity-full); } }
-  @media (prefers-reduced-motion: reduce) {
-    #catalogue-motion-demo .armature-token-motion-track span,
-    #catalogue-motion-demo:is(:hover, :focus-within) .armature-token-motion-track span { transform: none; transition-duration: var(--armature-duration-reduced); animation-duration: var(--armature-duration-reduced); animation-iteration-count: var(--armature-iterations-reduced); }
-  }
 }

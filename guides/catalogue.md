@@ -31,6 +31,10 @@ scope out of production; the catalogue does not add authentication. It defines
 LiveView routes only and inherits your pipeline, root layout and LiveSocket.
 Load `armature.css` and your token overrides in that layout, just as for your
 other components. No additional hooks or JavaScript bundles are required.
+The catalogue renders its own presentation inline from
+`priv/catalogue/catalogue.css`, so your layout loads only `armature.css`. A
+content security policy must allow inline styles on the catalogue route, as its
+token specimens already require.
 Nested and aliased scopes are supported. The live session defaults to
 `:armature_catalogue`; give multiple mounts distinct `:live_session_name` atom
 options, following the mountable Phoenix page pattern.
@@ -106,10 +110,11 @@ visible captions, including forced focus, hover and pressed states. Focus or
 hover the motion sample to run its fast and base transitions; reduced motion
 stops displacement.
 
-A compact reference below the panels is generated from `Armature.Tokens.all/0`
-and lists every token's group, role and values in all six contexts. The Contrast
-panel collects all required pairs in one scrollable table with minimum, ratio
-and Pass or Fail in words. Both tables use the configured consumer stylesheets;
+A reference below the panels is generated from `Armature.Tokens.all/0` and
+lists every token's group, role and values in all six contexts. The Contrast
+panel collects all required pairs in one table with minimum, ratio and Pass or
+Fail in words. Both tables are `data_table` compositions with compact density,
+so they scroll inside their panels like any other data table. Both tables use the configured consumer stylesheets;
 switching the visual theme does not hide other contexts.
 
 ## Supplying examples
