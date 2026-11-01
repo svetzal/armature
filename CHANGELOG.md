@@ -18,6 +18,18 @@ Until 1.0.0, a minor version can change the public surface.
 
 ### Changed
 
+- The baseline components now live in one module per level:
+  `Armature.Components.Atoms`, `Armature.Components.Layouts`,
+  `Armature.Components.Molecules`, `Armature.Components.Organisms` and
+  `Armature.Components.Templates`. `Armature.Components` is now a `use`
+  target that imports all five, and it keeps `themes/0` and
+  `theme_attribute/1`. Phoenix keeps component declarations per module, so
+  the old single import cannot carry them. `Armature.UI.Registry` names the
+  level modules. Migration: replace `import Armature.Components` with
+  `use Armature.Components`, and place it before
+  `import Phoenix.Component, except: [link: 1]`.
+  Replace qualified calls such as `Armature.Components.button` with the level
+  module, such as `Armature.Components.Atoms.button`.
 - The registry docs check now compares a purpose column (a prose second
   column, or a third column) with each node's `purpose` and reports
   `{:docs_purpose_mismatch, id, registry_purpose, documented_purpose}`, so a

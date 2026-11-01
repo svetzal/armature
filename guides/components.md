@@ -1,8 +1,10 @@
 # Baseline components
 
-Import `Armature.Components` in consumer HTML helpers, excluding the built-in
-link with `import Phoenix.Component, except: [link: 1]`. Load the Armature stylesheet
-and override its tokens in your own CSS. Components share light and dark token values.
+Add `use Armature.Components` to consumer HTML helpers, then exclude the
+built-in link with `import Phoenix.Component, except: [link: 1]`. It imports the
+five level modules: `Armature.Components.Atoms`, `Layouts`, `Molecules`,
+`Organisms` and `Templates`. Load the Armature stylesheet and override its
+tokens in your own CSS. Components share light and dark token values.
 
 ## Atoms
 

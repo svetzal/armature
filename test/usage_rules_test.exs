@@ -55,7 +55,7 @@ defmodule Armature.UsageRulesTest do
   end
 
   test "every backticked component, attribute or slot name exists" do
-    components = Armature.Components.__components__()
+    components = Enum.flat_map(Armature.UI.Registry.modules(), & &1.__components__())
 
     known =
       components
