@@ -399,12 +399,14 @@ items need a non-colour cue such as an outline, marker or label.
 
 ## Using baseline components
 
-`Armature.Components` is the public import for all baseline levels. In your
-consumer's HTML helpers, exclude Phoenix's link before importing Armature:
+The baseline components live in one module per level:
+`Armature.Components.Atoms`, `Layouts`, `Molecules`, `Organisms` and
+`Templates`. `use Armature.Components` imports all five. In your consumer's
+HTML helpers, use Armature, then exclude Phoenix's own link:
 
 ```elixir
+use Armature.Components
 import Phoenix.Component, except: [link: 1]
-import Armature.Components
 ```
 
 Then use:

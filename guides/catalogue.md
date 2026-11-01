@@ -151,7 +151,7 @@ defmodule Example.UI.Examples do
   attr :state, :map, required: true
   defp action(assigns) do
     ~H"""
-    <Armature.Components.button phx-click="custom:activate">Activate</Armature.Components.button>
+    <Armature.Components.Atoms.button phx-click="custom:activate">Activate</Armature.Components.Atoms.button>
     <p role="status">Activated {@state.activations} times.</p>
     """
   end

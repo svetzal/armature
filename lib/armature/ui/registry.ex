@@ -1,10 +1,15 @@
 defmodule Armature.UI.Registry do
   @moduledoc "The baseline components and their composition contracts."
   @behaviour Armature.Registry
+  alias Armature.Components.Atoms
+  alias Armature.Components.Layouts
+  alias Armature.Components.Molecules
+  alias Armature.Components.Organisms
+  alias Armature.Components.Templates
   alias Armature.Registry.Node
 
   @impl true
-  def modules, do: [Armature.Components]
+  def modules, do: [Atoms, Layouts, Molecules, Organisms, Templates]
 
   @impl true
   def nodes do
@@ -12,7 +17,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :eyebrow,
         level: :atom,
-        module: Armature.Components,
+        module: Atoms,
         function: :eyebrow,
         purpose: "A contextual uppercase label.",
         uses: []
@@ -20,7 +25,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :page_heading,
         level: :molecule,
-        module: Armature.Components,
+        module: Molecules,
         function: :page_heading,
         purpose: "A page heading with context and actions.",
         uses: [:eyebrow, :cluster]
@@ -28,7 +33,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :theme_switch,
         level: :molecule,
-        module: Armature.Components,
+        module: Molecules,
         function: :theme_switch,
         purpose: "A segmented system, light or dark choice of native radios.",
         uses: [:icon]
@@ -36,7 +41,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :side_nav,
         level: :organism,
-        module: Armature.Components,
+        module: Organisms,
         function: :side_nav,
         purpose: "Named section navigation with a brand and footnote.",
         uses: [:eyebrow, :link]
@@ -44,7 +49,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :top_bar,
         level: :organism,
-        module: Armature.Components,
+        module: Organisms,
         function: :top_bar,
         purpose: "A context band with actions.",
         uses: [:cluster]
@@ -52,7 +57,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :grouped_nav,
         level: :organism,
-        module: Armature.Components,
+        module: Organisms,
         function: :grouped_nav,
         purpose: "Grouped navigation with a labelled narrow-screen picker.",
         uses: [:eyebrow, :link, :select]
@@ -60,7 +65,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :panel,
         level: :organism,
-        module: Armature.Components,
+        module: Organisms,
         function: :panel,
         purpose: "A named content panel with heading and actions.",
         uses: [:cluster]
@@ -68,7 +73,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :app_shell,
         level: :template,
-        module: Armature.Components,
+        module: Templates,
         function: :app_shell,
         purpose: "An application shell with skip navigation and a page heading.",
         uses: [:link, :side_nav, :top_bar, :page_heading]
@@ -76,7 +81,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :button,
         level: :atom,
-        module: Armature.Components,
+        module: Atoms,
         function: :button,
         purpose: "A named native action.",
         uses: []
@@ -84,7 +89,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :link,
         level: :atom,
-        module: Armature.Components,
+        module: Atoms,
         function: :link,
         purpose: "A named navigation link.",
         uses: []
@@ -92,7 +97,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :icon,
         level: :atom,
-        module: Armature.Components,
+        module: Atoms,
         function: :icon,
         purpose: "Decorative consumer SVG.",
         uses: []
@@ -100,7 +105,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :input,
         level: :atom,
-        module: Armature.Components,
+        module: Atoms,
         function: :input,
         purpose: "A native single-line control.",
         uses: []
@@ -108,7 +113,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :select,
         level: :atom,
-        module: Armature.Components,
+        module: Atoms,
         function: :select,
         purpose: "A native option control.",
         uses: []
@@ -116,7 +121,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :textarea,
         level: :atom,
-        module: Armature.Components,
+        module: Atoms,
         function: :textarea,
         purpose: "A native multiline control.",
         uses: []
@@ -124,7 +129,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :status,
         level: :atom,
-        module: Armature.Components,
+        module: Atoms,
         function: :status,
         purpose: "A status expressed in words.",
         uses: []
@@ -132,7 +137,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :stack,
         level: :layout,
-        module: Armature.Components,
+        module: Layouts,
         function: :stack,
         purpose: "Vertical rhythm.",
         uses: []
@@ -140,7 +145,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :cluster,
         level: :layout,
-        module: Armature.Components,
+        module: Layouts,
         function: :cluster,
         purpose: "A wrapping inline group.",
         uses: []
@@ -148,7 +153,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :grid,
         level: :layout,
-        module: Armature.Components,
+        module: Layouts,
         function: :grid,
         purpose: "Responsive minimum-width columns.",
         uses: []
@@ -156,7 +161,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :split,
         level: :layout,
-        module: Armature.Components,
+        module: Layouts,
         function: :split,
         purpose: "Two regions that stack.",
         uses: []
@@ -164,7 +169,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :field,
         level: :molecule,
-        module: Armature.Components,
+        module: Molecules,
         function: :field,
         purpose: "A labelled control with hint and validation.",
         uses: [:input, :select, :textarea]
@@ -172,7 +177,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :facts,
         level: :molecule,
-        module: Armature.Components,
+        module: Molecules,
         function: :facts,
         purpose: "Labelled record facts in a description list.",
         uses: []
@@ -180,7 +185,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :notice,
         level: :molecule,
-        module: Armature.Components,
+        module: Molecules,
         function: :notice,
         purpose: "Static guidance or reported results with actions.",
         uses: []
@@ -188,7 +193,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :table_toolbar,
         level: :molecule,
-        module: Armature.Components,
+        module: Molecules,
         function: :table_toolbar,
         purpose: "A labelled search and announced result count.",
         uses: [:input, :icon, :button]
@@ -196,7 +201,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :pagination,
         level: :molecule,
-        module: Armature.Components,
+        module: Molecules,
         function: :pagination,
         purpose: "Named paging controls and an announced range.",
         uses: [:button, :select]
@@ -204,7 +209,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :record_header,
         level: :molecule,
-        module: Armature.Components,
+        module: Molecules,
         function: :record_header,
         purpose: "A record heading with context and actions.",
         uses: [:status]
@@ -212,7 +217,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :data_table,
         level: :organism,
-        module: Armature.Components,
+        module: Organisms,
         function: :data_table,
         purpose: "A sortable native table with named record selection.",
         uses: []
@@ -220,7 +225,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :inspector,
         level: :organism,
-        module: Armature.Components,
+        module: Organisms,
         function: :inspector,
         purpose: "A named complementary details landmark.",
         uses: []
@@ -228,7 +233,7 @@ defmodule Armature.UI.Registry do
       %Node{
         id: :table_inspector,
         level: :template,
-        module: Armature.Components,
+        module: Templates,
         function: :table_inspector,
         purpose: "A complete table and supporting details workflow.",
         uses: [:link, :split, :table_toolbar, :data_table, :pagination, :inspector]

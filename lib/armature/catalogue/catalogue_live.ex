@@ -3,7 +3,11 @@ defmodule Armature.Catalogue.CatalogueLive do
   use Phoenix.LiveView
   alias Phoenix.LiveView.JS
   alias Armature.Catalogue.{Page, Preview}
-  alias Armature.Components, as: A
+  alias Armature.Components.Atoms
+  alias Armature.Components.Layouts
+  alias Armature.Components.Molecules
+  alias Armature.Components.Organisms
+  alias Armature.Components.Templates
 
   @external_resource "priv/static/armature.css"
   @stylesheet File.read!("priv/static/armature.css")
@@ -94,7 +98,7 @@ defmodule Armature.Catalogue.CatalogueLive do
     <style id="armature-catalogue-stylesheet">
       <%= Phoenix.HTML.raw(@catalogue_stylesheet) %>
     </style>
-    <A.app_shell
+    <Templates.app_shell
       id="armature-catalogue"
       title={@title}
       subtitle="Component catalogue"
@@ -107,11 +111,11 @@ defmodule Armature.Catalogue.CatalogueLive do
       heading_id={@heading_id}
       heading_rest={%{"phx-mounted" => JS.focus()}}
       eyebrow={@eyebrow}
-      data-armature-theme={A.theme_attribute(@theme)}
+      data-armature-theme={Armature.Components.theme_attribute(@theme)}
     >
       <:footnote>Live components · Synthetic examples · Refresh resets examples</:footnote>
       <:top_actions>
-        <A.theme_switch
+        <Molecules.theme_switch
           id="catalogue-theme"
           value={@theme}
           label="Example theme"
@@ -122,7 +126,7 @@ defmodule Armature.Catalogue.CatalogueLive do
         <Armature.Catalogue.TokenPage.page values={@token_values} theme={@theme} />
       <% else %>
         <div class={["armature-catalogue-explorer"]}>
-          <A.grouped_nav
+          <Organisms.grouped_nav
             id="catalogue-components"
             label="Components"
             event="catalogue:choose"
@@ -143,8 +147,8 @@ defmodule Armature.Catalogue.CatalogueLive do
                   phx-change="catalogue:width"
                   phx-submit="catalogue:width"
                 >
-                  <A.cluster>
-                    <A.field
+                  <Layouts.cluster>
+                    <Molecules.field
                       type="select"
                       id="catalogue-preview-width"
                       name="width"
@@ -156,12 +160,15 @@ defmodule Armature.Catalogue.CatalogueLive do
                     <p id="catalogue-preview-status" role="status" aria-live="polite">
                       Preview width: {width_label(@preview_width)}
                     </p>
-                  </A.cluster>
+                  </Layouts.cluster>
                 </form>
                 <div class={["armature-catalogue-panels"]}>
                   <div class={["armature-catalogue-panel-items"]}>
                     <article :for={{example, index} <- Enum.with_index(@previews)}>
-                      <A.panel id={"catalogue-example-#{@node.id}-#{index}"} heading={example.title}>
+                      <Organisms.panel
+                        id={"catalogue-example-#{@node.id}-#{index}"}
+                        heading={example.title}
+                      >
                         <p>{example.description}</p>
                         <.example_preview
                           example={example}
@@ -169,7 +176,7 @@ defmodule Armature.Catalogue.CatalogueLive do
                           theme={@theme}
                           width={@preview_width}
                         />
-                      </A.panel>
+                      </Organisms.panel>
                     </article>
                   </div>
                 </div>
@@ -183,7 +190,7 @@ defmodule Armature.Catalogue.CatalogueLive do
                 <p :if={@uses == []}>No registered ingredients.</p>
                 <ul>
                   <li :for={item <- @uses}>
-                    <A.link patch={Page.node_path(@path, item)}>{item.id}</A.link>
+                    <Atoms.link patch={Page.node_path(@path, item)}>{item.id}</Atoms.link>
                   </li>
                 </ul>
               </section>
@@ -192,7 +199,7 @@ defmodule Armature.Catalogue.CatalogueLive do
                 <p :if={@used_by == []}>No registered dependants.</p>
                 <ul>
                   <li :for={item <- @used_by}>
-                    <A.link patch={Page.node_path(@path, item)}>{item.id}</A.link>
+                    <Atoms.link patch={Page.node_path(@path, item)}>{item.id}</Atoms.link>
                   </li>
                 </ul>
               </section>
@@ -202,7 +209,7 @@ defmodule Armature.Catalogue.CatalogueLive do
           </div>
         </div>
       <% end %>
-    </A.app_shell>
+    </Templates.app_shell>
     """
   end
 

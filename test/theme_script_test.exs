@@ -5,7 +5,7 @@ defmodule Armature.ThemeScriptTest do
   use ExUnit.Case, async: true
   use Phoenix.Component
   import Armature.MarkupHelpers
-  alias Armature.Components, as: C
+  alias Armature.Components.Molecules
 
   @script_path Path.expand("../priv/static/armature-theme.js", __DIR__)
 
@@ -19,7 +19,7 @@ defmodule Armature.ThemeScriptTest do
     doc =
       document(fn assigns ->
         ~H"""
-        <C.theme_switch id="theme" value="dark" />
+        <Molecules.theme_switch id="theme" value="dark" />
         """
       end)
 
@@ -33,7 +33,7 @@ defmodule Armature.ThemeScriptTest do
     doc =
       document(fn assigns ->
         ~H"""
-        <C.theme_switch id="theme" event="theme" />
+        <Molecules.theme_switch id="theme" event="theme" />
         """
       end)
 

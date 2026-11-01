@@ -7,9 +7,12 @@ and register what you add. Full guides: `deps/armature/README.md` and
 
 ## Components
 
-- Use `Armature.Components` for interface elements. Import it in the web
-  module's HTML helpers with `import Phoenix.Component, except: [link: 1]`
-  followed by `import Armature.Components`, or alias it.
+- Use `Armature.Components` for interface elements. Add it to the web
+  module's HTML helpers with `use Armature.Components`, which imports the
+  level modules `Armature.Components.Atoms`, `Layouts`, `Molecules`,
+  `Organisms` and `Templates`, followed by
+  `import Phoenix.Component, except: [link: 1]`. To alias instead, alias the
+  level modules.
 - Prefer Armature components over Phoenix's generated core components and over
   hand-written markup: `button`, `link`, `field`, `status`, `notice`, `facts`,
   `panel`, `data_table`, `table_toolbar`, `pagination`, `inspector`,

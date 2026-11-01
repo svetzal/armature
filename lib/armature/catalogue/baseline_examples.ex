@@ -2,23 +2,29 @@ defmodule Armature.Catalogue.BaselineExamples do
   @moduledoc "Neutral, interactive demonstrations of every node in `Armature.UI.Registry`."
   @behaviour Armature.Catalogue.Examples
   use Phoenix.Component
-  alias Armature.Components, as: A
+  alias Armature.Components.Atoms
+  alias Armature.Components.Layouts
+  alias Armature.Components.Molecules
+  alias Armature.Components.Organisms
+  alias Armature.Components.Templates
   alias Armature.Catalogue.Records
 
-  @themes A.themes()
+  @themes Armature.Components.themes()
 
   @impl true
   def examples(id) do
-    if Enum.any?(Armature.UI.Registry.nodes(), &(&1.id == id)) do
-      [
-        %{
-          title: "#{id} in use",
-          description: description(id),
-          render: fn assigns -> demo(assign(assigns, :node, id)) end
-        }
-      ]
-    else
-      []
+    case Enum.find(Armature.UI.Registry.nodes(), &(&1.id == id)) do
+      nil ->
+        []
+
+      node ->
+        [
+          %{
+            title: "#{id} in use",
+            description: description(id),
+            render: fn assigns -> demo(assign(assigns, :node, node)) end
+          }
+        ]
     end
   end
 
@@ -137,31 +143,229 @@ defmodule Armature.Catalogue.BaselineExamples do
   defp description(_id), do: "A named native control or region using the current theme."
 
   attr(:state, :map, required: true)
-  attr(:node, :atom, required: true)
+  attr(:node, Armature.Registry.Node, required: true)
 
   defp demo(assigns) do
     ~H"""
-    <%= case @node do %>
+    <%= case @node.level do %>
+      <% :atom -> %>
+        <.atom_demo id={@node.id} state={@state} />
+      <% :layout -> %>
+        <.layout_demo id={@node.id} state={@state} />
+      <% :molecule -> %>
+        <.molecule_demo id={@node.id} state={@state} />
+      <% :organism -> %>
+        <.organism_demo id={@node.id} state={@state} />
+      <% :template -> %>
+        <.template_demo id={@node.id} state={@state} />
+    <% end %>
+    """
+  end
+
+  attr(:state, :map, required: true)
+  attr(:id, :atom, required: true)
+
+  defp atom_demo(assigns) do
+    ~H"""
+    <%= case @id do %>
       <% :eyebrow -> %>
-        <A.eyebrow>Library / Examples</A.eyebrow>
+        <Atoms.eyebrow>Library / Examples</Atoms.eyebrow>
+      <% :button -> %>
+        <Layouts.cluster>
+          <Atoms.button id="example-action" phx-click="example:action">Activate</Atoms.button>
+          <Atoms.button variant="secondary" phx-click="example:action">Secondary action</Atoms.button>
+          <Atoms.button disabled>Unavailable</Atoms.button>
+          <Atoms.button variant="secondary" disabled>Unavailable secondary</Atoms.button>
+        </Layouts.cluster>
+        <p role="status">Activated {@state.count} times.</p>
+      <% :link -> %>
+        <Atoms.link href="#catalogue-usage">Read usage notes</Atoms.link>
+      <% :icon -> %>
+        <Atoms.button aria-label="Add example" phx-click="example:action">
+          <Atoms.icon>
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M12 4v16M4 12h16" /></svg>
+          </Atoms.icon>
+          Add example
+        </Atoms.button>
+        <p role="status">Added {@state.count} examples.</p>
+      <% :input -> %>
+        <label for="example-input">Example name</label>
+        <Atoms.input id="example-input" value="Sample" />
+        <label for="example-input-disabled">Disabled name</label>
+        <Atoms.input id="example-input-disabled" value="Sample" disabled />
+      <% :select -> %>
+        <label for="example-select">Size</label>
+        <Atoms.select
+          id="example-select"
+          options={[{"Small", "s"}, {"Large", "l"}]}
+          prompt="Choose a size"
+        />
+      <% :textarea -> %>
+        <label for="example-textarea">Notes</label>
+        <Atoms.textarea id="example-textarea" value="Synthetic notes" />
+      <% :status -> %>
+        <Layouts.cluster>
+          <Atoms.status
+            :for={tone <- ~w(neutral success warning error)}
+            tone={tone}
+            label={String.capitalize(tone)}
+          />
+        </Layouts.cluster>
+    <% end %>
+    """
+  end
+
+  attr(:state, :map, required: true)
+  attr(:id, :atom, required: true)
+
+  defp layout_demo(assigns) do
+    ~H"""
+    <%= case @id do %>
+      <% :stack -> %>
+        <Layouts.stack>
+          <p>First item</p><p>Second item</p><p>Third item</p>
+        </Layouts.stack>
+      <% :cluster -> %>
+        <Layouts.cluster>
+          <Atoms.status :for={number <- 1..8} label={"Item #{number}"} />
+        </Layouts.cluster>
+      <% :grid -> %>
+        <Layouts.grid>
+          <p :for={number <- 1..6}>Cell {number}</p>
+        </Layouts.grid>
+      <% :split -> %>
+        <Layouts.split>
+          <p>Main region</p><:secondary>
+            <p>Secondary region</p>
+          </:secondary>
+        </Layouts.split>
+    <% end %>
+    """
+  end
+
+  attr(:state, :map, required: true)
+  attr(:id, :atom, required: true)
+
+  defp molecule_demo(assigns) do
+    ~H"""
+    <%= case @id do %>
       <% :page_heading -> %>
-        <A.page_heading id="example-page-heading" title="Example page" eyebrow="Library / Examples">
-          <:actions><A.status label="Ready" /></:actions>
-        </A.page_heading>
+        <Molecules.page_heading
+          id="example-page-heading"
+          title="Example page"
+          eyebrow="Library / Examples"
+        >
+          <:actions><Atoms.status label="Ready" /></:actions>
+        </Molecules.page_heading>
       <% :theme_switch -> %>
-        <A.stack>
-          <A.theme_switch id="example-theme" value={@state.theme} event="example:theme" />
-          <A.theme_switch
+        <Layouts.stack>
+          <Molecules.theme_switch id="example-theme" value={@state.theme} event="example:theme" />
+          <Molecules.theme_switch
             id="example-theme-labelled"
             value={@state.theme}
             label="Appearance"
             label_visible
             event="example:theme"
           />
-        </A.stack>
+        </Layouts.stack>
         <p role="status">Selected theme: {@state.theme}</p>
+      <% :field -> %>
+        <.form
+          for={@state.form}
+          id="sample-form"
+          phx-change="example:validate"
+          phx-submit="example:save"
+        >
+          <Layouts.stack>
+            <Molecules.field field={@state.form[:name]} label="Name" hint="The name people will see." />
+            <Molecules.field
+              field={@state.form[:size]}
+              type="select"
+              label="Size"
+              prompt="Choose a size"
+              options={[{"Small", "s"}, {"Large", "l"}]}
+            />
+            <Molecules.field field={@state.form[:notes]} type="textarea" label="Notes" />
+            <Molecules.field field={@state.form[:accepted]} type="checkbox" label="Accept terms" />
+            <Molecules.field
+              id="example-error"
+              label="Invalid example"
+              value=""
+              errors={["Enter a value."]}
+            />
+            <Molecules.field id="example-disabled" label="Disabled example" value="Fixed" disabled />
+            <Atoms.button type="submit">Save</Atoms.button>
+            <Molecules.notice :if={@state.saved} id="example-saved" tone="success" result>
+              Saved for this preview.
+            </Molecules.notice>
+          </Layouts.stack>
+        </.form>
+      <% :notice -> %>
+        <Layouts.stack>
+          <Molecules.notice id="example-static" title="Information">
+            Static guidance has no live region.
+          </Molecules.notice>
+          <Molecules.notice id="example-result" tone="success" result title="Saved">
+            Announced politely.
+          </Molecules.notice>
+          <Molecules.notice id="example-warning" tone="warning" title="Review">
+            Check your example values.
+          </Molecules.notice>
+          <Molecules.notice id="example-failure" tone="error" result title="Could not save">
+            An error result is an alert.
+          </Molecules.notice>
+        </Layouts.stack>
+      <% :facts -> %>
+        <Molecules.facts>
+          <:fact label="Identifier">R-001</:fact>
+          <:fact label="Score">42</:fact>
+          <:fact label="State"><Atoms.status label="Available" tone="success" /></:fact>
+        </Molecules.facts>
+      <% :table_toolbar -> %>
+        <Molecules.table_toolbar
+          id="example-toolbar"
+          query={@state.query}
+          total={@state.records.total}
+          search_event="record_search"
+        >
+          <:actions><Atoms.button phx-click="example:action">Add example</Atoms.button></:actions>
+        </Molecules.table_toolbar>
+        <p role="status">Added {@state.count} examples.</p>
+      <% :pagination -> %>
+        <Molecules.pagination
+          id="example-pagination"
+          page={@state.page}
+          pages={@state.records.pages}
+          first={@state.records.first}
+          last={@state.records.last}
+          total={@state.records.total}
+          page_event="record_page"
+          page_size={@state.page_size}
+          page_sizes={[10, 25, 50]}
+          size_event="record_size"
+        />
+      <% :record_header -> %>
+        <Molecules.record_header
+          id="example-header"
+          title="Example record"
+          context="R-001"
+          status="Available"
+        >
+          <:actions><Atoms.button phx-click="example:action">Review</Atoms.button></:actions>
+        </Molecules.record_header>
+        <p role="status">Reviewed {@state.count} times.</p>
+    <% end %>
+    """
+  end
+
+  attr(:state, :map, required: true)
+  attr(:id, :atom, required: true)
+
+  defp organism_demo(assigns) do
+    ~H"""
+    <%= case @id do %>
       <% :side_nav -> %>
-        <A.side_nav
+        <Organisms.side_nav
           id="example-rail"
           title="Library"
           subtitle="Example application"
@@ -173,14 +377,14 @@ defmodule Armature.Catalogue.BaselineExamples do
             <svg viewBox="0 0 2 5" fill="currentColor"><path d="M1 0 2 2.5 1 5 0 2.5Z" /></svg>
           </:mark>
           <:footnote>Synthetic content</:footnote>
-        </A.side_nav>
+        </Organisms.side_nav>
       <% :top_bar -> %>
-        <A.top_bar context="Library / Examples">
-          <:actions><A.button phx-click="example:action">Activate</A.button></:actions>
-        </A.top_bar>
+        <Organisms.top_bar context="Library / Examples">
+          <:actions><Atoms.button phx-click="example:action">Activate</Atoms.button></:actions>
+        </Organisms.top_bar>
         <p role="status">Activated {@state.count} times.</p>
       <% :grouped_nav -> %>
-        <A.grouped_nav
+        <Organisms.grouped_nav
           id="example-grouped"
           label="Example components"
           event="example:choose"
@@ -188,141 +392,19 @@ defmodule Armature.Catalogue.BaselineExamples do
         />
         <p role="status">Selected destination: {@state.destination}</p>
       <% :panel -> %>
-        <A.grid>
-          <A.panel id="example-panel" heading="Example panel">
-            <:actions><A.button phx-click="example:action">Activate</A.button></:actions>
+        <Layouts.grid>
+          <Organisms.panel id="example-panel" heading="Example panel">
+            <:actions><Atoms.button phx-click="example:action">Activate</Atoms.button></:actions>
             <p role="status">Activated {@state.count} times.</p>
-          </A.panel>
-          <A.panel id="example-empty-panel" heading="Empty panel">
-            <A.notice id="example-empty-notice" title="No items">Add an item to begin.</A.notice>
-          </A.panel>
-        </A.grid>
-      <% :app_shell -> %>
-        <A.app_shell
-          id="example-shell"
-          title="Library"
-          nav_label="Example sections"
-          section_label="Sections"
-          heading="Example page"
-          heading_id="example-shell-heading"
-          eyebrow="Library / Examples"
-          context="Library / Examples"
-          items={example_nav()}
-        >
-          <:footnote>Synthetic content</:footnote>
-          <:top_actions>
-            <A.theme_switch id="example-shell-theme" value={@state.theme} event="example:theme" />
-          </:top_actions>
-          <A.panel id="example-shell-panel" heading="Content">
-            <p>A recomposable application shell.</p>
-          </A.panel>
-        </A.app_shell>
-      <% :button -> %>
-        <A.cluster>
-          <A.button id="example-action" phx-click="example:action">Activate</A.button>
-          <A.button variant="secondary" phx-click="example:action">Secondary action</A.button>
-          <A.button disabled>Unavailable</A.button>
-          <A.button variant="secondary" disabled>Unavailable secondary</A.button>
-        </A.cluster>
-        <p role="status">Activated {@state.count} times.</p>
-      <% :link -> %>
-        <A.link href="#catalogue-usage">Read usage notes</A.link>
-      <% :icon -> %>
-        <A.button aria-label="Add example" phx-click="example:action">
-          <A.icon>
-            <svg viewBox="0 0 24 24" focusable="false"><path d="M12 4v16M4 12h16" /></svg>
-          </A.icon>
-          Add example
-        </A.button>
-        <p role="status">Added {@state.count} examples.</p>
-      <% :input -> %>
-        <label for="example-input">Example name</label>
-        <A.input id="example-input" value="Sample" />
-        <label for="example-input-disabled">Disabled name</label>
-        <A.input id="example-input-disabled" value="Sample" disabled />
-      <% :select -> %>
-        <label for="example-select">Size</label>
-        <A.select
-          id="example-select"
-          options={[{"Small", "s"}, {"Large", "l"}]}
-          prompt="Choose a size"
-        />
-      <% :textarea -> %>
-        <label for="example-textarea">Notes</label>
-        <A.textarea id="example-textarea" value="Synthetic notes" />
-      <% :status -> %>
-        <A.cluster>
-          <A.status
-            :for={tone <- ~w(neutral success warning error)}
-            tone={tone}
-            label={String.capitalize(tone)}
-          />
-        </A.cluster>
-      <% :stack -> %>
-        <A.stack>
-          <p>First item</p><p>Second item</p><p>Third item</p>
-        </A.stack>
-      <% :cluster -> %>
-        <A.cluster><A.status :for={number <- 1..8} label={"Item #{number}"} /></A.cluster>
-      <% :grid -> %>
-        <A.grid>
-          <p :for={number <- 1..6}>Cell {number}</p>
-        </A.grid>
-      <% :split -> %>
-        <A.split>
-          <p>Main region</p><:secondary>
-            <p>Secondary region</p>
-          </:secondary>
-        </A.split>
-      <% :field -> %>
-        <.form
-          for={@state.form}
-          id="sample-form"
-          phx-change="example:validate"
-          phx-submit="example:save"
-        >
-          <A.stack>
-            <A.field field={@state.form[:name]} label="Name" hint="The name people will see." />
-            <A.field
-              field={@state.form[:size]}
-              type="select"
-              label="Size"
-              prompt="Choose a size"
-              options={[{"Small", "s"}, {"Large", "l"}]}
-            />
-            <A.field field={@state.form[:notes]} type="textarea" label="Notes" />
-            <A.field field={@state.form[:accepted]} type="checkbox" label="Accept terms" />
-            <A.field id="example-error" label="Invalid example" value="" errors={["Enter a value."]} />
-            <A.field id="example-disabled" label="Disabled example" value="Fixed" disabled />
-            <A.button type="submit">Save</A.button>
-            <A.notice :if={@state.saved} id="example-saved" tone="success" result>
-              Saved for this preview.
-            </A.notice>
-          </A.stack>
-        </.form>
-      <% :notice -> %>
-        <A.stack>
-          <A.notice id="example-static" title="Information">
-            Static guidance has no live region.
-          </A.notice>
-          <A.notice id="example-result" tone="success" result title="Saved">
-            Announced politely.
-          </A.notice>
-          <A.notice id="example-warning" tone="warning" title="Review">
-            Check your example values.
-          </A.notice>
-          <A.notice id="example-failure" tone="error" result title="Could not save">
-            An error result is an alert.
-          </A.notice>
-        </A.stack>
-      <% :facts -> %>
-        <A.facts>
-          <:fact label="Identifier">R-001</:fact>
-          <:fact label="Score">42</:fact>
-          <:fact label="State"><A.status label="Available" tone="success" /></:fact>
-        </A.facts>
+          </Organisms.panel>
+          <Organisms.panel id="example-empty-panel" heading="Empty panel">
+            <Molecules.notice id="example-empty-notice" title="No items">
+              Add an item to begin.
+            </Molecules.notice>
+          </Organisms.panel>
+        </Layouts.grid>
       <% :data_table -> %>
-        <A.data_table
+        <Organisms.data_table
           id="example-table"
           density="compact"
           rows={@state.records.rows}
@@ -338,15 +420,15 @@ defmodule Armature.Catalogue.BaselineExamples do
             {row.name}{" "}<small>{row.group}</small>
           </:col>
           <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
-        </A.data_table>
-        <A.inspector id="example-details" title="Selected record">
+        </Organisms.data_table>
+        <Organisms.inspector id="example-details" title="Selected record">
           <.details state={@state} />
-        </A.inspector>
-        <A.data_table id="example-empty-table" rows={[]} caption="Empty records">
+        </Organisms.inspector>
+        <Organisms.data_table id="example-empty-table" rows={[]} caption="Empty records">
           <:col label="Name" />
-        </A.data_table>
+        </Organisms.data_table>
         <h3>Default density</h3>
-        <A.data_table
+        <Organisms.data_table
           id="example-table-default"
           rows={Enum.take(@state.records.rows, 3)}
           caption="Default density records"
@@ -354,42 +436,48 @@ defmodule Armature.Catalogue.BaselineExamples do
           <:col :let={row} label="Identifier">{row.id}</:col>
           <:col :let={row} label="Name" row_label>{row.name}{" "}<small>{row.group}</small></:col>
           <:col :let={row} label="Score" numeric>{row.score}</:col>
-        </A.data_table>
-      <% :table_toolbar -> %>
-        <A.table_toolbar
-          id="example-toolbar"
-          query={@state.query}
-          total={@state.records.total}
-          search_event="record_search"
-        >
-          <:actions><A.button phx-click="example:action">Add example</A.button></:actions>
-        </A.table_toolbar>
-        <p role="status">Added {@state.count} examples.</p>
-      <% :pagination -> %>
-        <A.pagination
-          id="example-pagination"
-          page={@state.page}
-          pages={@state.records.pages}
-          first={@state.records.first}
-          last={@state.records.last}
-          total={@state.records.total}
-          page_event="record_page"
-          page_size={@state.page_size}
-          page_sizes={[10, 25, 50]}
-          size_event="record_size"
-        />
+        </Organisms.data_table>
       <% :inspector -> %>
-        <A.button phx-click="record_select" phx-value-id="R-001">Inspect R-001</A.button>
-        <A.inspector id="example-inspector" title="Example details">
+        <Atoms.button phx-click="record_select" phx-value-id="R-001">Inspect R-001</Atoms.button>
+        <Organisms.inspector id="example-inspector" title="Example details">
           <.details state={@state} />
-        </A.inspector>
-      <% :record_header -> %>
-        <A.record_header id="example-header" title="Example record" context="R-001" status="Available">
-          <:actions><A.button phx-click="example:action">Review</A.button></:actions>
-        </A.record_header>
-        <p role="status">Reviewed {@state.count} times.</p>
+        </Organisms.inspector>
+    <% end %>
+    """
+  end
+
+  attr(:state, :map, required: true)
+  attr(:id, :atom, required: true)
+
+  defp template_demo(assigns) do
+    ~H"""
+    <%= case @id do %>
+      <% :app_shell -> %>
+        <Templates.app_shell
+          id="example-shell"
+          title="Library"
+          nav_label="Example sections"
+          section_label="Sections"
+          heading="Example page"
+          heading_id="example-shell-heading"
+          eyebrow="Library / Examples"
+          context="Library / Examples"
+          items={example_nav()}
+        >
+          <:footnote>Synthetic content</:footnote>
+          <:top_actions>
+            <Molecules.theme_switch
+              id="example-shell-theme"
+              value={@state.theme}
+              event="example:theme"
+            />
+          </:top_actions>
+          <Organisms.panel id="example-shell-panel" heading="Content">
+            <p>A recomposable application shell.</p>
+          </Organisms.panel>
+        </Templates.app_shell>
       <% :table_inspector -> %>
-        <A.table_inspector
+        <Templates.table_inspector
           id="example-records"
           density="compact"
           rows={@state.records.rows}
@@ -418,7 +506,7 @@ defmodule Armature.Catalogue.BaselineExamples do
           </:col>
           <:col :let={row} label="Score" numeric sort_key="score">{row.score}</:col>
           <:details><.details state={@state} /></:details>
-        </A.table_inspector>
+        </Templates.table_inspector>
     <% end %>
     """
   end
@@ -428,16 +516,16 @@ defmodule Armature.Catalogue.BaselineExamples do
   defp details(assigns) do
     ~H"""
     <%= if @state.selected do %>
-      <A.record_header
+      <Molecules.record_header
         id="example-selected-record"
         title={@state.selected.name}
         context={@state.selected.id}
         status="Available"
       />
-      <A.facts>
+      <Molecules.facts>
         <:fact label="Group">{@state.selected.group}</:fact>
         <:fact label="Score">{@state.selected.score}</:fact>
-      </A.facts>
+      </Molecules.facts>
       <p :if={!Enum.any?(@state.records.rows, &(&1.id == @state.selected_id))}>
         The selected record is outside the current results.
       </p>

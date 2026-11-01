@@ -31,7 +31,11 @@ end
 
 defmodule Armature.Browser.Fixtures do
   use Phoenix.Component
-  alias Armature.Components, as: C
+  alias Armature.Components.Atoms
+  alias Armature.Components.Layouts
+  alias Armature.Components.Molecules
+  alias Armature.Components.Organisms
+  alias Armature.Components.Templates
 
   def page(assigns) do
     assigns =
@@ -43,10 +47,12 @@ defmodule Armature.Browser.Fixtures do
       )
 
     ~H"""
-    <C.theme_switch id="theme-one"><C.button type="submit">Apply theme</C.button></C.theme_switch>
-    <C.theme_switch id="theme-two" label="Appearance" />
+    <Molecules.theme_switch id="theme-one">
+      <Atoms.button type="submit">Apply theme</Atoms.button>
+    </Molecules.theme_switch>
+    <Molecules.theme_switch id="theme-two" label="Appearance" />
     <div id="shell-host">
-      <C.app_shell
+      <Templates.app_shell
         id="shell"
         heading="Examples"
         heading_id="heading"
@@ -60,36 +66,40 @@ defmodule Armature.Browser.Fixtures do
           <svg viewBox="0 0 2 5" fill="currentColor"><path d="M1 0 2 2.5 1 5 0 2.5Z" /></svg>
         </:mark>
         <p>Component fixtures</p>
-      </C.app_shell>
+      </Templates.app_shell>
     </div>
     <div id="nav-host">
-      <C.grouped_nav id="navigation" label="Examples" event="choose" groups={@groups} />
+      <Organisms.grouped_nav id="navigation" label="Examples" event="choose" groups={@groups} />
     </div>
-    <C.button id="open-example" type="submit" form="navigation-form">Open example</C.button>
+    <Atoms.button id="open-example" type="submit" form="navigation-form">Open example</Atoms.button>
     <div id="grid-host">
-      <C.grid id="panels">
-        <C.panel id="first-panel" heading="First">First panel</C.panel>
-        <C.panel id="second-panel" heading="Second">Second panel</C.panel>
-      </C.grid>
+      <Layouts.grid id="panels">
+        <Organisms.panel id="first-panel" heading="First">First panel</Organisms.panel>
+        <Organisms.panel id="second-panel" heading="Second">Second panel</Organisms.panel>
+      </Layouts.grid>
     </div>
     <section aria-label="Controls">
-      <C.button id="enabled">Save</C.button>
-      <C.button id="disabled" disabled>Unavailable</C.button>
-      <label for="valid">Name</label><C.input id="valid" />
+      <Atoms.button id="enabled">Save</Atoms.button>
+      <Atoms.button id="disabled" disabled>Unavailable</Atoms.button>
+      <label for="valid">Name</label><Atoms.input id="valid" />
       <label for="invalid">Required name</label>
-      <C.input id="invalid" aria-invalid="true" aria-describedby="invalid-message" />
+      <Atoms.input id="invalid" aria-invalid="true" aria-describedby="invalid-message" />
       <p id="invalid-message">Enter a name</p>
-      <label for="disabled-input">Unavailable name</label><C.input id="disabled-input" disabled />
-      <C.field id="check" type="checkbox" label="Include record" />
-      <label for="list">Options</label><C.select id="list" multiple options={[{"First", "first"}]} />
+      <label for="disabled-input">Unavailable name</label><Atoms.input id="disabled-input" disabled />
+      <Molecules.field id="check" type="checkbox" label="Include record" />
+      <label for="list">Options</label><Atoms.select
+        id="list"
+        multiple
+        options={[{"First", "first"}]}
+      />
       <label for="single">Choice</label>
-      <C.select id="single" options={[{"First", "first"}, {"Second", "second"}]} />
+      <Atoms.select id="single" options={[{"First", "first"}, {"Second", "second"}]} />
       <div role="tablist" aria-label="Record views">
-        <C.button id="selected" role="tab" aria-selected="true" aria-controls="selected-panel">Selected record</C.button>
+        <Atoms.button id="selected" role="tab" aria-selected="true" aria-controls="selected-panel">Selected record</Atoms.button>
       </div>
       <div id="selected-panel" role="tabpanel" aria-labelledby="selected">Record view</div>
     </section>
-    <C.data_table
+    <Organisms.data_table
       id="records"
       rows={@rows}
       caption="Records"
@@ -102,16 +112,16 @@ defmodule Armature.Browser.Fixtures do
     >
       <:col :let={row} sort_key="name" label="Name" row_label>{row.name}</:col>
       <:col :let={row} label="Count" numeric>{row.count}</:col>
-    </C.data_table>
-    <C.inspector id="details" title="Record details">Choose a record</C.inspector>
-    <C.side_nav
+    </Organisms.data_table>
+    <Organisms.inspector id="details" title="Record details">Choose a record</Organisms.inspector>
+    <Organisms.side_nav
       id="plain-brand"
       title="Library"
       subtitle="Example application"
       label="Plain brand sections"
       items={[%{label: "Overview", href: "/fixtures"}]}
     />
-    <C.theme_switch id="theme-three" label="Colour scheme" label_visible />
+    <Molecules.theme_switch id="theme-three" label="Colour scheme" label_visible />
     """
   end
 end
