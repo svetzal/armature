@@ -696,4 +696,180 @@ defmodule Armature.Components.MoleculesTest do
       %{query: query}
     )
   end
+
+  describe "icon_button" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Molecules.icon_button id="add" icon="plus" label="Add record" phx-click="add" />
+          <Molecules.icon_button id="show" icon="eye" label="Show hidden" pressed variant="primary" />
+          <Molecules.icon_button id="hide" icon="eye-off" label="Hide hidden" pressed={false} disabled />
+          <Molecules.icon_button id="own" label="Own glyph"><svg><path d="M0 0" /></svg></Molecules.icon_button>
+          """
+        end)
+
+      %{doc: doc}
+    end
+
+    test "renders the native button atom with type button", %{doc: doc} do
+      assert present?(doc, "button#add.armature-button[type=button]")
+    end
+
+    test "is named by its label in words", %{doc: doc} do
+      assert text(doc, "#add .armature-sr-only") == "Add record"
+    end
+
+    test "offers its label as the native title", %{doc: doc} do
+      assert attribute(doc, "#add", "title") == "Add record"
+    end
+
+    test "shows its named glyph as hidden decoration", %{doc: doc} do
+      assert present?(doc, "#add > .armature-icon[aria-hidden=true] > svg > path")
+    end
+
+    test "shows a consumer glyph from its slot", %{doc: doc} do
+      assert present?(doc, "#own > .armature-icon[aria-hidden=true] > svg > path[d='M0 0']")
+    end
+
+    test "defaults to the secondary variant", %{doc: doc} do
+      assert present?(doc, "#add.armature-button-secondary")
+    end
+
+    test "takes the primary variant", %{doc: doc} do
+      assert present?(doc, "#show.armature-button-primary")
+    end
+
+    test "has no pressed state as an ordinary action", %{doc: doc} do
+      refute present?(doc, "#add[aria-pressed]")
+    end
+
+    test "exposes a pressed toggle", %{doc: doc} do
+      assert attribute(doc, "#show", "aria-pressed") == "true"
+    end
+
+    test "exposes an unpressed toggle", %{doc: doc} do
+      assert attribute(doc, "#hide", "aria-pressed") == "false"
+    end
+
+    test "renders disabled only when asked", %{doc: doc} do
+      assert present?(doc, "#hide[disabled]")
+      refute present?(doc, "#add[disabled]")
+    end
+
+    test "forwards rest attributes such as phx-click", %{doc: doc} do
+      assert present?(doc, "#add[phx-click=add]")
+    end
+
+    test "marks itself for the square icon button styles", %{doc: doc} do
+      assert present?(doc, "#add[data-armature-icon-button]")
+    end
+  end
+
+  test "an icon button cannot render without a label" do
+    assert_raise KeyError, fn -> document(&Molecules.icon_button/1, %{icon: "plus"}) end
+  end
+
+  test "an icon button needs an icon name or an inline SVG" do
+    assert_raise ArgumentError, ~r/needs an icon name or an inline SVG/, fn ->
+      document(&Molecules.icon_button/1, %{label: "Add"})
+    end
+  end
+
+  test "an icon button refuses both an icon name and an inline SVG" do
+    assert_raise ArgumentError, ~r/not both/, fn ->
+      document(fn assigns ->
+        ~H|<Molecules.icon_button icon="x" label="Close"><svg /></Molecules.icon_button>|
+      end)
+    end
+  end
+
+  describe "toolbar" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Molecules.toolbar id="tools" label="Record actions">
+            <:group>
+              <Molecules.icon_button id="add" icon="plus" label="Add" />
+              <Molecules.icon_button id="edit" icon="pencil" label="Edit" disabled />
+            </:group>
+            <:group label="View">
+              <Molecules.icon_button id="show" icon="eye" label="Show hidden" pressed={false} />
+            </:group>
+            <:group><Atoms.button id="more" variant="secondary">More</Atoms.button></:group>
+          </Molecules.toolbar>
+          <Molecules.toolbar id="column" label="Arrangement" orientation="vertical">
+            <:group><Atoms.button id="up">Move up</Atoms.button></:group>
+            <:group><Atoms.button id="down">Move down</Atoms.button></:group>
+          </Molecules.toolbar>
+          """
+        end)
+
+      %{doc: doc}
+    end
+
+    test "is a toolbar named by its label", %{doc: doc} do
+      assert attribute(doc, "#tools[role=toolbar]", "aria-label") == "Record actions"
+    end
+
+    test "is horizontal by default", %{doc: doc} do
+      assert attribute(doc, "#tools", "aria-orientation") == "horizontal"
+    end
+
+    test "takes a vertical orientation", %{doc: doc} do
+      assert attribute(doc, "#column", "aria-orientation") == "vertical"
+    end
+
+    test "separates each group from the next", %{doc: doc} do
+      assert doc |> LazyHTML.query("#tools > [role=separator]") |> Enum.count() == 2
+    end
+
+    test "places separators only between groups", %{doc: doc} do
+      refute present?(
+               doc,
+               "#tools > [role=separator]:first-child, #tools > [role=separator]:last-child"
+             )
+    end
+
+    test "orients separators across a horizontal toolbar", %{doc: doc} do
+      assert attribute(doc, "#tools > [role=separator]:nth-child(2)", "aria-orientation") ==
+               "vertical"
+    end
+
+    test "orients separators across a vertical toolbar", %{doc: doc} do
+      assert attribute(doc, "#column > [role=separator]", "aria-orientation") == "horizontal"
+    end
+
+    test "names a labelled group", %{doc: doc} do
+      assert attribute(doc, "#tools > [role=group]", "aria-label") == "View"
+    end
+
+    test "leaves an unlabelled group without a role", %{doc: doc} do
+      assert doc |> LazyHTML.query("#tools > [role=group]") |> Enum.count() == 1
+    end
+
+    test "renders the caller's controls in order", %{doc: doc} do
+      ids =
+        for {"button", attributes, _} <-
+              doc |> LazyHTML.query("#tools button") |> LazyHTML.to_tree(),
+            do: :proplists.get_value("id", attributes)
+
+      assert ids == ~w(add edit show more)
+    end
+
+    test "attaches the roving tabindex hook", %{doc: doc} do
+      assert present?(doc, "#tools[phx-hook=ArmatureToolbar]")
+    end
+
+    test "leaves every control in the tab order without the hook", %{doc: doc} do
+      refute present?(doc, "#tools [tabindex]")
+    end
+  end
+
+  test "the toolbar hook ships in the Hex package under the name the markup uses" do
+    script = File.read!(Path.expand("../../priv/static/armature-toolbar.js", __DIR__))
+    assert "priv" in Mix.Project.config()[:package][:files]
+    assert script =~ "export default ArmatureToolbar;"
+  end
 end

@@ -99,7 +99,7 @@ defmodule Armature.UI.Registry do
         level: :atom,
         module: Atoms,
         function: :icon,
-        purpose: "Decorative consumer SVG.",
+        purpose: "A decorative vendored glyph or consumer SVG.",
         uses: []
       },
       %Node{
@@ -197,6 +197,22 @@ defmodule Armature.UI.Registry do
         function: :table_toolbar,
         purpose: "A labelled search and announced result count.",
         uses: [:input, :icon, :button]
+      },
+      %Node{
+        id: :icon_button,
+        level: :molecule,
+        module: Molecules,
+        function: :icon_button,
+        purpose: "A named square action or toggle showing only an icon.",
+        uses: [:button, :icon]
+      },
+      %Node{
+        id: :toolbar,
+        level: :molecule,
+        module: Molecules,
+        function: :toolbar,
+        purpose: "A named group of controls with one tab stop and arrow-key movement.",
+        uses: []
       },
       %Node{
         id: :pagination,

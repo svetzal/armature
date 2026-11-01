@@ -26,13 +26,26 @@ defmodule PreviewLayout do
                    )
   @stylesheet @font_stylesheet <> File.read!(Path.expand("../priv/static/armature.css", __DIR__))
 
+  # The playground's layout builds its LiveSocket from window.hooks, so the
+  # toolbar hook joins that object before the socket's views mount. An
+  # application imports the module in app.js instead; see guides/components.md.
+  @toolbar_hook "(function () {\n" <>
+                  String.replace(
+                    File.read!(Path.expand("../priv/static/armature-toolbar.js", __DIR__)),
+                    "export default ArmatureToolbar;",
+                    "window.hooks.ArmatureToolbar = ArmatureToolbar;"
+                  ) <> "\n})();"
+
   def root(assigns) do
-    assigns = assign(assigns, :stylesheet, @stylesheet)
+    assigns = assign(assigns, stylesheet: @stylesheet, toolbar_hook: @toolbar_hook)
 
     content = ~H"""
     <style>
       <%= Phoenix.HTML.raw(@stylesheet) %>
     </style>
+    <script>
+      <%= Phoenix.HTML.raw(@toolbar_hook) %>
+    </script>
     {@inner_content}
     """
 

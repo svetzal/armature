@@ -180,4 +180,96 @@ defmodule Armature.Components.AtomsTest do
       refute present?(doc, "[role], [aria-live]")
     end
   end
+
+  describe "icon given a name" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H|<Atoms.button id="find"><Atoms.icon name="search" /> Find</Atoms.button>|
+        end)
+
+      %{doc: doc}
+    end
+
+    test "is hidden from assistive technology", %{doc: doc} do
+      assert present?(doc, "#find .armature-icon[aria-hidden=true] > svg")
+    end
+
+    test "draws in the current colour on a 24 by 24 grid", %{doc: doc} do
+      assert present?(doc, "#find svg[viewBox='0 0 24 24'][stroke=currentColor][fill=none]")
+    end
+
+    test "draws the vendored glyph's own shapes", %{doc: doc} do
+      assert present?(doc, "#find svg > circle[cx='11'][cy='11'][r='8']")
+    end
+
+    test "leaves the control's name in words", %{doc: doc} do
+      assert text(doc, "#find") == "Find"
+    end
+  end
+
+  test "an unknown icon name raises an error that lists the known names" do
+    assert_raise ArgumentError, ~r/unknown icon "missing"; known icons are: .*search/, fn ->
+      document(&Atoms.icon/1, %{name: "missing"})
+    end
+  end
+
+  test "an icon needs a name or an inline SVG" do
+    assert_raise ArgumentError, ~r/needs a name or an inline SVG/, fn ->
+      document(&Atoms.icon/1, %{})
+    end
+  end
+
+  test "an icon refuses both a name and an inline SVG" do
+    assert_raise ArgumentError, ~r/not both/, fn ->
+      document(fn assigns -> ~H|<Atoms.icon name="x"><svg /></Atoms.icon>| end)
+    end
+  end
+
+  test "a literal unknown icon name warns at compile time" do
+    source = """
+    defmodule Example.UI.UnknownIcon do
+      use Phoenix.Component
+
+      def example(assigns), do: ~H|<Armature.Components.Atoms.icon name="missing" />|
+    end
+    """
+
+    warnings = ExUnit.CaptureIO.capture_io(:stderr, fn -> Code.compile_string(source) end)
+
+    assert warnings =~
+             ~s(attribute "name" in component Armature.Components.Atoms.icon/1 must be one of)
+
+    assert warnings =~ ~s(got: "missing")
+  end
+
+  describe "the vendored icon set" do
+    test "lists its names in order" do
+      assert Armature.Icons.names() == Enum.sort(Armature.Icons.names())
+    end
+
+    test "includes the glyphs Armature draws itself" do
+      assert ~w(search x monitor sun moon) -- Armature.Icons.names() == []
+    end
+
+    test "every glyph is made only of plain SVG shapes" do
+      for name <- Armature.Icons.names() do
+        tags =
+          ~r/<([a-z]+)/
+          |> Regex.scan(Armature.Icons.glyph!(name), capture: :all_but_first)
+          |> List.flatten()
+          |> Enum.uniq()
+
+        assert tags != [] and tags -- ~w(path circle rect line polyline polygon ellipse) == [],
+               "#{name} has #{inspect(tags)}"
+      end
+    end
+
+    test "ships Lucide's licence for the pinned version" do
+      licence = File.read!(Path.expand("../../priv/icons/LICENSE.txt", __DIR__))
+      assert "priv" in Mix.Project.config()[:package][:files]
+      assert licence =~ "ISC License"
+      assert licence =~ "lucide-static npm package, version #{Armature.Icons.lucide_version()}"
+    end
+  end
 end

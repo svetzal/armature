@@ -30,7 +30,10 @@ Use your application's existing `:dev_routes` compile-time setting. Keep this
 scope out of production; the catalogue does not add authentication. It defines
 LiveView routes only and inherits your pipeline, root layout and LiveSocket.
 Load `armature.css` and your token overrides in that layout, just as for your
-other components. No additional hooks or JavaScript bundles are required.
+other components. No additional JavaScript bundles are required. Register the
+`ArmatureToolbar` hook in your LiveSocket, as the
+[component guide](components.md#the-toolbar-hook) shows, so the `toolbar`
+example has its single tab stop; without it the example still works with Tab.
 The catalogue renders its own presentation inline from
 `priv/catalogue/catalogue.css`, so your layout loads only `armature.css`. A
 content security policy must allow inline styles on the catalogue route, as its
