@@ -72,12 +72,45 @@ defmodule Armature.Components.Atoms do
     """
   end
 
-  @doc "Wraps a consumer's inline SVG as decoration. Put the accessible name on the control."
-  slot(:inner_block, required: true)
+  @doc """
+  A decorative glyph: a vendored icon by `name`, or the consumer's inline SVG in the slot.
 
-  def icon(assigns) do
+  `name` is one of `Armature.Icons.names/0`. A literal unknown name warns at
+  compile time and any unknown name raises `ArgumentError` when rendered.
+  Supply either `name` or an inner SVG, not both. The icon is always hidden
+  from assistive technology and drawn in `currentColor`; put the accessible
+  name on the surrounding control.
+  """
+  attr(:name, :string, default: nil, values: [nil | Armature.Icons.names()])
+  slot(:inner_block)
+
+  def icon(%{name: nil, inner_block: []}) do
+    raise ArgumentError, "icon needs a name or an inline SVG in its slot"
+  end
+
+  def icon(%{name: name, inner_block: [_ | _]}) when is_binary(name) do
+    raise ArgumentError, "icon takes a name or an inline SVG, not both"
+  end
+
+  def icon(%{name: nil} = assigns) do
     ~H"""
     <span class={["armature-icon"]} aria-hidden="true">{render_slot(@inner_block)}</span>
+    """
+  end
+
+  def icon(assigns) do
+    assigns = assign(assigns, :glyph, Phoenix.HTML.raw(Armature.Icons.glyph!(assigns.name)))
+
+    ~H"""
+    <span class={["armature-icon"]} aria-hidden="true"><svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      focusable="false"
+    >{@glyph}</svg></span>
     """
   end
 

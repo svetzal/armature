@@ -74,6 +74,11 @@ The sans token selects Barlow with a system fallback. Barlow 400 and 600 ship
 under the SIL Open Font License in `priv/static/fonts/OFL.txt`; the library
 code remains MIT licensed. Loading the font stylesheet is optional.
 
+The base icon set is vendored from [Lucide](https://lucide.dev)
+(`lucide-static` 1.58.0) under the ISC licence, which ships in
+`priv/icons/LICENSE.txt`. The glyphs are data in `Armature.Icons`; there is
+nothing to serve.
+
 Serve Armature's static files from your endpoint, before its router:
 
 ```elixir

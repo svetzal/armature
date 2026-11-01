@@ -13,7 +13,7 @@ tokens in your own CSS. Components share light and dark token values.
 | `eyebrow` | — | A contextual uppercase label. |
 | `button` | — | A named native action. |
 | `link` | — | A named navigation link. |
-| `icon` | — | Decorative consumer SVG. |
+| `icon` | — | A decorative vendored glyph or consumer SVG. |
 | `input` | — | A native single-line control. |
 | `select` | — | A native option control. |
 | `textarea` | — | A native multiline control. |
@@ -38,6 +38,8 @@ tokens in your own CSS. Components share light and dark token values.
 | `facts` | — | Labelled record facts in a description list. |
 | `notice` | — | Static guidance or reported results with actions. |
 | `table_toolbar` | `input`, `icon`, `button` | A labelled search and announced result count. |
+| `icon_button` | `button`, `icon` | A named square action or toggle showing only an icon. |
+| `toolbar` | — | A named group of controls with one tab stop and arrow-key movement. |
 | `pagination` | `button`, `select` | Named paging controls and an announced range. |
 | `record_header` | `status` | A record heading with context and actions. |
 
@@ -173,12 +175,128 @@ valid. Caller `aria-describedby` ids are preserved and must point at caller-owne
 elements. `aria-invalid` is emitted only when displayed errors exist.
 With plain name/value inputs, supply a stable unique `id`.
 
+## Icons, icon buttons and toolbars
+
+`icon` draws a glyph from Armature's base set by `name`, such as
+`<.icon name="search" />`, or wraps your own inline SVG in its slot. Give it
+one or the other: neither, or both, raises `ArgumentError`. An unknown name
+raises when it renders, and a literal unknown name also warns at compile
+time, so `mix compile --warnings-as-errors` catches a typo. The icon is
+always hidden from assistive technology and drawn in `currentColor`, 16px
+square (`--armature-text-large`). Keep the accessible name on the surrounding
+control. Supply only decorative, noninteractive SVG in the slot.
+
+The base set is 33 general-purpose glyphs vendored unchanged from
+[Lucide](https://lucide.dev) (`lucide-static` 1.58.0, ISC licence; the licence
+ships in `priv/icons/LICENSE.txt`). They keep Lucide's names:
+`arrow-down`, `arrow-up`, `arrow-up-down`, `check`, `chevron-down`,
+`chevron-left`, `chevron-right`, `chevron-up`, `circle-alert`, `circle-check`,
+`copy`, `download`, `ellipsis`, `ellipsis-vertical`, `external-link`, `eye`,
+`eye-off`, `funnel`, `info`, `menu`, `minus`, `monitor`, `moon`, `pencil`,
+`plus`, `refresh-cw`, `search`, `settings`, `sun`, `trash-2`,
+`triangle-alert`, `upload` and `x`. `Armature.Icons.names/0` returns them, so
+a consumer can enumerate the set; the catalogue's `icon` page shows each one.
+For any other glyph, pass your own SVG.
+
+`icon_button` is a **molecule**: the `button` atom holding the `icon` atom
+and nothing else. It is not a variant of `button`, because an atom composes
+nothing and because its contract differs: an icon button has no visible
+words, so its `label` is required. The label is visually hidden text inside
+the button, which names it for assistive technology, voice control and page
+translation, and it is also the native `title`. Use `icon` for a vendored
+glyph or the slot for your own SVG. `variant` is `"secondary"` (the default,
+because icon buttons usually sit in groups) or `"primary"`; `disabled`
+renders the native attribute and the dashed disabled look of `button`. Set
+`pressed` to `true` or `false` to make a toggle: it renders `aria-pressed`,
+and a pressed button shows the `--armature-selected` surface inside a
+`--armature-selected-cue` border with a `--armature-cue-width` marker bar
+along its lower edge. The bar keeps the state visible without colour; a
+disabled toggle keeps the bar in the muted colour, and forced colours draw a
+pressed button as a solid ring inside and a focused one as a double ring
+outside. Leave `pressed` unset for an ordinary action. The button is square:
+`--armature-control-height-compact` on a fine pointer and at least 44px under
+a coarse pointer or a narrow viewport, as `--armature-target-size` grows.
+The caller owns the pressed state and sends it back on each render.
+
+```heex
+<.icon_button icon="plus" label="Add record" phx-click="add" />
+<.icon_button icon="eye" label="Show hidden records" pressed={@show_hidden}
+  phx-click="toggle_hidden" />
+```
+
+There is no tooltip beyond the native `title`. A custom tooltip that met
+WCAG 1.4.13 (dismissible with Escape, hoverable, persistent) needs script and
+focus management that this release leaves out; where sighted people need the
+words, use a `button` with visible text and an icon instead.
+
+`toolbar` is a **molecule** that arranges controls, such as `icon_button` and
+`button`, under the ARIA toolbar pattern. It renders `role="toolbar"` named
+by its required `label`, with `aria-orientation` from `orientation`
+(`"horizontal"`, the default, or `"vertical"`). Each `group` slot holds
+related controls; a `role="separator"` divider, oriented across the toolbar,
+sits between one group and the next. A group with a `label` becomes a named
+`role="group"`. The toolbar has no surface of its own and wraps when space
+runs out, so it fits a top bar, panel or record header. It holds no
+application state: the caller owns each control's event, pressed state and
+disabled state.
+
+```heex
+<.toolbar id="record-actions" label="Record actions">
+  <:group>
+    <.icon_button icon="plus" label="Add" phx-click="add" />
+    <.icon_button icon="pencil" label="Edit" phx-click="edit" />
+    <.icon_button icon="trash-2" label="Delete" disabled={@selected == nil} phx-click="delete" />
+  </:group>
+  <:group label="View">
+    <.icon_button icon="eye" label="Show hidden" pressed={@show_hidden} phx-click="toggle_hidden" />
+  </:group>
+  <:group><.icon_button icon="ellipsis" label="More actions" phx-click="more" /></:group>
+</.toolbar>
+```
+
+### The toolbar hook
+
+The server-rendered toolbar works on its own: every control is a native
+element and each one is a Tab stop. The `ArmatureToolbar` hook makes the
+toolbar one tab stop, as the pattern expects. When it mounts, it gives the
+controls a roving tabindex. The arrow keys along the orientation (Left and
+Right, or Up and Down for a vertical toolbar) move focus between controls and
+wrap at the ends; Home and End move to the first and last control. Natively
+disabled controls cannot take focus and are skipped; a control marked only
+`aria-disabled="true"` stays reachable, as the pattern allows. Keys typed into
+a text field, select or radio keep their native meaning. After every LiveView
+patch the hook applies the tabindex again, keeping the control that last had
+focus as the tab stop while it is present and enabled, else the first.
+
+The hook is plain JavaScript with no dependencies in
+`priv/static/armature-toolbar.js`, an ES module whose default export is the
+hook. Import it in your `assets/js/app.js` and register it under the name the
+markup uses, `ArmatureToolbar`:
+
+```javascript
+import ArmatureToolbar from "../../deps/armature/priv/static/armature-toolbar.js"
+
+const liveSocket = new LiveSocket("/live", Socket, {
+  hooks: { ArmatureToolbar },
+  params: { _csrf_token: csrfToken },
+})
+```
+
+The path is relative to `assets/js/`. Phoenix's esbuild configuration puts
+`deps` on `NODE_PATH`, so `"armature/priv/static/armature-toolbar.js"` also
+works. A vendored copy (`{:armature, path: "vendor/armature"}`) imports from
+`"../../vendor/armature/priv/static/armature-toolbar.js"`. If you already
+spread other hooks, add it beside them:
+`hooks: { ...colocatedHooks, ArmatureToolbar }`. Without the hook, LiveView
+logs that the hook is unknown and the toolbar keeps working with Tab. On a
+controller page the `phx-hook` attribute is inert, so the toolbar is a row of
+ordinary Tab stops. The hook has no inline script or `eval` and sets no
+inline styles, so it runs under `script-src 'self'`.
+
 ## Feedback
 
 `status` labels must express meaning in words, such as "Complete" or "Needs review".
-Tones are `neutral`, `success`, `warning` and `error`. `icon` always hides its inline
-SVG slot from assistive technology; keep accessible names on the surrounding control.
-Supply only decorative, noninteractive SVG content.
+Tones are `neutral`, `success`, `warning` and `error`.
 
 `notice` defaults to static guidance with no live region. Set `result` when reporting
 an outcome: non-error results use `role="status"`, errors use `role="alert"`.
@@ -328,6 +446,9 @@ control sizes are minimums, allowing text to grow.
 | Numbers and counts tabular | Numeric cells, facts values, toolbar counts and pagination use `font-variant-numeric: tabular-nums` |
 | Buttons: 32px minimum, 6px × 12px, 5px radius, 1px border | `control-height-compact`, `space-control`, `space-3`, `radius-base`, `border-width` |
 | Buttons: accent/paper primary; paper secondary; subtle hover; 6px icon gap | Button variant rules, `hover-mix`, `space-control` |
+| Icon buttons: square, 32px; coarse/narrow at least 44px; pressed surface, cue border and 3px lower bar | `control-height-compact`, `target-size`, `selected`, `selected-cue`, `cue-width` |
+| Icons: 16px square in the current colour | `text-large`; `currentColor` stroke |
+| Toolbar: 8px between groups, 4px within a group, 1px decorative separators | `space-2`, `space-1`, `border-width`, `line` |
 | Inputs/selects: 36px minimum, 7px × 10px, 5px radius, control border | `control-height`, `space-input`, `space-detail`, `radius-base`, `control-border` |
 | Toolbar fields: 32px minimum | `control-height-compact`; compact vertical inset in the search rule |
 | Select chevron; native in forced colours | `chevron-size`, `chevron-angle`, `chevron-stop`; forced-colour appearance override |

@@ -21,6 +21,10 @@
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
+  /* The icon page's gallery: each vendored glyph beside its name. */
+  .armature-catalogue-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--armature-layout-min-width) * 0.75)), 1fr)); gap: var(--armature-space-2); }
+  .armature-catalogue-icons li { display: flex; align-items: center; gap: var(--armature-space-2); padding: var(--armature-space-2); border: var(--armature-border-width) solid var(--armature-line); border-radius: var(--armature-radius-base); }
+  .armature-catalogue-icons code { font-family: var(--armature-font-mono); font-size: var(--armature-text-small); }
   .armature-catalogue-detail ul { list-style: none; padding: var(--armature-space-zero); margin: var(--armature-space-zero); }
   .armature-catalogue-detail h3 { font-size: var(--armature-text-base); font-weight: var(--armature-weight-emphasis); }
   .armature-catalogue-detail p { overflow-wrap: anywhere; }

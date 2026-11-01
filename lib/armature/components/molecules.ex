@@ -82,16 +82,15 @@ defmodule Armature.Components.Molecules do
       <fieldset>
         <legend class={[!@label_visible && "armature-sr-only"]}>{@label}</legend>
         <span class={["armature-theme-switch-options"]}>
-          <.theme_choice id={@id} value="auto" name="System" checked={@value == "auto"}>
-            <rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" />
-          </.theme_choice>
-          <.theme_choice id={@id} value="light" name="Light" checked={@value == "light"}>
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-          </.theme_choice>
-          <.theme_choice id={@id} value="dark" name="Dark" checked={@value == "dark"}>
-            <path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z" />
-          </.theme_choice>
+          <.theme_choice
+            id={@id}
+            value="auto"
+            name="System"
+            icon="monitor"
+            checked={@value == "auto"}
+          />
+          <.theme_choice id={@id} value="light" name="Light" icon="sun" checked={@value == "light"} />
+          <.theme_choice id={@id} value="dark" name="Dark" icon="moon" checked={@value == "dark"} />
         </span>
       </fieldset>
       {render_slot(@inner_block)}
@@ -102,8 +101,8 @@ defmodule Armature.Components.Molecules do
   attr(:id, :string, required: true)
   attr(:value, :string, required: true)
   attr(:name, :string, required: true)
+  attr(:icon, :string, required: true)
   attr(:checked, :boolean, required: true)
-  slot(:inner_block, required: true)
 
   # The radio covers its whole choice, so the choice is its target; the
   # name in words is the radio's label and the icon is decoration.
@@ -111,18 +110,7 @@ defmodule Armature.Components.Molecules do
     ~H"""
     <label class={["armature-theme-switch-option"]} title={@name}>
       <input type="radio" id={@id <> "-" <> @value} name="theme" value={@value} checked={@checked} />
-      <Atoms.icon>
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          {render_slot(@inner_block)}
-        </svg>
-      </Atoms.icon>
+      <Atoms.icon name={@icon} />
       <span class={["armature-sr-only"]}>{@name}</span>
     </label>
     """
@@ -261,11 +249,7 @@ defmodule Armature.Components.Molecules do
       <form id={@id <> "-search-form"} phx-change={@search_event} phx-submit={@search_event}>
         <label for={@id <> "-search"} class={["armature-sr-only"]}>{@search_label}</label>
         <div class={["armature-search"]}>
-          <Atoms.icon>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="10" cy="10" r="6" /><path d="m15 15 6 6" />
-            </svg>
-          </Atoms.icon>
+          <Atoms.icon name="search" />
           <Atoms.input id={@id <> "-search"} type="search" name="query" value={@query} />
           <Atoms.button
             :if={@query != ""}
@@ -275,11 +259,7 @@ defmodule Armature.Components.Molecules do
             phx-value-query=""
             aria-label="Clear search"
           >
-            <Atoms.icon>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="m6 6 12 12M18 6 6 18" />
-              </svg>
-            </Atoms.icon>
+            <Atoms.icon name="x" />
           </Atoms.button>
         </div>
       </form>
@@ -287,6 +267,119 @@ defmodule Armature.Components.Molecules do
         @total
       )} results</span>
       <div :if={@actions != []} class={["armature-toolbar-actions"]}>{render_slot(@actions)}</div>
+    </div>
+    """
+  end
+
+  @doc """
+  A square, icon-only native button with a required name.
+
+  `label` names the button for assistive technology, as visually hidden text
+  inside it, and is also its native `title`. Show a vendored glyph with
+  `icon` (one of `Armature.Icons.names/0`) or put your own inline SVG in the
+  slot. `variant` is `"secondary"` (the default, a paper surface) or
+  `"primary"` (an accent fill), as for `Armature.Components.Atoms.button/1`.
+  Set `pressed` to `true` or `false` to make a toggle: it renders `aria-pressed`, and a pressed button
+  shows a selected surface with a marker bar along its lower edge, so the
+  state does not rest on colour. Leave `pressed` unset for an ordinary action.
+  The button is square: one compact control tall on a fine pointer, and at
+  least 44px under a coarse pointer or a narrow viewport.
+  """
+  attr(:label, :string, required: true)
+  attr(:icon, :string, default: nil, values: [nil | Armature.Icons.names()])
+  attr(:type, :string, default: "button", values: ~w(button submit reset))
+  attr(:variant, :string, default: "secondary", values: ~w(primary secondary))
+  attr(:disabled, :boolean, default: false)
+  attr(:pressed, :boolean, default: nil)
+  attr(:rest, :global, include: ~w(form name value))
+  slot(:inner_block)
+
+  def icon_button(%{icon: nil, inner_block: []}) do
+    raise ArgumentError, "icon_button needs an icon name or an inline SVG in its slot"
+  end
+
+  def icon_button(%{icon: icon, inner_block: [_ | _]}) when is_binary(icon) do
+    raise ArgumentError, "icon_button takes an icon name or an inline SVG, not both"
+  end
+
+  def icon_button(assigns) do
+    ~H"""
+    <Atoms.button
+      type={@type}
+      variant={@variant}
+      disabled={@disabled}
+      title={@label}
+      aria-pressed={if(is_boolean(@pressed), do: to_string(@pressed))}
+      data-armature-icon-button
+      {@rest}
+    >
+      <Atoms.icon :if={@icon} name={@icon} />
+      <Atoms.icon :if={!@icon}>{render_slot(@inner_block)}</Atoms.icon>
+      <span class={["armature-sr-only"]}>{@label}</span>
+    </Atoms.button>
+    """
+  end
+
+  @doc """
+  A named group of controls with one tab stop, following the ARIA toolbar pattern.
+
+  Each `group` slot holds related controls, such as `icon_button/1` and
+  `Armature.Components.Atoms.button/1`; a separator divides one group from
+  the next. A group with a `label` is a named `role="group"`. `label` names the toolbar, and
+  `orientation` (`"horizontal"` or `"vertical"`) sets `aria-orientation` and
+  the arrangement.
+
+  The markup works on its own: every control is a native element reachable
+  with Tab. Register the `ArmatureToolbar` hook from `armature-toolbar.js` in
+  your LiveSocket to make the toolbar one tab stop. The hook gives the
+  controls a roving tabindex: the arrow keys along the orientation move
+  between enabled controls and wrap, Home and End go to the first and last,
+  and natively disabled controls are skipped. It keeps the tabindex right
+  after every LiveView patch. The toolbar holds no application state: the
+  caller owns what each control does and whether it is pressed or disabled.
+  """
+  attr(:id, :string, required: true)
+  attr(:label, :string, required: true)
+  attr(:orientation, :string, default: "horizontal", values: ~w(horizontal vertical))
+  attr(:rest, :global)
+
+  slot :group, required: true do
+    attr(:label, :string)
+  end
+
+  def toolbar(assigns) do
+    assigns =
+      assign(assigns,
+        separator_orientation:
+          if(assigns.orientation == "vertical", do: "horizontal", else: "vertical")
+      )
+
+    ~H"""
+    <div
+      id={@id}
+      class={["armature-toolbar"]}
+      role="toolbar"
+      aria-label={@label}
+      aria-orientation={@orientation}
+      phx-hook="ArmatureToolbar"
+      {@rest}
+    >
+      <%= for {group, index} <- Enum.with_index(@group) do %>
+        <div
+          :if={index > 0}
+          class={["armature-toolbar-separator"]}
+          role="separator"
+          aria-orientation={@separator_orientation}
+        >
+        </div>
+        <div
+          class={["armature-toolbar-group"]}
+          role={group[:label] && "group"}
+          aria-label={group[:label]}
+        >
+          {render_slot(group)}
+        </div>
+      <% end %>
     </div>
     """
   end

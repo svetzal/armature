@@ -735,6 +735,32 @@
   .armature-button-primary:hover { background: color-mix(in srgb, var(--armature-accent), var(--armature-ink) var(--armature-hover-mix)); }
   .armature-button:active { transform: translateY(var(--armature-press-offset)); }
 
+  /* An icon button is square: one compact control tall on a fine pointer,
+     and the enhanced target under a coarse pointer or a narrow viewport,
+     where the target-size token grows. */
+  .armature-button[data-armature-icon-button] {
+    flex: none;
+    inline-size: max(var(--armature-control-height-compact), var(--armature-target-size));
+    block-size: max(var(--armature-control-height-compact), var(--armature-target-size));
+    padding: var(--armature-space-zero);
+  }
+
+  /* A pressed toggle is a selected surface in a selected-cue border, with a
+     marker bar along its lower edge, so the state is a shape as well as a
+     colour. Hover keeps the bar and adds the usual inner ring. */
+  .armature-button[aria-pressed="true"] {
+    color: var(--armature-ink);
+    background: var(--armature-selected);
+    border-color: var(--armature-selected-cue);
+    box-shadow: inset var(--armature-space-zero) calc(var(--armature-cue-width) * -1) var(--armature-space-zero) var(--armature-selected-cue);
+  }
+  .armature-button[aria-pressed="true"]:hover {
+    background: color-mix(in srgb, var(--armature-selected), var(--armature-ink) var(--armature-hover-mix));
+    box-shadow:
+      inset var(--armature-space-zero) calc(var(--armature-cue-width) * -1) var(--armature-space-zero) var(--armature-selected-cue),
+      inset var(--armature-space-zero) var(--armature-space-zero) var(--armature-space-zero) var(--armature-border-width) var(--armature-selected-cue);
+  }
+
   /* Disabled looks the same for every variant: a primary fill would hide a
      dashed border drawn in its own colour. */
   .armature-button:disabled,
@@ -745,6 +771,66 @@
     border-color: var(--armature-control-border);
     border-style: dashed;
     box-shadow: none;
+  }
+  /* A disabled toggle keeps its pressed bar, in the muted colour. */
+  .armature-button[aria-pressed="true"]:disabled {
+    box-shadow: inset var(--armature-space-zero) calc(var(--armature-cue-width) * -1) var(--armature-space-zero) var(--armature-muted);
+  }
+  /* Forced colours drop surfaces and shadows, so a pressed toggle is a solid
+     ring inside, as selection is elsewhere, and a focused one a double ring
+     outside. */
+  @media (forced-colors: active) {
+    .armature-button[aria-pressed="true"] {
+      outline: var(--armature-focus-width) solid var(--armature-selected-cue);
+      outline-offset: calc(var(--armature-focus-width) * -1);
+    }
+    .armature-button[aria-pressed="true"]:focus-visible {
+      outline: calc(var(--armature-focus-width) * 2) double var(--armature-focus);
+      outline-offset: var(--armature-focus-offset);
+    }
+  }
+
+  /* A toolbar arranges groups of controls in a row that wraps, or a column.
+     It has no surface of its own, so it sits in a top bar, panel or header. */
+  .armature-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--armature-space-2);
+    max-width: 100%;
+    color: var(--armature-ink);
+    font-family: var(--armature-font-sans);
+    font-size: var(--armature-text-base);
+    line-height: var(--armature-line-height);
+  }
+  .armature-toolbar-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--armature-space-1);
+  }
+  /* The separator is a decorative divider: a border, so forced colours keep it. */
+  .armature-toolbar-separator {
+    align-self: stretch;
+    margin-block: var(--armature-space-1);
+    border-inline-start: var(--armature-border-width) solid var(--armature-line);
+  }
+  .armature-toolbar[aria-orientation="vertical"] {
+    display: inline-flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+  .armature-toolbar[aria-orientation="vertical"] > .armature-toolbar-group {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+  .armature-toolbar[aria-orientation="vertical"] > .armature-toolbar-separator {
+    margin-block: var(--armature-space-zero);
+    margin-inline: var(--armature-space-1);
+    border-inline-start: none;
+    border-block-start: var(--armature-border-width) solid var(--armature-line);
   }
   .armature-link {
     display: inline-flex;

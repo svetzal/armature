@@ -122,6 +122,13 @@ defmodule Armature.Browser.Fixtures do
       items={[%{label: "Overview", href: "/fixtures"}]}
     />
     <Molecules.theme_switch id="theme-three" label="Colour scheme" label_visible />
+    <Molecules.toolbar id="plain-toolbar" label="Plain actions">
+      <:group>
+        <Molecules.icon_button id="plain-add" icon="plus" label="Add" />
+        <Molecules.icon_button id="plain-edit" icon="pencil" label="Edit" disabled />
+      </:group>
+      <:group><Molecules.icon_button id="plain-more" icon="ellipsis" label="More actions" /></:group>
+    </Molecules.toolbar>
     """
   end
 end

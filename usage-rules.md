@@ -16,7 +16,8 @@ and register what you add. Full guides: `deps/armature/README.md` and
 - Prefer Armature components over Phoenix's generated core components and over
   hand-written markup: `button`, `link`, `field`, `status`, `notice`, `facts`,
   `panel`, `data_table`, `table_toolbar`, `pagination`, `inspector`,
-  `record_header`, and the layouts `stack`, `cluster`, `grid` and `split`.
+  `record_header`, `icon_button`, `toolbar`, and the layouts `stack`,
+  `cluster`, `grid` and `split`.
 - Forms: use `field` with `field={@form[:name]}` and a visible `label`. Use
   `type` for `select`, `textarea` and `checkbox`. Do not hand-build label,
   hint and error markup; `field` binds them with `aria-describedby` and
@@ -27,8 +28,18 @@ and register what you add. Full guides: `deps/armature/README.md` and
   "auto", "light" and "dark" and the ids "<id>-auto", "<id>-light" and
   "<id>-dark", not a select. Its legend is hidden unless `label_visible` is
   set.
-- `icon` wraps your own inline SVG as decoration only. Put the accessible name
-  on the control, never on the icon.
+- `icon` draws a vendored glyph by `name` (see `Armature.Icons.names/0`, for
+  example "search", "x", "plus", "pencil", "trash-2") or wraps your own inline
+  SVG in its slot, as decoration only. Put the accessible name on the control,
+  never on the icon.
+- For an action shown only as an icon, use `icon_button` with a `label`; do
+  not hand-build a button with an `aria-label`. Set `pressed` only for a
+  toggle, and keep its state in the LiveView.
+- Group related controls in `toolbar` with a `label` and `group` slots.
+  Register the `ArmatureToolbar` hook from
+  `deps/armature/priv/static/armature-toolbar.js` in the LiveSocket's hooks
+  so the toolbar is one tab stop with arrow-key movement. Do not write your
+  own roving tabindex.
 - Do not put Tailwind or other utility classes on Armature components or copy
   their markup. Extend instead (see below).
 

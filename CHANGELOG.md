@@ -15,6 +15,42 @@ Until 1.0.0, a minor version can change the public surface.
   value for one: `nil` for `"auto"`, so the attribute is omitted.
 - `Armature.Registry.level_name/1` gives a level's plural heading, such as
   `"Atoms"`. The catalogue and the registry's guide check both use it.
+- A base icon set: 33 general-purpose glyphs vendored unchanged from Lucide
+  (`lucide-static` 1.58.0, ISC licence). The licence ships in
+  `priv/icons/LICENSE.txt`. `Armature.Icons.names/0` lists the names, which
+  are Lucide's own: `arrow-down`, `arrow-up`, `arrow-up-down`, `check`,
+  `chevron-down`, `chevron-left`, `chevron-right`, `chevron-up`,
+  `circle-alert`, `circle-check`, `copy`, `download`, `ellipsis`,
+  `ellipsis-vertical`, `external-link`, `eye`, `eye-off`, `funnel`, `info`,
+  `menu`, `minus`, `monitor`, `moon`, `pencil`, `plus`, `refresh-cw`,
+  `search`, `settings`, `sun`, `trash-2`, `triangle-alert`, `upload` and `x`.
+- `icon` takes a `name` and draws that glyph. Its slot still takes your own
+  inline SVG; give one or the other. An unknown name raises `ArgumentError`
+  when rendered, and a literal unknown name warns at compile time. The icon
+  is still hidden from assistive technology and drawn in `currentColor`.
+- `icon_button`, a molecule: a square, icon-only `button` with a required
+  `label`, rendered as visually hidden text and as the native `title`. It
+  takes `icon` or a slot for your own SVG, `variant` (`"secondary"` by
+  default, or `"primary"`), `disabled`, and `pressed` for a toggle, which
+  renders `aria-pressed`. A pressed button shows the selected surface in a
+  selected-cue border with a marker bar along its lower edge, so the state
+  does not rest on colour; forced colours draw it as an inner ring. It is one
+  compact control square on a fine pointer and at least 44px under a coarse
+  pointer or a narrow viewport. No tooltip beyond the native `title`.
+- `toolbar`, a molecule following the ARIA toolbar pattern: `role="toolbar"`
+  named by a required `label`, `aria-orientation` from `orientation`
+  (`"horizontal"` or `"vertical"`), and `group` slots separated by
+  `role="separator"` dividers. A group with a `label` is a named
+  `role="group"`. It holds no application state.
+- `priv/static/armature-toolbar.js`, the `ArmatureToolbar` LiveView hook: a
+  dependency-free ES module that gives a toolbar a roving tabindex, so it is
+  one tab stop. Arrow keys along the orientation move between enabled
+  controls and wrap, Home and End reach the ends, and natively disabled
+  controls are skipped. It reapplies the tabindex after every LiveView patch.
+  Import it in `app.js` and add it to your LiveSocket `hooks`; the component
+  guide shows how. Without it every control stays reachable with Tab.
+- Catalogue examples for `icon_button` and `toolbar`, and a gallery of every
+  vendored glyph on the `icon` page.
 
 ### Changed
 
@@ -44,6 +80,12 @@ Until 1.0.0, a minor version can change the public surface.
   `data_table` with compact density. Their first column is a plain cell, no
   longer a row header. The preview-width control is now a `field` in a
   `cluster` instead of borrowing the theme switch's class.
+- `theme_switch` draws its monitor, sun and moon from the base icon set, and
+  `table_toolbar` its search and clear glyphs. The shapes are Lucide's, so
+  they differ slightly from the hand-drawn ones; markup roles, names, ids and
+  events do not change.
+- A `button` with `aria-pressed="true"` now shows the pressed look, whether
+  or not it is an `icon_button`.
 
 ### Fixed
 

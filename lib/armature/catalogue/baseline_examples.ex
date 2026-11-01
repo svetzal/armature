@@ -45,7 +45,10 @@ defmodule Armature.Catalogue.BaselineExamples do
       saved: false,
       theme: "auto",
       destination: "",
-      count: 0
+      count: 0,
+      items: 0,
+      hidden_shown: false,
+      toolbar_status: "No toolbar action yet."
     })
   end
 
@@ -57,6 +60,9 @@ defmodule Armature.Catalogue.BaselineExamples do
     do: %{state | destination: destination}
 
   def handle_event("example:action", _params, state), do: %{state | count: state.count + 1}
+
+  def handle_event("example:toolbar", %{"action" => action}, state),
+    do: toolbar_action(action, state)
 
   def handle_event(event, %{"sample" => params}, state)
       when event in ~w(example:validate example:save) do
@@ -105,6 +111,34 @@ defmodule Armature.Catalogue.BaselineExamples do
 
   def handle_event(_event, _params, state), do: state
 
+  defp toolbar_action("add", state),
+    do: %{
+      state
+      | items: state.items + 1,
+        toolbar_status: "Added an item. Items: #{state.items + 1}."
+    }
+
+  defp toolbar_action("edit", state),
+    do: %{state | toolbar_status: "Editing is not part of this preview."}
+
+  defp toolbar_action("delete", %{items: items} = state) when items > 0,
+    do: %{state | items: items - 1, toolbar_status: "Deleted an item. Items: #{items - 1}."}
+
+  defp toolbar_action("hidden", state) do
+    shown = !state.hidden_shown
+
+    %{
+      state
+      | hidden_shown: shown,
+        toolbar_status: if(shown, do: "Hidden items shown.", else: "Hidden items concealed.")
+    }
+  end
+
+  defp toolbar_action("more", state),
+    do: %{state | toolbar_status: "More actions would open here."}
+
+  defp toolbar_action(_action, state), do: state
+
   defp refresh(state) do
     records = Records.page(state)
     Map.merge(state, %{records: records, page: records.page})
@@ -132,6 +166,17 @@ defmodule Armature.Catalogue.BaselineExamples do
       "System, Light and Dark as native radios. The second switch shows its legend; both share one choice."
 
   defp description(:notice), do: "Static guidance, polite results and error alerts."
+
+  defp description(:icon),
+    do: "Every vendored glyph by name, and a consumer's own inline SVG, beside a named button."
+
+  defp description(:icon_button),
+    do:
+      "Secondary, primary, disabled and pressed icon-only buttons, each named in words; activation updates a local count."
+
+  defp description(:toolbar),
+    do:
+      "One tab stop: arrow keys move between controls, Home and End reach the ends, and Delete is skipped while disabled."
 
   defp description(id) when id in [:stack, :cluster, :grid, :split],
     do: "Resize the page to explore wrapping and arrangement."
@@ -181,13 +226,22 @@ defmodule Armature.Catalogue.BaselineExamples do
       <% :link -> %>
         <Atoms.link href="#catalogue-usage">Read usage notes</Atoms.link>
       <% :icon -> %>
-        <Atoms.button aria-label="Add example" phx-click="example:action">
-          <Atoms.icon>
-            <svg viewBox="0 0 24 24" focusable="false"><path d="M12 4v16M4 12h16" /></svg>
-          </Atoms.icon>
-          Add example
-        </Atoms.button>
+        <Layouts.cluster>
+          <Atoms.button phx-click="example:action"><Atoms.icon name="plus" /> Add example</Atoms.button>
+          <Atoms.button variant="secondary" phx-click="example:action">
+            <Atoms.icon>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 21 12 12 21 3 12Z" /></svg>
+            </Atoms.icon>
+            Consumer glyph
+          </Atoms.button>
+        </Layouts.cluster>
         <p role="status">Added {@state.count} examples.</p>
+        <h3>Vendored glyphs</h3>
+        <ul id="example-icon-gallery" class={["armature-catalogue-icons"]}>
+          <li :for={name <- Armature.Icons.names()}>
+            <Atoms.icon name={name} /><code>{name}</code>
+          </li>
+        </ul>
       <% :input -> %>
         <label for="example-input">Example name</label>
         <Atoms.input id="example-input" value="Sample" />
@@ -344,6 +398,98 @@ defmodule Armature.Catalogue.BaselineExamples do
           page_sizes={[10, 25, 50]}
           size_event="record_size"
         />
+      <% :icon_button -> %>
+        <Layouts.cluster>
+          <Molecules.icon_button
+            id="example-icon-add"
+            icon="plus"
+            label="Add example"
+            phx-click="example:action"
+          />
+          <Molecules.icon_button
+            icon="pencil"
+            label="Edit example"
+            variant="primary"
+            phx-click="example:action"
+          />
+          <Molecules.icon_button icon="trash-2" label="Delete example" disabled />
+          <Molecules.icon_button icon="settings" label="Example settings" variant="primary" disabled />
+          <Molecules.icon_button
+            id="example-icon-toggle"
+            icon="eye"
+            label="Show hidden items"
+            pressed={@state.hidden_shown}
+            phx-click="example:toolbar"
+            phx-value-action="hidden"
+          />
+          <Molecules.icon_button label="Consumer glyph" phx-click="example:action">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 21 12 12 21 3 12Z" /></svg>
+          </Molecules.icon_button>
+        </Layouts.cluster>
+        <p role="status">
+          Activated {@state.count} times. Hidden items {if(@state.hidden_shown,
+            do: "shown",
+            else: "concealed"
+          )}.
+        </p>
+      <% :toolbar -> %>
+        <Molecules.toolbar id="example-toolbar-actions" label="Item actions">
+          <:group>
+            <Molecules.icon_button
+              id="example-toolbar-add"
+              icon="plus"
+              label="Add"
+              phx-click="example:toolbar"
+              phx-value-action="add"
+            />
+            <Molecules.icon_button
+              id="example-toolbar-edit"
+              icon="pencil"
+              label="Edit"
+              phx-click="example:toolbar"
+              phx-value-action="edit"
+            />
+            <Molecules.icon_button
+              id="example-toolbar-delete"
+              icon="trash-2"
+              label="Delete"
+              disabled={@state.items == 0}
+              phx-click="example:toolbar"
+              phx-value-action="delete"
+            />
+          </:group>
+          <:group label="View">
+            <Molecules.icon_button
+              id="example-toolbar-hidden"
+              icon="eye"
+              label="Show hidden items"
+              pressed={@state.hidden_shown}
+              phx-click="example:toolbar"
+              phx-value-action="hidden"
+            />
+          </:group>
+          <:group>
+            <Molecules.icon_button
+              id="example-toolbar-more"
+              icon="ellipsis"
+              label="More actions"
+              phx-click="example:toolbar"
+              phx-value-action="more"
+            />
+          </:group>
+        </Molecules.toolbar>
+        <p role="status">{@state.toolbar_status}</p>
+        <h3>Vertical</h3>
+        <Molecules.toolbar id="example-toolbar-vertical" label="Arrangement" orientation="vertical">
+          <:group>
+            <Atoms.button variant="secondary" phx-click="example:action">Move up</Atoms.button>
+            <Atoms.button variant="secondary" phx-click="example:action">Move down</Atoms.button>
+          </:group>
+          <:group>
+            <Molecules.icon_button icon="copy" label="Duplicate" phx-click="example:action" />
+          </:group>
+        </Molecules.toolbar>
+        <p role="status">Arranged {@state.count} times.</p>
       <% :record_header -> %>
         <Molecules.record_header
           id="example-header"
