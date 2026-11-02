@@ -356,6 +356,42 @@ defmodule Armature.Components.MoleculesTest do
     test "renders caller actions", %{doc: doc} do
       assert text(doc, ".armature-toolbar-actions button") == "Export"
     end
+
+    test "names the clear button with a supplied clear_label" do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Molecules.table_toolbar
+            id="tools"
+            search_event="search"
+            query="Example"
+            total={2}
+            clear_label="Suche leeren"
+          />
+          """
+        end)
+
+      assert present?(doc, "#tools-clear[aria-label='Suche leeren']")
+    end
+
+    test "formats the count with a supplied count_label" do
+      doc =
+        document(
+          fn assigns ->
+            ~H"""
+            <Molecules.table_toolbar
+              id="tools"
+              search_event="search"
+              total={1200}
+              count_label={@count_label}
+            />
+            """
+          end,
+          %{count_label: fn total -> "Ergebnisse: #{total}" end}
+        )
+
+      assert text(doc, "#tools-count") == "Ergebnisse: 1200"
+    end
   end
 
   describe "pagination" do
@@ -367,7 +403,10 @@ defmodule Armature.Components.MoleculesTest do
     ]
 
     test "names the page navigation" do
-      assert present?(pagination_document(1, 80, 1, 25, 2000), "nav[aria-label='Table pages']")
+      assert present?(
+               pagination_document(1, 80, 1, 25, 2000),
+               "nav#pages[aria-label='Table pages']"
+             )
     end
 
     test "previous sends the preceding page number" do
@@ -375,14 +414,14 @@ defmodule Armature.Components.MoleculesTest do
 
       assert present?(
                doc,
-               "button[aria-label='Previous page'][phx-click=page][phx-value-page='1']"
+               "button#pages-previous[phx-click=page][phx-value-page='1']"
              )
     end
 
     test "next sends the following page number" do
       doc = pagination_document(2, 80, 26, 50, 2000)
 
-      assert present?(doc, "button[aria-label='Next page'][phx-click=page][phx-value-page='3']")
+      assert present?(doc, "button#pages-next[phx-click=page][phx-value-page='3']")
     end
 
     test "disables previous on the first page" do
@@ -390,7 +429,7 @@ defmodule Armature.Components.MoleculesTest do
             @page_boundaries do
         doc = pagination_document(page, pages, first, last, total)
 
-        assert present?(doc, "button[aria-label='Previous page'][disabled]") ==
+        assert present?(doc, "button#pages-previous[disabled]") ==
                  previous_disabled?
       end
     end
@@ -399,7 +438,7 @@ defmodule Armature.Components.MoleculesTest do
       for {page, pages, first, last, total, _previous_disabled?, next_disabled?} <-
             @page_boundaries do
         doc = pagination_document(page, pages, first, last, total)
-        assert present?(doc, "button[aria-label='Next page'][disabled]") == next_disabled?
+        assert present?(doc, "button#pages-next[disabled]") == next_disabled?
       end
     end
 
@@ -415,6 +454,27 @@ defmodule Armature.Components.MoleculesTest do
         assert text(doc, "#pages-range[role=status][aria-live=polite][aria-atomic=true]") ==
                  announcement
       end
+    end
+
+    test "the page buttons are named by their visible text" do
+      doc = pagination_document(2, 80, 26, 50, 2000)
+      assert text(doc, "#pages-previous:not([aria-label])") == "Previous"
+      assert text(doc, "#pages-next:not([aria-label])") == "Next"
+    end
+
+    test "renders caller-supplied labels" do
+      doc =
+        pagination_document(2, 80, 26, 50, 2000, %{
+          label: "Seiten",
+          previous_label: "Zurück",
+          next_label: "Weiter",
+          page_size_label: "Einträge pro Seite"
+        })
+
+      assert present?(doc, "nav#pages[aria-label=Seiten]")
+      assert text(doc, "#pages-previous") == "Zurück"
+      assert text(doc, "#pages-next") == "Weiter"
+      assert text(doc, "label[for=pages-size]") == "Einträge pro Seite"
     end
 
     test "labels the page size picker" do
@@ -628,19 +688,25 @@ defmodule Armature.Components.MoleculesTest do
     end
   end
 
-  defp pagination_document(page, pages, first, last, total) do
-    document(&Molecules.pagination/1, %{
-      id: "pages",
-      page: page,
-      pages: pages,
-      first: first,
-      last: last,
-      total: total,
-      page_event: "page",
-      page_size: 25,
-      page_sizes: [10, 25, 50],
-      size_event: "size"
-    })
+  defp pagination_document(page, pages, first, last, total, labels \\ %{}) do
+    document(
+      &Molecules.pagination/1,
+      Map.merge(
+        %{
+          id: "pages",
+          page: page,
+          pages: pages,
+          first: first,
+          last: last,
+          total: total,
+          page_event: "page",
+          page_size: 25,
+          page_sizes: [10, 25, 50],
+          size_event: "size"
+        },
+        labels
+      )
+    )
   end
 
   defp translated_form_field_document(params) do

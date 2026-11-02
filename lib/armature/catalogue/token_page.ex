@@ -158,6 +158,7 @@ defmodule Armature.Catalogue.TokenPage do
           id="catalogue-token-secondary"
           label="Secondary navigation specimen"
           event="catalogue:token-demo"
+          prompt="Choose a component"
           groups={[
             %{
               label: "Components",

@@ -23,7 +23,8 @@ defmodule Armature.Components.Templates do
   or symbol before the title.
   The rail narrows below 800px and stacks below 520px of the shell's own inline size.
 
-  The skip link is an ordinary `href` fragment to the h1, which has
+  The skip link reads `skip_label` (default "Skip to main content"). It is an
+  ordinary `href` fragment to the h1, which has
   `tabindex="-1"`, so it moves focus on pages without LiveView. Its
   `JS.focus/1` command is an enhancement for LiveView pages. `heading_rest`
   forwards LiveView focus commands to the h1 after patch navigation.
@@ -33,6 +34,7 @@ defmodule Armature.Components.Templates do
   attr(:subtitle, :string, default: nil)
   attr(:nav_label, :string, default: "Main")
   attr(:section_label, :string, default: nil)
+  attr(:skip_label, :string, default: "Skip to main content")
   attr(:items, :list, required: true)
   attr(:context, :string, required: true)
   attr(:heading, :string, required: true)
@@ -54,7 +56,7 @@ defmodule Armature.Components.Templates do
         href={"#" <> @heading_id}
         class={["armature-skip-link"]}
         phx-click={Phoenix.LiveView.JS.focus(to: "#" <> @heading_id)}
-      >Skip to main content</Atoms.link>
+      >{@skip_label}</Atoms.link>
       <div class={["armature-app-shell-grid"]}>
         <Organisms.side_nav
           id={@id <> "-rail"}
@@ -94,10 +96,12 @@ defmodule Armature.Components.Templates do
 
   The caller owns filtering, ordering, paging and persistent selection. `col`
   slots are forwarded unchanged to `data_table/1`, which defines their contract,
-  and the paging attributes follow `pagination/1`. `details` holds
+  and the paging attributes follow `pagination/1`, including its `label`,
+  `previous_label`, `next_label` and `page_size_label`. `details` holds
   the selected record's content. Update
   `selection_label` on selection changes to announce them without moving focus.
   The skip link targets the inspector; narrow layouts place it below the table.
+  `search_label`, `clear_label` and `count_label` pass to `table_toolbar/1`.
   """
   attr(:id, :string, required: true)
   attr(:rows, :list, required: true)
@@ -105,6 +109,9 @@ defmodule Armature.Components.Templates do
   attr(:density, :string, default: "default", values: ~w(default compact))
   attr(:query, :string, default: "")
   attr(:search_event, :string, required: true)
+  attr(:search_label, :string, default: "Search records")
+  attr(:clear_label, :string, default: "Clear search")
+  attr(:count_label, :any, default: nil)
   attr(:sort_event, :string, required: true)
   attr(:sort_by, :string, default: nil)
   attr(:sort_direction, :string, default: "asc", values: ~w(asc desc))
@@ -139,6 +146,9 @@ defmodule Armature.Components.Templates do
         <Molecules.table_toolbar
           id={@id <> "-toolbar"}
           search_event={@search_event}
+          search_label={@search_label}
+          clear_label={@clear_label}
+          count_label={@count_label}
           query={@query}
           total={@total}
         >
@@ -172,6 +182,10 @@ defmodule Armature.Components.Templates do
           page_size={@page_size}
           page_sizes={@page_sizes}
           size_event={@size_event}
+          label={@label}
+          previous_label={@previous_label}
+          next_label={@next_label}
+          page_size_label={@page_size_label}
         />
         <:secondary>
           <Organisms.inspector id={@id <> "-inspector"} title={@inspector_title}>

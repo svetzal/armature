@@ -121,12 +121,41 @@ defmodule Armature.Components.TemplatesTest do
       refute present?(doc, "aside[aria-live]")
     end
 
+    test "passes search_label to the toolbar" do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Templates.table_inspector
+            id="browser"
+            rows={[]}
+            caption="Records"
+            total={0}
+            page={1}
+            pages={1}
+            first={0}
+            last={0}
+            search_event="search"
+            sort_event="sort"
+            page_event="page"
+            select_event="select"
+            search_label="Datensätze suchen"
+          >
+            <:col :let={row} label="Name" row_label>{row.name}</:col>
+            <:details>Nothing selected</:details>
+          </Templates.table_inspector>
+          """
+        end)
+
+      assert text(doc, "label[for=browser-toolbar-search]") == "Datensätze suchen"
+    end
+
     test "declares the same col slot attributes as data_table" do
       assert slot_attrs(:table_inspector, :col) == slot_attrs(:data_table, :col)
     end
 
     test "declares the paging attributes as pagination does" do
-      paging = ~w(page pages first last total page_event page_size page_sizes size_event)a
+      paging =
+        ~w(page pages first last total page_event page_size page_sizes size_event label previous_label next_label page_size_label)a
 
       assert declared_attrs(:table_inspector, paging) == declared_attrs(:pagination, paging)
     end
@@ -139,6 +168,26 @@ defmodule Armature.Components.TemplatesTest do
 
     test "skip link targets the main heading", %{doc: doc} do
       assert text(doc, "#shell > a:first-child[href='#overview']") == "Skip to main content"
+    end
+
+    test "skip link reads a supplied skip_label" do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Templates.app_shell
+            id="shell"
+            heading="Overview"
+            heading_id="overview"
+            context="Overview"
+            items={[]}
+            skip_label="Zum Inhalt springen"
+          >
+            Content
+          </Templates.app_shell>
+          """
+        end)
+
+      assert text(doc, "#shell > a:first-child") == "Zum Inhalt springen"
     end
 
     test "brand link patches home with an accessible name", %{doc: doc} do

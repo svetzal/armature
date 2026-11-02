@@ -69,7 +69,8 @@ Tables are checked against `Armature.UI.Registry` by the test suite.
 skips to the unique, focusable `heading_id`; the main landmark is named by that
 heading. The skip link is a plain `href` fragment and the h1 has
 `tabindex="-1"`, so it moves focus without JavaScript; its LiveView
-`JS.focus` command is an enhancement. Set `title` and `subtitle` for your application's brand, `nav_label`
+`JS.focus` command is an enhancement. The skip link reads `skip_label`
+(default "Skip to main content"). Set `title` and `subtitle` for your application's brand, `nav_label`
 to name the rail's navigation (default "Main") and `section_label` for an
 optional caption above its links. The brand and caption render only when you
 give them. Navigation items have
@@ -109,7 +110,9 @@ text in the content slot. Arrange panels with `grid`; they stack as space runs o
 
 `grouped_nav` takes `groups` of `%{label: text, items: items}` using the same
 item contract. Its `label` names both the wide navigation and the narrow native
-select. Its description warns that choosing an option opens its page. The select emits `destination` on `event`. Validate it against the
+select. The select's empty option reads `prompt` (default "Choose a
+destination") and its description reads `hint` (default "Choosing an option
+opens its page."). Pass your own words, or translations, there. The select emits `destination` on `event`. Validate it against the
 supplied destinations before calling `push_patch` or `push_navigate`. Its optional
 content slot can supply guidance. Keep current selection in caller state.
 
@@ -362,11 +365,19 @@ inherit cell typography with emphasis weight, no border or fill, and a minimum
 `table_toolbar` renders a labelled search form sending `%{"query" => query}`
 to `search_event` on change or submit, an atomic polite result count from `total`,
 and an optional `actions` slot. Searching is always the caller's responsibility.
+Its words are attributes: `search_label` (default "Search records"),
+`clear_label` for the clear button (default "Clear search") and `count_label`,
+a function from `total` to the count text (default "1,234 results"), so a
+translation controls the word order. `table_inspector` passes all three to its toolbar.
 `pagination` receives `page`, `pages`, `first`, `last`, `total` and `page_event`;
 its named buttons send `%{"page" => page}` and disable at the boundaries. For
 an empty result set pass page 1 of 1 and range 0–0. Supplying `page_sizes` and
 `size_event` adds a labelled select sending `%{"page_size" => size}`. Its range
 is an atomic polite status, with grouping separators, such as "26–50 of 2,000".
+`label` names the navigation (default "Table pages"), `previous_label` and
+`next_label` are the buttons' visible text and accessible names (default
+"Previous" and "Next"), and `page_size_label` labels the size select (default
+"Records per page"). The buttons have the ids `<id>-previous` and `<id>-next`.
 Phoenix delivers these event values as strings.
 
 `inspector` is an `aside` named by its heading, with a stable `id` and
