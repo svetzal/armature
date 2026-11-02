@@ -130,6 +130,7 @@ defmodule Armature.Catalogue.CatalogueLive do
             id="catalogue-components"
             label="Components"
             event="catalogue:choose"
+            prompt="Choose a component"
             groups={component_groups(@nodes, @path, @level, @node)}
           />
           <div class={["armature-catalogue-detail"]}>

@@ -235,15 +235,27 @@ defmodule Armature.Components.Molecules do
     """
   end
 
-  @doc "A labelled search form, polite atomic result count and optional caller actions. Sends query."
+  @doc """
+  A labelled search form, polite atomic result count and optional caller actions. Sends query.
+
+  The words are the caller's: `search_label` labels the search (default
+  "Search records"), `clear_label` names the clear button (default "Clear
+  search"), and `count_label` is a function from `total` to the count text
+  (default "1,234 results"), so a translation controls the word order.
+  """
   attr(:id, :string, required: true)
   attr(:search_label, :string, default: "Search records")
+  attr(:clear_label, :string, default: "Clear search")
+  attr(:count_label, :any, default: nil)
   attr(:search_event, :string, required: true)
   attr(:query, :string, default: "")
   attr(:total, :integer, required: true)
   slot(:actions)
 
   def table_toolbar(assigns) do
+    assigns =
+      assign(assigns, :count_label, assigns.count_label || (&default_count_label/1))
+
     ~H"""
     <div id={@id} class={["armature-table-toolbar"]}>
       <form id={@id <> "-search-form"} phx-change={@search_event} phx-submit={@search_event}>
@@ -257,15 +269,15 @@ defmodule Armature.Components.Molecules do
             variant="secondary"
             phx-click={@search_event}
             phx-value-query=""
-            aria-label="Clear search"
+            aria-label={@clear_label}
           >
             <Atoms.icon name="x" />
           </Atoms.button>
         </div>
       </form>
-      <span id={@id <> "-count"} role="status" aria-live="polite" aria-atomic="true">{format_count(
+      <span id={@id <> "-count"} role="status" aria-live="polite" aria-atomic="true">{@count_label.(
         @total
-      )} results</span>
+      )}</span>
       <div :if={@actions != []} class={["armature-toolbar-actions"]}>{render_slot(@actions)}</div>
     </div>
     """
@@ -389,13 +401,19 @@ defmodule Armature.Components.Molecules do
 
   Send `page` to `page_event`. Use page 1 of 1 and range 0–0 for no results.
   Supplying `page_sizes` and `size_event` adds a labelled select sending `page_size`.
+
+  The words are the caller's: `label` names the navigation (default "Table
+  pages"), `previous_label` and `next_label` are the buttons' visible text and
+  accessible names (default "Previous" and "Next"), and `page_size_label`
+  labels the size select (default "Records per page"). The buttons have the
+  ids `<id>-previous` and `<id>-next`.
   """
   attr(:id, :string, required: true)
   for {name, type, opts} <- @paging_attributes, do: attr(name, type, opts)
 
   def pagination(assigns) do
     ~H"""
-    <nav id={@id} class={["armature-pagination"]} aria-label="Table pages">
+    <nav id={@id} class={["armature-pagination"]} aria-label={@label}>
       <span id={@id <> "-range"} role="status" aria-live="polite" aria-atomic="true">{format_count(
         @first
       )}–{format_count(@last)} of {format_count(@total)}</span>
@@ -405,23 +423,23 @@ defmodule Armature.Components.Molecules do
         phx-change={@size_event}
         phx-submit={@size_event}
       >
-        <label for={@id <> "-size"}>Records per page</label>
+        <label for={@id <> "-size"}>{@page_size_label}</label>
         <Atoms.select id={@id <> "-size"} name="page_size" value={@page_size} options={@page_sizes} />
       </form>
       <Atoms.button
+        id={@id <> "-previous"}
         variant="secondary"
         phx-click={@page_event}
         phx-value-page={max(1, @page - 1)}
         disabled={@page <= 1}
-        aria-label="Previous page"
-      >Previous</Atoms.button>
+      >{@previous_label}</Atoms.button>
       <Atoms.button
+        id={@id <> "-next"}
         variant="secondary"
         phx-click={@page_event}
         phx-value-page={min(@pages, @page + 1)}
         disabled={@page >= @pages}
-        aria-label="Next page"
-      >Next</Atoms.button>
+      >{@next_label}</Atoms.button>
     </nav>
     """
   end
@@ -493,6 +511,8 @@ defmodule Armature.Components.Molecules do
 
     assign(assigns, control_rest: rest, checked: checked)
   end
+
+  defp default_count_label(total), do: "#{format_count(total)} results"
 
   defp format_count(count) do
     count |> Integer.to_string() |> String.replace(~r/\B(?=(\d{3})+(?!\d))/, ",")

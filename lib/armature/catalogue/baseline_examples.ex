@@ -534,6 +534,7 @@ defmodule Armature.Catalogue.BaselineExamples do
           id="example-grouped"
           label="Example components"
           event="example:choose"
+          prompt="Choose a component"
           groups={[%{label: "Examples", items: example_nav()}]}
         />
         <p role="status">Selected destination: {@state.destination}</p>

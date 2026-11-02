@@ -380,6 +380,29 @@ defmodule Armature.Components.OrganismsTest do
       assert present?(doc, "select[name=destination][aria-describedby=components-hint]")
       assert text(doc, "#components-hint") == "Choosing an option opens its page."
     end
+
+    test "the picker prompts for a destination by default", %{doc: doc} do
+      assert text(doc, "#components-choice option[value='']") == "Choose a destination"
+    end
+
+    test "renders a supplied prompt and hint" do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Organisms.grouped_nav
+            id="pages"
+            label="Pages"
+            event="choose"
+            groups={[]}
+            prompt="Seite wählen"
+            hint="Die Auswahl öffnet die Seite."
+          />
+          """
+        end)
+
+      assert text(doc, "#pages-choice option[value='']") == "Seite wählen"
+      assert text(doc, "#pages-hint") == "Die Auswahl öffnet die Seite."
+    end
   end
 
   defp sortable_records_document(sort_by, direction) do

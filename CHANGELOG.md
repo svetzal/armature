@@ -8,6 +8,36 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Fixed
+
+- Components no longer hard-code English that a consumer cannot replace. Each
+  new attribute defaults to the words the component rendered before, so an
+  application that sets none of them renders the same text.
+  - `pagination` takes `label` (default "Table pages"), `previous_label`
+    (default "Previous"), `next_label` (default "Next") and `page_size_label`
+    (default "Records per page"). `table_inspector` declares and forwards the
+    same four attributes.
+  - `pagination`'s buttons now have the ids `<id>-previous` and `<id>-next`
+    and no `aria-label`: their visible text is their accessible name. Their
+    names change from "Previous page" and "Next page" to "Previous" and
+    "Next". Tests that selected `button[aria-label='Next page']` should
+    select `#<id>-next` instead.
+  - `table_toolbar` takes `clear_label` (default "Clear search") for the
+    clear button and `count_label`, a function from `total` to the count
+    text (default "1,234 results"), so a translation controls word order.
+    `table_inspector` now declares and forwards `search_label`,
+    `clear_label` and `count_label` to its toolbar.
+  - `app_shell` takes `skip_label` (default "Skip to main content").
+  - `grouped_nav` takes `prompt` and `hint`. The prompt default changes from
+    the catalogue's "Choose a component" to "Choose a destination"; pass
+    `prompt` to keep the old words. The hint default is unchanged
+    ("Choosing an option opens its page."). The catalogue passes its own
+    "Choose a component".
+  - Known gap: the sort button name ("Sort by …") in `data_table`, the
+    brand link name ("… home") in `side_nav`, the "of" in `pagination`'s
+    range and "Skip to" in `table_inspector`'s skip link are still English
+    that a consumer cannot replace.
+
 ## [0.4.0] - 2026-11-01
 
 A base icon set, `icon_button` and `toolbar`, and one module per level. This

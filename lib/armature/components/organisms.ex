@@ -85,11 +85,15 @@ defmodule Armature.Components.Organisms do
   The select submits `destination` to the caller's `event` on change. Validate
   that destination against the supplied items before navigating. The caller
   owns selection and navigation; the component retains no state.
+  `prompt` is the select's empty option (default "Choose a destination") and
+  `hint` describes it (default "Choosing an option opens its page.").
   """
   attr(:id, :string, required: true)
   attr(:label, :string, required: true)
   attr(:groups, :list, required: true)
   attr(:event, :string, required: true)
+  attr(:prompt, :string, default: "Choose a destination")
+  attr(:hint, :string, default: "Choosing an option opens its page.")
 
   slot(:inner_block)
 
@@ -118,12 +122,12 @@ defmodule Armature.Components.Organisms do
         <Atoms.select
           id={@id <> "-choice"}
           name="destination"
-          prompt="Choose a component"
+          prompt={@prompt}
           value={@current_destination}
           options={@picker_options}
           aria-describedby={@id <> "-hint"}
         />
-        <p id={@id <> "-hint"}>Choosing an option opens its page.</p>
+        <p id={@id <> "-hint"}>{@hint}</p>
       </form>
       {render_slot(@inner_block)}
     </div>

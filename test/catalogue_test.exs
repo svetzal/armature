@@ -659,12 +659,12 @@ defmodule Armature.CatalogueTest do
     end
 
     test "next page announces the following range", %{view: view} do
-      view |> element("button[aria-label='Next page']") |> render_click()
+      view |> element("#example-records-pagination-next") |> render_click()
       assert has_element?(view, "#example-records-pagination-range", "26–50 of 200")
     end
 
     test "changing the page size returns to the first page", %{view: view} do
-      view |> element("button[aria-label='Next page']") |> render_click()
+      view |> element("#example-records-pagination-next") |> render_click()
 
       view
       |> form("#example-records-pagination-size-form", %{"page_size" => "10"})
@@ -810,14 +810,14 @@ defmodule Armature.CatalogueTest do
     test "paging keeps the selection announced", %{view: view} do
       select_r173(view)
       search(view, "")
-      view |> element("button[aria-label='Next page']") |> render_click()
+      view |> element("#example-records-pagination-next") |> render_click()
       assert has_element?(view, "#example-records-selection", "Selected R-173, Example 001.")
     end
 
     test "paging keeps the selected record in the inspector", %{view: view} do
       select_r173(view)
       search(view, "")
-      view |> element("button[aria-label='Next page']") |> render_click()
+      view |> element("#example-records-pagination-next") |> render_click()
       assert has_element?(view, "#example-selected-record", "R-173")
     end
   end
