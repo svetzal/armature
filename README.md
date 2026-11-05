@@ -357,9 +357,12 @@ own values in unlayered CSS after the imports. This neutral example changes
 spacing, typography and surface contrast:
 
 ```css
-:root, [data-armature-theme] {
+:root {
   --armature-font-sans: ui-sans-serif, system-ui, sans-serif;
   --armature-space-4: 1.125rem;
+}
+
+:root, [data-armature-theme="light"] {
   --armature-ink: #181818;
   --armature-paper: #ffffff;
 }
@@ -375,20 +378,17 @@ spacing, typography and surface contrast:
   --armature-ink: #fafafa;
   --armature-paper: #181818;
 }
-
-[data-armature-theme="light"] {
-  --armature-ink: #181818;
-  --armature-paper: #ffffff;
-}
 ```
 
 Set `data-armature-theme="light"` or `data-armature-theme="dark"` on the
 `html` element to choose a theme; omit the attribute to follow the system preference.
 There is no `"auto"` value: an element without the attribute inherits the
 page's tokens, including your overrides. The attribute also supports themed
-subtrees, but an element that carries it declares the full light or dark set
-on itself, so your overrides reach it only through the matching selectors
-above. Match all of them in consumer overrides.
+subtrees. An element that carries it declares only that theme's colour tokens
+on itself and inherits every other token, so a `:root` override of spacing or
+typography reaches it. Your colour overrides reach it only through the
+matching theme selectors above; put each light colour before its dark
+counterparts, as shown, so an explicit dark theme wins.
 
 The base layer provides focus rings, `.armature-sr-only`, reduced motion and
 forced-colour state cues. It does not reset elements or style components.

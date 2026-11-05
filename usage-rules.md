@@ -79,9 +79,12 @@ and register what you add. Full guides: `deps/armature/README.md` and
 - Armature styles everything through `--armature-*` CSS custom properties in
   cascade layers. Change the look by overriding token values in unlayered CSS
   imported after `armature.css`. Never edit Armature's stylesheet or copy it.
-- Override a token under every selector you need: `:root`, the
-  `@media (prefers-color-scheme: dark)` block, and
-  `[data-armature-theme="light"]` and `[data-armature-theme="dark"]`.
+- Override a theme-independent token (spacing, typography, motion, the rail)
+  on `:root` alone; themed elements inherit it. Override a colour that differs
+  between themes under every theme selector: `:root, [data-armature-theme="light"]`,
+  then the `@media (prefers-color-scheme: dark)` block and
+  `[data-armature-theme="dark"]`. A themed element declares only that theme's
+  colours.
   Omit `data-armature-theme` for automatic theming; there is no `"auto"` value.
 - Write your own component styles with Armature tokens, not literal colours,
   sizes or fonts.

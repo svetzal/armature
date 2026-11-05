@@ -51,9 +51,9 @@ the new page heading.
 The theme control defaults to Auto, which sets no attribute: the catalogue
 inherits your page's tokens, so components look exactly as they do in your
 application. Light and Dark set `data-armature-theme` on the catalogue
-container, which declares the full light or dark token set there. They show
-your look only if your overrides also match `[data-armature-theme="light"]`
-and `[data-armature-theme="dark"]`; see the README token stylesheet example.
+container, which declares that theme's colour tokens there and inherits the
+rest. They show your colours only if your colour overrides also match
+`[data-armature-theme="light"]` and `[data-armature-theme="dark"]`; see the README token stylesheet example.
 
 ## Application shell
 

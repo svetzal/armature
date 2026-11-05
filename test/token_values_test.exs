@@ -136,6 +136,12 @@ defmodule Armature.Tokens.ValuesTest do
              Values.evaluate(@defaults).light.values["--armature-ink"]
   end
 
+  test "a root override of a theme-independent token reaches an explicit theme container" do
+    assert evaluate(":root { --armature-space-4: 9rem; }").explicit_dark.values[
+             "--armature-space-4"
+           ] == "9rem"
+  end
+
   @cascade """
   @layer first, second;
   @layer first { :root { --armature-paper: #123456 !important; --armature-ink: #111111; } }

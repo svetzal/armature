@@ -8,6 +8,19 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Changed
+
+- The stylesheet declares each theme-independent token once, on `:root`. This
+  covers all non-colour tokens and the `--armature-rail-*` colours. The light
+  and dark theme rules now declare only the 23 colours that differ between
+  themes. Resolved values are unchanged in every theme context.
+  - Explicit theme containers (`data-armature-theme="light"` or `"dark"`) now
+    inherit theme-independent tokens. A `:root` override of spacing,
+    typography, motion or the rail reaches themed subtrees, and an override on
+    an ancestor is no longer reset to the default inside one.
+  - No migration is needed. Overrides written against
+    `:root, [data-armature-theme]` keep working.
+
 ### Fixed
 
 - Components no longer hard-code English that a consumer cannot replace. Each
