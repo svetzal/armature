@@ -9,6 +9,10 @@ defmodule Armature.TokensTest do
   @stylesheet Path.expand("../priv/static/armature.css", __DIR__)
   @guide Path.expand("../guides/tokens.md", __DIR__)
 
+  @light_selector ":root, [data-armature-theme=\"light\"]"
+  @automatic_dark_selector ":root:where(:not([data-armature-theme=\"light\"]))"
+  @explicit_dark_selector "[data-armature-theme=\"dark\"]"
+
   setup do
     css = File.read!(@stylesheet)
 
@@ -49,24 +53,41 @@ defmodule Armature.TokensTest do
     end
   end
 
-  test "every theme selector defines exactly the contract", %{rules: rules} do
+  test "every contract token is declared once across the shared and light rules", %{
+    rules: rules
+  } do
     expected = Tokens.all() |> Enum.map(& &1.name) |> Enum.sort()
 
-    for selector <- theme_selectors() do
-      values = rule!(rules, selector)
-      names = Enum.map(values, &elem(&1, 0))
-      assert Enum.sort(names) == expected, "Token mismatch in #{selector}"
+    names =
+      (rule!(rules, ":root") ++ rule!(rules, @light_selector))
+      |> Enum.map(&elem(&1, 0))
+      |> Enum.sort()
+
+    assert names == expected
+  end
+
+  test "theme rules declare only tokens whose value differs between light and dark", %{
+    rules: rules
+  } do
+    light = rules |> rule!(@light_selector) |> Map.new()
+    dark = rules |> rule!(@explicit_dark_selector) |> Map.new()
+
+    for {name, value} <- light do
+      refute dark[name] == value, "#{name} is the same in both themes"
+    end
+  end
+
+  test "each dark rule overrides exactly the light rule's tokens", %{rules: rules} do
+    light_names = rules |> rule!(@light_selector) |> Enum.map(&elem(&1, 0)) |> Enum.sort()
+
+    for selector <- [@automatic_dark_selector, @explicit_dark_selector] do
+      names = rules |> rule!(selector) |> Enum.map(&elem(&1, 0)) |> Enum.sort()
+      assert names == light_names, "Token mismatch in #{selector}"
     end
   end
 
   test "explicit dark theme equals automatic dark theme", %{rules: rules} do
-    assert rule!(rules, "[data-armature-theme=\"dark\"]") ==
-             rule!(rules, ":root:where(:not([data-armature-theme=\"light\"]))")
-  end
-
-  test "explicit light theme equals root", %{rules: rules} do
-    assert rule!(rules, ":root") ==
-             rule!(rules, "[data-armature-theme=\"light\"]")
+    assert rule!(rules, @explicit_dark_selector) == rule!(rules, @automatic_dark_selector)
   end
 
   test "every custom property named in the stylesheet belongs to the contract", %{css: css} do
@@ -179,6 +200,7 @@ defmodule Armature.TokensTest do
     assert css =~ "@layer armature.tokens, armature.base, armature.components;"
     selectors = Enum.map(rules, &elem(&1, 0))
     positions = Enum.map(theme_selectors(), &Enum.find_index(selectors, fn s -> s == &1 end))
+    assert Enum.all?(positions, &is_integer/1), inspect(positions)
     assert Enum.sort(positions) == positions
   end
 
@@ -324,16 +346,12 @@ defmodule Armature.TokensTest do
   end
 
   defp theme_selectors do
-    [
-      ":root",
-      ":root:where(:not([data-armature-theme=\"light\"]))",
-      "[data-armature-theme=\"dark\"]",
-      "[data-armature-theme=\"light\"]"
-    ]
+    [":root", @light_selector, @automatic_dark_selector, @explicit_dark_selector]
   end
 
+  # The first rule with the selector; later `:root` rules sit inside media blocks.
   defp rule!(rules, selector) do
-    [{_, values}] = Enum.filter(rules, fn {name, _} -> name == selector end)
+    {_, values} = Enum.find(rules, fn {name, _} -> name == selector end) || raise "No #{selector}"
     values
   end
 end
