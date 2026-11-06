@@ -20,6 +20,7 @@ Until 1.0.0, a minor version can change the public surface.
     an ancestor is no longer reset to the default inside one.
   - No migration is needed. Overrides written against
     `:root, [data-armature-theme]` keep working.
+- Update the browser-test dependency `@playwright/test` from 1.64.1 to 1.65.0.
 
 ### Fixed
 
