@@ -109,7 +109,13 @@ defmodule Armature.Components.Molecules do
   defp theme_choice(assigns) do
     ~H"""
     <label class={["armature-theme-switch-option"]} title={@name}>
-      <input type="radio" id={@id <> "-" <> @value} name="theme" value={@value} checked={@checked} />
+      <Atoms.input
+        type="radio"
+        id={@id <> "-" <> @value}
+        name="theme"
+        value={@value}
+        checked={@checked}
+      />
       <Atoms.icon name={@icon} />
       <span class={["armature-sr-only"]}>{@name}</span>
     </label>
@@ -146,7 +152,7 @@ defmodule Armature.Components.Molecules do
 
     ~H"""
     <div class={["armature-field"]}>
-      <label :if={@type != "checkbox"} for={@id} class={["armature-label"]}>{@label}</label>
+      <Atoms.label :if={@type != "checkbox"} for={@id}>{@label}</Atoms.label>
       <%= case @type do %>
         <% "select" -> %>
           <Atoms.select
@@ -179,7 +185,7 @@ defmodule Armature.Components.Molecules do
               checked={@checked}
               {@control_rest}
             />
-            <label for={@id} class={["armature-label"]}>{@label}</label>
+            <Atoms.label for={@id}>{@label}</Atoms.label>
           </div>
         <% _ -> %>
           <Atoms.input id={@id} name={@name} value={@value} type={@type} {@control_rest} />
@@ -259,7 +265,7 @@ defmodule Armature.Components.Molecules do
     ~H"""
     <div id={@id} class={["armature-table-toolbar"]}>
       <form id={@id <> "-search-form"} phx-change={@search_event} phx-submit={@search_event}>
-        <label for={@id <> "-search"} class={["armature-sr-only"]}>{@search_label}</label>
+        <Atoms.label for={@id <> "-search"} visually_hidden>{@search_label}</Atoms.label>
         <div class={["armature-search"]}>
           <Atoms.icon name="search" />
           <Atoms.input id={@id <> "-search"} type="search" name="query" value={@query} />
@@ -423,7 +429,7 @@ defmodule Armature.Components.Molecules do
         phx-change={@size_event}
         phx-submit={@size_event}
       >
-        <label for={@id <> "-size"}>{@page_size_label}</label>
+        <Atoms.label for={@id <> "-size"}>{@page_size_label}</Atoms.label>
         <Atoms.select id={@id <> "-size"} name="page_size" value={@page_size} options={@page_sizes} />
       </form>
       <Atoms.button

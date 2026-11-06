@@ -14,8 +14,8 @@ and register what you add. Full guides: `deps/armature/README.md` and
   `import Phoenix.Component, except: [link: 1]`. To alias instead, alias the
   level modules.
 - Prefer Armature components over Phoenix's generated core components and over
-  hand-written markup: `button`, `link`, `field`, `status`, `notice`, `facts`,
-  `panel`, `data_table`, `table_toolbar`, `pagination`, `inspector`,
+  hand-written markup: `button`, `link`, `label`, `field`, `status`, `notice`,
+  `facts`, `panel`, `data_table`, `table_toolbar`, `pagination`, `inspector`,
   `record_header`, `icon_button`, `toolbar`, and the layouts `stack`,
   `cluster`, `grid` and `split`.
 - Forms: use `field` with `field={@form[:name]}` and a visible `label`. Use

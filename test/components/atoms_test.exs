@@ -2,6 +2,36 @@ defmodule Armature.Components.AtomsTest do
   use Armature.ComponentsCase, async: true
   alias Armature.Components.Atoms
 
+  describe "label" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Atoms.label for="shown">Shown</Atoms.label>
+          <Atoms.label for="hidden" visually_hidden>Hidden</Atoms.label>
+          """
+        end)
+
+      %{doc: doc}
+    end
+
+    test "binds to the control named by for", %{doc: doc} do
+      assert text(doc, "label[for=shown]") == "Shown"
+    end
+
+    test "carries the label treatment", %{doc: doc} do
+      assert present?(doc, "label[for=shown].armature-label")
+    end
+
+    test "stays visible by default", %{doc: doc} do
+      refute present?(doc, "label[for=shown].armature-sr-only")
+    end
+
+    test "hides visually when asked", %{doc: doc} do
+      assert present?(doc, "label[for=hidden].armature-sr-only")
+    end
+  end
+
   describe "button" do
     setup do
       doc =

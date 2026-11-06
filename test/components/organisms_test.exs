@@ -24,18 +24,22 @@ defmodule Armature.Components.OrganismsTest do
       end
     end
 
-    test "shows a decorative sort hint only on unsorted sortable headings" do
-      for sort_by <- ~w(name score), direction <- ~w(asc desc) do
-        doc = sortable_records_document(sort_by, direction)
-        [inactive] = ~w(name score) -- [sort_by]
+    test "an unsorted heading shows the both-ways glyph" do
+      doc = sortable_records_document("name", "asc")
 
-        assert present?(
-                 doc,
-                 "button[phx-value-key=#{inactive}] .armature-sort-hint[aria-hidden=true]"
-               )
+      assert present?(doc, "button[phx-value-key=score] .armature-icon path[d='M17 20V4']")
+    end
 
-        refute present?(doc, "th[aria-sort] .armature-sort-hint")
-      end
+    test "an ascending heading shows the up glyph" do
+      doc = sortable_records_document("name", "asc")
+
+      assert present?(doc, "th[aria-sort] .armature-icon path[d='m5 12 7-7 7 7']")
+    end
+
+    test "a descending heading shows the down glyph" do
+      doc = sortable_records_document("name", "desc")
+
+      assert present?(doc, "th[aria-sort] .armature-icon path[d='m19 12-7 7-7-7']")
     end
 
     test "sort buttons are named after their column" do
@@ -103,7 +107,7 @@ defmodule Armature.Components.OrganismsTest do
     end
 
     test "names the row button by its visible text", %{doc: doc} do
-      assert text(doc, "#records-R-1 .armature-row-select") == "Example"
+      assert text(doc, "#records-R-1 button") == "Example"
       refute present?(doc, "tbody button[aria-label]")
     end
 

@@ -243,20 +243,25 @@ defmodule Armature.Catalogue.BaselineExamples do
           </li>
         </ul>
       <% :input -> %>
-        <label for="example-input">Example name</label>
+        <Atoms.label for="example-input">Example name</Atoms.label>
         <Atoms.input id="example-input" value="Sample" />
-        <label for="example-input-disabled">Disabled name</label>
+        <Atoms.label for="example-input-disabled">Disabled name</Atoms.label>
         <Atoms.input id="example-input-disabled" value="Sample" disabled />
       <% :select -> %>
-        <label for="example-select">Size</label>
+        <Atoms.label for="example-select">Size</Atoms.label>
         <Atoms.select
           id="example-select"
           options={[{"Small", "s"}, {"Large", "l"}]}
           prompt="Choose a size"
         />
       <% :textarea -> %>
-        <label for="example-textarea">Notes</label>
+        <Atoms.label for="example-textarea">Notes</Atoms.label>
         <Atoms.textarea id="example-textarea" value="Synthetic notes" />
+      <% :label -> %>
+        <Atoms.label for="example-labelled">Example name</Atoms.label>
+        <Atoms.input id="example-labelled" value="Sample" />
+        <Atoms.label for="example-labelled-hidden" visually_hidden>Search examples</Atoms.label>
+        <Atoms.input id="example-labelled-hidden" type="search" placeholder="Label hidden visually" />
       <% :status -> %>
         <Layouts.cluster>
           <Atoms.status

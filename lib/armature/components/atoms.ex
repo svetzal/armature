@@ -171,6 +171,25 @@ defmodule Armature.Components.Atoms do
     """
   end
 
+  @doc """
+  A native label bound to the control named by `for`.
+
+  Set `visually_hidden` when the surrounding design already makes the control's
+  purpose plain: the label then names the control for assistive technology only.
+  """
+  attr(:for, :string, required: true)
+  attr(:visually_hidden, :boolean, default: false)
+  attr(:rest, :global)
+  slot(:inner_block, required: true)
+
+  def label(assigns) do
+    ~H"""
+    <label for={@for} class={["armature-label", @visually_hidden && "armature-sr-only"]} {@rest}>{render_slot(
+      @inner_block
+    )}</label>
+    """
+  end
+
   @doc "A compact status badge. Its label must express the meaning independently of its tone."
   attr(:label, :string, required: true)
   attr(:tone, :string, default: "neutral", values: @tones)
