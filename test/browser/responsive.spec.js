@@ -74,7 +74,7 @@ for (const theme of ['light', 'dark']) {
     await expect(page.locator('[data-phx-main]')).toHaveClass(/phx-connected/);
     await page.locator(`#catalogue-theme-${theme}`).check();
     const template = page.locator('#example-records');
-    const selection = template.locator('.armature-row-select').first();
+    const selection = template.locator('tbody .armature-button').first();
     await selection.click();
     await expect(selection).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#example-records-selection')).not.toHaveText('No record selected.');

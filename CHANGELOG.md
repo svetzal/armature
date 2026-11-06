@@ -8,8 +8,31 @@ Until 1.0.0, a minor version can change the public surface.
 
 ## [Unreleased]
 
+### Added
+
+- A `label` atom: a native label bound to its control by `for`, with
+  `visually_hidden` to name a control for assistive technology only.
+  `use Armature.Components` now imports `label/1`, which clashes with a
+  `label/1` the consumer imports or defines. To keep your own, exclude this
+  one: `import Armature.Components.Atoms, except: [label: 1]` after the `use`.
+
 ### Changed
 
+- The baseline now composes its native controls from atoms, so the registry
+  tells the truth about the graph and a consumer can see which parts each
+  component uses. `data_table` uses `button` and `icon`, `theme_switch` uses
+  `input`, and `field`, `table_toolbar`, `pagination` and `grouped_nav` use
+  `label`. Behaviour and accessible names are unchanged.
+  - The classes `.armature-sort`, `.armature-sort-hint` and
+    `.armature-row-select` are removed. Style a sort button through
+    `.armature-table thead .armature-button` and `th[aria-sort] .armature-button`,
+    and a row's selection button through `.armature-clickable-row .armature-button`.
+    Tests that select these classes should use the same selectors.
+  - Sort arrows are SVG icons (`arrow-up`, `arrow-down`, `arrow-up-down`)
+    rather than text characters. An unsorted column's glyph still takes
+    `--armature-sort-opacity`.
+  - Theme radios carry `armature-input`, and every label a component renders
+    carries `armature-label`. Consumer CSS on those classes now reaches them.
 - The stylesheet declares each theme-independent token once, on `:root`. This
   covers all non-colour tokens and the `--armature-rail-*` colours. The light
   and dark theme rules now declare only the 23 colours that differ between

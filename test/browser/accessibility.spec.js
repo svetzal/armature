@@ -129,7 +129,7 @@ for (const theme of ['light', 'dark']) {
     for (const width of [1280, 320]) {
       await page.setViewportSize({ width, height: 900 });
       for (const selector of ['#enabled', '#valid', '#invalid', '#theme-one-auto', '#theme-one-dark',
-        '#records .armature-sort', '#records-r1 button', '#shell-rail nav a']) {
+        '#records thead .armature-button', '#records-r1 button', '#shell-rail nav a']) {
         const r = await page.locator(selector).boundingBox();
         const minimum = width === 320 || selector === '#shell-rail nav a' ? 44 : 24;
         expect(r.width, selector).toBeGreaterThanOrEqual(minimum);

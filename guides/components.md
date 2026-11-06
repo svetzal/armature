@@ -17,6 +17,7 @@ tokens in your own CSS. Components share light and dark token values.
 | `input` | — | A native single-line control. |
 | `select` | — | A native option control. |
 | `textarea` | — | A native multiline control. |
+| `label` | — | A native label bound to its control. |
 | `status` | — | A status expressed in words. |
 
 ## Layouts
@@ -32,15 +33,15 @@ tokens in your own CSS. Components share light and dark token values.
 
 | Component | Uses | Purpose |
 | --- | --- | --- |
-| `theme_switch` | `icon` | A segmented system, light or dark choice of native radios. |
+| `theme_switch` | `icon`, `input` | A segmented system, light or dark choice of native radios. |
 | `page_heading` | `eyebrow`, `cluster` | A page heading with context and actions. |
-| `field` | `input`, `select`, `textarea` | A labelled control with hint and validation. |
+| `field` | `label`, `input`, `select`, `textarea` | A labelled control with hint and validation. |
 | `facts` | — | Labelled record facts in a description list. |
 | `notice` | — | Static guidance or reported results with actions. |
-| `table_toolbar` | `input`, `icon`, `button` | A labelled search and announced result count. |
+| `table_toolbar` | `label`, `input`, `icon`, `button` | A labelled search and announced result count. |
 | `icon_button` | `button`, `icon` | A named square action or toggle showing only an icon. |
 | `toolbar` | — | A named group of controls with one tab stop and arrow-key movement. |
-| `pagination` | `button`, `select` | Named paging controls and an announced range. |
+| `pagination` | `label`, `button`, `select` | Named paging controls and an announced range. |
 | `record_header` | `status` | A record heading with context and actions. |
 
 ## Organisms
@@ -48,10 +49,10 @@ tokens in your own CSS. Components share light and dark token values.
 | Component | Uses | Purpose |
 | --- | --- | --- |
 | `panel` | `cluster` | A named content panel with heading and actions. |
-| `grouped_nav` | `eyebrow`, `link`, `select` | Grouped navigation with a labelled narrow-screen picker. |
+| `grouped_nav` | `eyebrow`, `link`, `label`, `select` | Grouped navigation with a labelled narrow-screen picker. |
 | `top_bar` | `cluster` | A context band with actions. |
 | `side_nav` | `eyebrow`, `link` | Named section navigation with a brand and footnote. |
-| `data_table` | — | A sortable native table with named record selection. |
+| `data_table` | `button`, `icon` | A sortable native table with named record selection. |
 | `inspector` | — | A named complementary details landmark. |
 
 ## Templates
@@ -159,8 +160,9 @@ and visible current-page outlines; reduced motion uses the base-layer policy.
 `button` defaults to `type="button"`; use `type="submit"` explicitly in forms.
 `link` forwards Phoenix's `navigate`, `patch` and `href` behavior. Native controls
 preserve browser keyboard behavior. Standalone input, select and textarea atoms
-need a caller-owned visible label or `aria-label`. Use `field` for a visible label,
-optional hint and errors bound to the control by stable ids.
+need a caller-owned `label` atom or `aria-label`; `label` binds by `for`, and
+`visually_hidden` keeps its name for assistive technology only. Use `field` for a
+visible label, optional hint and errors bound to the control by stable ids.
 
 ```heex
 <.field field={@form[:name]} label="Name" hint="Use a short name."
@@ -470,7 +472,7 @@ control sizes are minimums, allowing text to grow.
 | Compact cells: 6px × 16px, 34px rows | `table-cell-padding-compact`, `table-row-height-compact`; `data-density="compact"` |
 | Rows: 1px line dividers, hover/focus surface, selected surface and 3px inset accent bar | `border-width`, `line`, `hover`, `selected`, `cue-width`, `accent`; first-cell shadow |
 | Secondary cell line: muted, 11px | `td small`, `muted`, `text-micro` |
-| Inline sorting with faint arrow, stronger on hover/active | `.armature-sort`, `sort-opacity`, `opacity-full`, active heading rule |
+| Inline sorting with faint arrow, stronger on hover/active | `.armature-table thead .armature-button`, `sort-opacity`, `opacity-full`, active heading rule |
 | Toolbar: 8px × 16px, bottom divider, actions at end | `space-2`, `space-4`, `border-width`, `line`; action auto margin |
 | Search: 240px, decorative leading icon, named clear action inside | `search-width`; search layout and Clear search button |
 | Pagination: 10px × 16px, top divider, 12px muted tabular range, compact buttons | `space-detail`, `space-4`, `border-width`, `line`, `text-small`, `muted`, `control-height-compact` |

@@ -36,7 +36,7 @@ defmodule Armature.UI.Registry do
         module: Molecules,
         function: :theme_switch,
         purpose: "A segmented system, light or dark choice of native radios.",
-        uses: [:icon]
+        uses: [:icon, :input]
       },
       %Node{
         id: :side_nav,
@@ -60,7 +60,7 @@ defmodule Armature.UI.Registry do
         module: Organisms,
         function: :grouped_nav,
         purpose: "Grouped navigation with a labelled narrow-screen picker.",
-        uses: [:eyebrow, :link, :select]
+        uses: [:eyebrow, :link, :label, :select]
       },
       %Node{
         id: :panel,
@@ -127,6 +127,14 @@ defmodule Armature.UI.Registry do
         uses: []
       },
       %Node{
+        id: :label,
+        level: :atom,
+        module: Atoms,
+        function: :label,
+        purpose: "A native label bound to its control.",
+        uses: []
+      },
+      %Node{
         id: :status,
         level: :atom,
         module: Atoms,
@@ -172,7 +180,7 @@ defmodule Armature.UI.Registry do
         module: Molecules,
         function: :field,
         purpose: "A labelled control with hint and validation.",
-        uses: [:input, :select, :textarea]
+        uses: [:label, :input, :select, :textarea]
       },
       %Node{
         id: :facts,
@@ -196,7 +204,7 @@ defmodule Armature.UI.Registry do
         module: Molecules,
         function: :table_toolbar,
         purpose: "A labelled search and announced result count.",
-        uses: [:input, :icon, :button]
+        uses: [:label, :input, :icon, :button]
       },
       %Node{
         id: :icon_button,
@@ -220,7 +228,7 @@ defmodule Armature.UI.Registry do
         module: Molecules,
         function: :pagination,
         purpose: "Named paging controls and an announced range.",
-        uses: [:button, :select]
+        uses: [:label, :button, :select]
       },
       %Node{
         id: :record_header,
@@ -236,7 +244,7 @@ defmodule Armature.UI.Registry do
         module: Organisms,
         function: :data_table,
         purpose: "A sortable native table with named record selection.",
-        uses: []
+        uses: [:button, :icon]
       },
       %Node{
         id: :inspector,

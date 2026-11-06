@@ -431,6 +431,7 @@ Then use:
 Create `@form` with `Phoenix.Component.to_form/2`. Import the stylesheet as
 shown in [the token guide](guides/tokens.md). See [the component guide](guides/components.md)
 for plain controls, translation, notices, layouts and accessibility responsibilities.
+A control outside `field` takes the `label` atom, which binds to it by `for`.
 
 Data components include `data_table`, `table_toolbar`, `pagination`, `inspector`
 and `record_header`. The `table_inspector` template composes the browsing workflow

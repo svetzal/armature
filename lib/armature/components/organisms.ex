@@ -118,7 +118,7 @@ defmodule Armature.Components.Organisms do
         phx-change={@event}
         phx-submit={@event}
       >
-        <label for={@id <> "-choice"}>{@label}</label>
+        <Atoms.label for={@id <> "-choice"}>{@label}</Atoms.label>
         <Atoms.select
           id={@id <> "-choice"}
           name="destination"
@@ -229,24 +229,15 @@ defmodule Armature.Components.Organisms do
                 )
               }
             >
-              <button
+              <Atoms.button
                 :if={@sort_event && col[:sort_key]}
-                type="button"
-                class={["armature-sort"]}
+                variant="secondary"
                 phx-click={@sort_event}
                 phx-value-key={col.sort_key}
                 aria-label={"Sort by #{col.label}"}
               >
-                {col.label}<span :if={@sort_by == col.sort_key} aria-hidden="true">{if(
-                  @sort_direction == "asc",
-                  do: " ↑",
-                  else: " ↓"
-                )}</span><span
-                  :if={@sort_by != col.sort_key}
-                  class={["armature-sort-hint"]}
-                  aria-hidden="true"
-                > ↕</span>
-              </button>
+                {col.label}<Atoms.icon name={sort_icon(@sort_by == col.sort_key, @sort_direction)} />
+              </Atoms.button>
               <span :if={!@sort_event || !col[:sort_key]}>{col.label}</span>
             </th>
           </tr>
@@ -264,16 +255,15 @@ defmodule Armature.Components.Organisms do
           >
             <td :for={col <- @col} class={[col[:numeric] && "armature-numeric"]}>
               <%= if @select_event && col[:row_label] do %>
-                <button
-                  type="button"
-                  class={["armature-row-select"]}
+                <Atoms.button
+                  variant="secondary"
                   phx-click={@select_event}
                   phx-value-id={@row_id.(row)}
                   aria-pressed={to_string(@selected_id == @row_id.(row))}
                   aria-controls={@inspector_id}
                 >
                   {render_slot(col, row)}
-                </button>
+                </Atoms.button>
               <% else %>
                 {render_slot(col, row)}
               <% end %>
@@ -315,6 +305,10 @@ defmodule Armature.Components.Organisms do
     </Atoms.link>
     """
   end
+
+  defp sort_icon(false, _direction), do: "arrow-up-down"
+  defp sort_icon(true, "asc"), do: "arrow-up"
+  defp sort_icon(true, "desc"), do: "arrow-down"
 
   defp picker_options(groups) do
     Enum.map(groups, fn group ->
