@@ -58,6 +58,25 @@ defmodule Armature.Components.OrganismsTest do
       end
     end
 
+    test "sort buttons take their name from sort_label" do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Organisms.data_table
+            id="ordered"
+            rows={[%{id: "R-1", name: "Example"}]}
+            caption="Example records"
+            sort_event="order"
+            sort_label={&("Order by " <> &1)}
+          >
+            <:col :let={row} label="Name" sort_key="name">{row.name}</:col>
+          </Organisms.data_table>
+          """
+        end)
+
+      assert present?(doc, "th button[phx-value-key=name][aria-label='Order by Name']")
+    end
+
     test "sort buttons send the sort event with the column key" do
       for sort_by <- ~w(name score), direction <- ~w(asc desc) do
         doc = sortable_records_document(sort_by, direction)
@@ -325,6 +344,24 @@ defmodule Armature.Components.OrganismsTest do
 
     test "renders no mark without a title", %{doc: doc} do
       refute present?(doc, "#untitled-art")
+    end
+
+    test "the home link reads a supplied home_label" do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Organisms.side_nav
+            id="named-home"
+            title="Library"
+            home_patch="/"
+            home_label="Library start page"
+            items={[]}
+          />
+          """
+        end)
+
+      assert attribute(doc, "#named-home .armature-side-nav-brand > a", "aria-label") ==
+               "Library start page"
     end
   end
 

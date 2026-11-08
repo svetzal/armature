@@ -19,7 +19,8 @@ defmodule Armature.Components.Organisms do
   "Main", so give a second rail on the same page its own name. `title` and
   `subtitle` form the brand, and `section_label` adds a caption above the links.
   Each renders only when given. Optional `home_patch` links the wordmark to an
-  index. The optional `mark` slot puts a logo or symbol, such as an `<img>` or
+  index; `home_label` is that link's accessible name (default: the title
+  followed by " home"). The optional `mark` slot puts a logo or symbol, such as an `<img>` or
   an inline SVG, on the same row before the title and inside its link. It
   renders only with a title, which names the brand, so the mark is hidden from
   assistive technology. Its height is `--armature-brand-mark-size` and its width
@@ -33,15 +34,23 @@ defmodule Armature.Components.Organisms do
   attr(:label, :string, default: "Main")
   attr(:section_label, :string, default: nil)
   attr(:home_patch, :string, default: nil)
+  attr(:home_label, :string, default: nil)
   attr(:items, :list, required: true)
   slot(:mark)
   slot(:footnote)
 
   def side_nav(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :home_label,
+        assigns.home_label || (assigns.title && assigns.title <> " home")
+      )
+
     ~H"""
     <div id={@id} class={["armature-side-nav"]}>
       <div :if={@title || @subtitle} class={["armature-side-nav-brand"]}>
-        <Atoms.link :if={@title && @home_patch} patch={@home_patch} aria-label={@title <> " home"}>
+        <Atoms.link :if={@title && @home_patch} patch={@home_patch} aria-label={@home_label}>
           <.brand_mark mark={@mark} />{@title}
         </Atoms.link>
         <span :if={@title && !@home_patch}><.brand_mark mark={@mark} />{@title}</span>
@@ -173,6 +182,8 @@ defmodule Armature.Components.Organisms do
   links or a details pattern. Selection also works by clicking anywhere on the row.
   `density="compact"` reduces cell padding and row height on fine pointers.
   `caption_hidden` hides only the caption visually. Empty results use words.
+  The sort button's name is `sort_label`, a function from the column label
+  (default "Sort by Name"), so a translation controls word order.
   """
   attr(:id, :string, required: true)
   attr(:rows, :list, required: true)
@@ -184,6 +195,7 @@ defmodule Armature.Components.Organisms do
   attr(:sort_by, :string, default: nil)
   attr(:sort_direction, :string, default: "asc", values: ~w(asc desc))
   attr(:sort_event, :string, default: nil)
+  attr(:sort_label, :any, default: nil)
   attr(:row_id, :any, default: nil)
   attr(:select_event, :string, default: nil)
   attr(:selected_id, :any, default: nil)
@@ -199,7 +211,11 @@ defmodule Armature.Components.Organisms do
     end
 
     validate_selectable_columns!(assigns)
-    assigns = assign_row_identity(assigns)
+
+    assigns =
+      assigns
+      |> assign_row_identity()
+      |> assign(:sort_label, assigns.sort_label || (&default_sort_label/1))
 
     ~H"""
     <div
@@ -234,7 +250,7 @@ defmodule Armature.Components.Organisms do
                 variant="secondary"
                 phx-click={@sort_event}
                 phx-value-key={col.sort_key}
-                aria-label={"Sort by #{col.label}"}
+                aria-label={@sort_label.(col.label)}
               >
                 {col.label}<Atoms.icon name={sort_icon(@sort_by == col.sort_key, @sort_direction)} />
               </Atoms.button>
@@ -305,6 +321,8 @@ defmodule Armature.Components.Organisms do
     </Atoms.link>
     """
   end
+
+  defp default_sort_label(label), do: "Sort by #{label}"
 
   defp sort_icon(false, _direction), do: "arrow-up-down"
   defp sort_icon(true, "asc"), do: "arrow-up"

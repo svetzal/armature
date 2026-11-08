@@ -25,9 +25,12 @@ and register what you add. Full guides: `deps/armature/README.md` and
 - Text a component renders on its own is an attribute with a neutral English
   default: `skip_label`, `label`, `previous_label`, `next_label`,
   `page_size_label`, `search_label`, `clear_label`, `count_label`, `prompt`,
-  `hint` and `empty_label`. Pass the application's Gettext strings there.
-  `count_label` is a function from the total to the count text, so a
-  translation controls the word order.
+  `hint`, `empty_label`, `sort_label`, `home_label`, `auto_label`,
+  `light_label`, `dark_label` and `range_label`. Pass the application's
+  Gettext strings there. `count_label` is a function from the total to the
+  count text, `sort_label` a function from the column label to the sort
+  button's name, and `range_label` a function from the first, last and total
+  to the range text, so a translation controls the word order.
 - Application frame: build page frames from `app_shell`, `side_nav`, `top_bar`,
   `page_heading` and `grouped_nav`. Use `theme_switch` for light, dark and
   automatic themes. It renders three radios named "theme" with the values

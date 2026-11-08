@@ -48,7 +48,8 @@ defmodule Armature.Components.Attributes do
       {:label, :string, [default: "Table pages"]},
       {:previous_label, :string, [default: "Previous"]},
       {:next_label, :string, [default: "Next"]},
-      {:page_size_label, :string, [default: "Records per page"]}
+      {:page_size_label, :string, [default: "Records per page"]},
+      {:range_label, :any, [default: nil]}
     ]
   end
 end

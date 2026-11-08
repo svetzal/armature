@@ -70,10 +70,20 @@ Until 1.0.0, a minor version can change the public surface.
     `prompt` to keep the old words. The hint default is unchanged
     ("Choosing an option opens its page."). The catalogue passes its own
     "Choose a component".
-  - Known gap: the sort button name ("Sort by …") in `data_table`, the
-    brand link name ("… home") in `side_nav`, the "of" in `pagination`'s
-    range and "Skip to" in `table_inspector`'s skip link are still English
-    that a consumer cannot replace.
+  - `data_table` takes `sort_label`, a function from the column label to the
+    sort button's name (default "Sort by Name"), so a translation controls
+    word order. `table_inspector` declares and forwards it.
+  - `side_nav` takes `home_label` for the brand link's name (default: the
+    title followed by " home"). `app_shell` declares and forwards it.
+  - `theme_switch` takes `auto_label`, `light_label` and `dark_label`
+    (default "System", "Light" and "Dark"). `armature-theme.js` announces
+    whichever name is rendered.
+  - `pagination` takes `range_label`, a function from `first`, `last` and
+    `total` to the range text (default "26–50 of 2,000"), so a translation
+    controls word order and grouping. `table_inspector` declares and
+    forwards it.
+  - `table_inspector` takes `skip_label` for its skip link (default "Skip to "
+    followed by `inspector_title`).
 
 ## [0.4.0] - 2026-11-01
 
