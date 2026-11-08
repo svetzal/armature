@@ -46,8 +46,9 @@ defmodule Armature.Components.Molecules do
 
   A fieldset whose legend carries `label` (default "Theme") groups three
   radios named `theme` with the values `"auto"`, `"light"` and `"dark"`. Each
-  choice shows an icon (a monitor, a sun, a moon) and has a name in words:
-  "System", "Light" and "Dark". The choices sit in a rounded track. The radio
+  choice shows an icon (a monitor, a sun, a moon) and has a name in words.
+  The names are the caller's: `auto_label`, `light_label` and `dark_label`
+  (default "System", "Light" and "Dark"). The choices sit in a rounded track. The radio
   that matches `value` is checked, and its choice is a raised thumb: a paper
   surface inside a control border, with a soft shadow and an ink icon.
   Native radios give one tab stop and arrow-key movement. The legend is
@@ -60,13 +61,16 @@ defmodule Armature.Components.Molecules do
   without overwriting them. On a page without a LiveView socket, omit `event`
   and load `armature-theme.js`: it finds the form by its
   `data-armature-theme-switch` attribute, applies and remembers the choice on
-  the document element and announces it. The script leaves alone any switch
+  the document element and announces whichever name is rendered. The script leaves alone any switch
   inside a LiveView.
   """
   attr(:id, :string, required: true)
   attr(:value, :string, default: "auto", values: @themes)
   attr(:label, :string, default: "Theme")
   attr(:label_visible, :boolean, default: false)
+  attr(:auto_label, :string, default: "System")
+  attr(:light_label, :string, default: "Light")
+  attr(:dark_label, :string, default: "Dark")
   attr(:event, :string, default: nil)
   slot(:inner_block)
 
@@ -85,12 +89,24 @@ defmodule Armature.Components.Molecules do
           <.theme_choice
             id={@id}
             value="auto"
-            name="System"
+            name={@auto_label}
             icon="monitor"
             checked={@value == "auto"}
           />
-          <.theme_choice id={@id} value="light" name="Light" icon="sun" checked={@value == "light"} />
-          <.theme_choice id={@id} value="dark" name="Dark" icon="moon" checked={@value == "dark"} />
+          <.theme_choice
+            id={@id}
+            value="light"
+            name={@light_label}
+            icon="sun"
+            checked={@value == "light"}
+          />
+          <.theme_choice
+            id={@id}
+            value="dark"
+            name={@dark_label}
+            icon="moon"
+            checked={@value == "dark"}
+          />
         </span>
       </fieldset>
       {render_slot(@inner_block)}
@@ -411,18 +427,25 @@ defmodule Armature.Components.Molecules do
   The words are the caller's: `label` names the navigation (default "Table
   pages"), `previous_label` and `next_label` are the buttons' visible text and
   accessible names (default "Previous" and "Next"), and `page_size_label`
-  labels the size select (default "Records per page"). The buttons have the
-  ids `<id>-previous` and `<id>-next`.
+  labels the size select (default "Records per page"). `range_label` is a
+  function from `first`, `last` and `total` to the range text (default
+  "26–50 of 2,000"), so a translation controls word order and grouping. The
+  buttons have the ids `<id>-previous` and `<id>-next`.
   """
   attr(:id, :string, required: true)
   for {name, type, opts} <- @paging_attributes, do: attr(name, type, opts)
 
   def pagination(assigns) do
+    assigns =
+      assign(assigns, :range_label, assigns.range_label || (&default_range_label/3))
+
     ~H"""
     <nav id={@id} class={["armature-pagination"]} aria-label={@label}>
-      <span id={@id <> "-range"} role="status" aria-live="polite" aria-atomic="true">{format_count(
-        @first
-      )}–{format_count(@last)} of {format_count(@total)}</span>
+      <span id={@id <> "-range"} role="status" aria-live="polite" aria-atomic="true">{@range_label.(
+        @first,
+        @last,
+        @total
+      )}</span>
       <form
         :if={@page_sizes != [] && @size_event}
         id={@id <> "-size-form"}
@@ -519,6 +542,9 @@ defmodule Armature.Components.Molecules do
   end
 
   defp default_count_label(total), do: "#{format_count(total)} results"
+
+  defp default_range_label(first, last, total),
+    do: "#{format_count(first)}–#{format_count(last)} of #{format_count(total)}"
 
   defp format_count(count) do
     count |> Integer.to_string() |> String.replace(~r/\B(?=(\d{3})+(?!\d))/, ",")

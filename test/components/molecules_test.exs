@@ -456,6 +456,15 @@ defmodule Armature.Components.MoleculesTest do
       end
     end
 
+    test "the range reads a supplied range_label" do
+      doc =
+        pagination_document(2, 80, 26, 50, 2000, %{
+          range_label: fn first, last, total -> "#{first} à #{last} sur #{total}" end
+        })
+
+      assert text(doc, "#pages-range") == "26 à 50 sur 2000"
+    end
+
     test "the page buttons are named by their visible text" do
       doc = pagination_document(2, 80, 26, 50, 2000)
       assert text(doc, "#pages-previous:not([aria-label])") == "Previous"
@@ -651,6 +660,17 @@ defmodule Armature.Components.MoleculesTest do
       assert attribute(doc, "label:has(> #theme-auto)", "title") == "System"
     end
 
+    test "names each segment with supplied labels" do
+      doc = translated_theme_switch_document()
+      names = for value <- ~w(auto light dark), do: text(doc, "label:has(> #theme-#{value})")
+      assert names == ["Automatique", "Clair", "Sombre"]
+    end
+
+    test "the tooltip follows a supplied label" do
+      doc = translated_theme_switch_document()
+      assert attribute(doc, "label:has(> #theme-auto)", "title") == "Automatique"
+    end
+
     test "draws each icon as hidden decoration in the current colour", %{doc: doc} do
       assert doc
              |> LazyHTML.query("#theme .armature-icon[aria-hidden=true] > svg")
@@ -686,6 +706,19 @@ defmodule Armature.Components.MoleculesTest do
     test "theme_attribute/1 names an explicit theme" do
       assert Armature.Components.theme_attribute("dark") == "dark"
     end
+  end
+
+  defp translated_theme_switch_document do
+    document(fn assigns ->
+      ~H"""
+      <Molecules.theme_switch
+        id="theme"
+        auto_label="Automatique"
+        light_label="Clair"
+        dark_label="Sombre"
+      />
+      """
+    end)
   end
 
   defp pagination_document(page, pages, first, last, total, labels \\ %{}) do

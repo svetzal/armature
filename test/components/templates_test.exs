@@ -101,6 +101,10 @@ defmodule Armature.Components.TemplatesTest do
       assert present?(doc, "a[href='#browser-inspector']")
     end
 
+    test "the skip link defaults to the inspector title", %{doc: doc} do
+      assert text(doc, "#browser > a:first-child") == "Skip to Selected record"
+    end
+
     test "announces the selection as a polite status", %{doc: doc} do
       assert text(doc, "#browser-selection[role=status][aria-live=polite][aria-atomic=true]") ==
                "Selected R-1"
@@ -155,9 +159,54 @@ defmodule Armature.Components.TemplatesTest do
 
     test "declares the paging attributes as pagination does" do
       paging =
-        ~w(page pages first last total page_event page_size page_sizes size_event label previous_label next_label page_size_label)a
+        ~w(page pages first last total page_event page_size page_sizes size_event label previous_label next_label page_size_label range_label)a
 
       assert declared_attrs(:table_inspector, paging) == declared_attrs(:pagination, paging)
+    end
+  end
+
+  describe "table_inspector given its words" do
+    setup do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Templates.table_inspector
+            id="worded"
+            rows={[%{id: "R-1", name: "Example"}]}
+            caption="Records"
+            total={1}
+            page={1}
+            pages={1}
+            first={1}
+            last={1}
+            search_event="search"
+            sort_event="sort"
+            page_event="page"
+            select_event="select"
+            skip_label="Aller aux détails"
+            sort_label={&("Trier par " <> &1)}
+            range_label={fn first, last, total -> "#{first} à #{last} sur #{total}" end}
+          >
+            <:col :let={row} label="Name" sort_key="name" row_label>{row.name}</:col>
+            <:details>Nothing selected</:details>
+          </Templates.table_inspector>
+          """
+        end)
+
+      %{doc: doc}
+    end
+
+    test "the skip link reads a supplied skip_label", %{doc: doc} do
+      assert text(doc, "#worded > a:first-child") == "Aller aux détails"
+    end
+
+    test "passes sort_label to its table", %{doc: doc} do
+      assert attribute(doc, "#worded-table th button[phx-value-key=name]", "aria-label") ==
+               "Trier par Name"
+    end
+
+    test "renders a supplied range_label in its pagination range", %{doc: doc} do
+      assert text(doc, "#worded-pagination-range") == "1 à 1 sur 1"
     end
   end
 
@@ -320,6 +369,29 @@ defmodule Armature.Components.TemplatesTest do
 
     test "names the navigation as given", %{doc: doc} do
       assert present?(doc, "#named-shell-rail nav[aria-label='Ledger sections']")
+    end
+
+    test "passes home_label to the rail's brand link" do
+      doc =
+        document(fn assigns ->
+          ~H"""
+          <Templates.app_shell
+            id="home-shell"
+            title="Ledger"
+            home_patch="/"
+            home_label="Ledger start page"
+            heading="Overview"
+            heading_id="home-overview"
+            context="Ledger"
+            items={[]}
+          >
+            <p>Content</p>
+          </Templates.app_shell>
+          """
+        end)
+
+      assert attribute(doc, "#home-shell-rail .armature-side-nav-brand > a", "aria-label") ==
+               "Ledger start page"
     end
   end
 

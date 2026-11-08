@@ -77,6 +77,7 @@ optional caption above its links. The brand and caption render only when you
 give them. Navigation items have
 `:label`, one of `:href`, `:patch` or `:navigate`, and optional `:id` and `:current`.
 Set `home_patch` to make the wordmark a patch link back to your index.
+Its accessible name is `home_label` (default: the title followed by " home").
 The optional `mark` slot puts a logo or symbol (an `<img>` or inline SVG)
 before the title, on the same row and inside its link. It renders only with a
 title and is hidden from assistive technology, because the title names the
@@ -120,7 +121,9 @@ content slot can supply guidance. Keep current selection in caller state.
 `theme_switch` is a three-way pill toggle: a `fieldset` whose `legend`
 carries `label` (default "Theme"), and three native radios named `theme` with
 the values `"auto"`, `"light"` and `"dark"`. Their choices show a monitor, a
-sun and a moon, and their names in words are "System", "Light" and "Dark".
+sun and a moon, and their names in words are the attributes `auto_label`,
+`light_label` and `dark_label` (default "System", "Light" and "Dark").
+`armature-theme.js` announces whichever name is rendered.
 "System" is the name of `"auto"`: that choice follows the operating system or
 browser preference, and the icon shows a screen. The choices sit in a rounded
 track on the `--armature-recessed` surface, with no borders between them. The
@@ -341,7 +344,9 @@ in words instead of an empty table. Each `col` slot receives a row; `numeric`
 right-aligns values with tabular numbers. A `sort_key` with `sort_event` renders
 a native button sending `%{"key" => key}`. Only the active sortable heading
 has `aria-sort`; the caller sorts the rows and supplies `sort_by` and
-`sort_direction` (`"asc"` or `"desc"`). Sticky headings return to normal flow
+`sort_direction` (`"asc"` or `"desc"`). The sort button's name is
+`sort_label`, a function from the column label (default "Sort by Name"), so a
+translation controls the word order. Sticky headings return to normal flow
 while the scroll region contains focus, so they cannot cover a keyboard target.
 
 Supply `select_event` and the id of an existing inspector to enable selection.
@@ -379,8 +384,10 @@ is an atomic polite status, with grouping separators, such as "26–50 of 2,000"
 `label` names the navigation (default "Table pages"), `previous_label` and
 `next_label` are the buttons' visible text and accessible names (default
 "Previous" and "Next"), and `page_size_label` labels the size select (default
-"Records per page"). The buttons have the ids `<id>-previous` and `<id>-next`.
-Phoenix delivers these event values as strings.
+"Records per page"). `range_label` is a function from `first`, `last` and
+`total` to the range text (default "26–50 of 2,000"), so a translation
+controls the word order and grouping. The buttons have the ids `<id>-previous`
+and `<id>-next`. Phoenix delivers these event values as strings.
 
 `inspector` is an `aside` named by its heading, with a stable `id` and
 `tabindex="-1"` for skip-link access. It is never a live region. `record_header`
@@ -394,7 +401,9 @@ the inspector. IDs derive from the template id, keeping the row-label buttons'
 `aria-controls` and skip link connected to the actual landmark. Update
 `selection_label` when selection changes; only this short status is announced,
 without moving focus or announcing all details. Keep selection outside the
-filtered and paged collection so it survives those operations.
+filtered and paged collection so it survives those operations. The skip link
+reads `skip_label` (default "Skip to " followed by `inspector_title`), and
+`sort_label` passes to the table.
 
 ```heex
 <.table_inspector id="records" rows={@rows} caption="Example records"

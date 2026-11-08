@@ -17,8 +17,8 @@ defmodule Armature.Components.Templates do
   @doc """
   An application shell with a skip link, side navigation, context bar and page heading.
   Supply globally unique `id` and `heading_id`. Item navigation and theme state
-  belong to the consumer. `title`, `subtitle`, `nav_label` and `section_label`
-  pass to `side_nav/1`, which renders a brand and caption only when given.
+  belong to the consumer. `title`, `subtitle`, `nav_label`, `section_label` and
+  `home_label` pass to `side_nav/1`, which renders a brand and caption only when given.
   The optional `mark` slot passes to `side_nav/1`'s `mark`, a decorative logo
   or symbol before the title.
   The rail narrows below 800px and stacks below 520px of the shell's own inline size.
@@ -41,6 +41,7 @@ defmodule Armature.Components.Templates do
   attr(:heading_id, :string, required: true)
   attr(:heading_rest, :map, default: %{})
   attr(:home_patch, :string, default: nil)
+  attr(:home_label, :string, default: nil)
   attr(:eyebrow, :string, default: nil)
   attr(:rest, :global)
   slot(:mark)
@@ -65,6 +66,7 @@ defmodule Armature.Components.Templates do
           label={@nav_label}
           section_label={@section_label}
           home_patch={@home_patch}
+          home_label={@home_label}
           items={@items}
         >
           <:mark :if={@mark != []}>{render_slot(@mark)}</:mark>
@@ -97,11 +99,13 @@ defmodule Armature.Components.Templates do
   The caller owns filtering, ordering, paging and persistent selection. `col`
   slots are forwarded unchanged to `data_table/1`, which defines their contract,
   and the paging attributes follow `pagination/1`, including its `label`,
-  `previous_label`, `next_label` and `page_size_label`. `details` holds
+  `previous_label`, `next_label`, `page_size_label` and `range_label`. `details` holds
   the selected record's content. Update
   `selection_label` on selection changes to announce them without moving focus.
-  The skip link targets the inspector; narrow layouts place it below the table.
-  `search_label`, `clear_label` and `count_label` pass to `table_toolbar/1`.
+  The skip link targets the inspector and reads `skip_label` (default "Skip to "
+  followed by `inspector_title`); narrow layouts place the inspector below the table.
+  `search_label`, `clear_label` and `count_label` pass to `table_toolbar/1`, and
+  `sort_label` passes to `data_table/1`.
   """
   attr(:id, :string, required: true)
   attr(:rows, :list, required: true)
@@ -113,6 +117,7 @@ defmodule Armature.Components.Templates do
   attr(:clear_label, :string, default: "Clear search")
   attr(:count_label, :any, default: nil)
   attr(:sort_event, :string, required: true)
+  attr(:sort_label, :any, default: nil)
   attr(:sort_by, :string, default: nil)
   attr(:sort_direction, :string, default: "asc", values: ~w(asc desc))
   attr(:row_id, :any, default: nil)
@@ -120,6 +125,7 @@ defmodule Armature.Components.Templates do
   attr(:selected_id, :any, default: nil)
   attr(:selection_label, :string, default: "No record selected.")
   attr(:inspector_title, :string, default: "Record details")
+  attr(:skip_label, :string, default: nil)
   for {name, type, opts} <- @paging_attributes, do: attr(name, type, opts)
 
   slot :col, required: true do
@@ -130,9 +136,12 @@ defmodule Armature.Components.Templates do
   slot(:details, required: true)
 
   def table_inspector(assigns) do
+    assigns =
+      assign(assigns, :skip_label, assigns.skip_label || "Skip to " <> assigns.inspector_title)
+
     ~H"""
     <div id={@id} class={["armature-table-inspector"]}>
-      <Atoms.link href={"##{@id}-inspector"}>Skip to {@inspector_title}</Atoms.link>
+      <Atoms.link href={"##{@id}-inspector"}>{@skip_label}</Atoms.link>
       <p
         id={@id <> "-selection"}
         class={["armature-sr-only"]}
@@ -162,6 +171,7 @@ defmodule Armature.Components.Templates do
           sort_by={@sort_by}
           sort_direction={@sort_direction}
           sort_event={@sort_event}
+          sort_label={@sort_label}
           row_id={@row_id}
           select_event={@select_event}
           selected_id={@selected_id}
@@ -186,6 +196,7 @@ defmodule Armature.Components.Templates do
           previous_label={@previous_label}
           next_label={@next_label}
           page_size_label={@page_size_label}
+          range_label={@range_label}
         />
         <:secondary>
           <Organisms.inspector id={@id <> "-inspector"} title={@inspector_title}>
