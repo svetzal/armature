@@ -12,6 +12,8 @@ defmodule Armature.Components.Atoms do
   alias Armature.Components.Attributes
 
   @tones Attributes.tones()
+  @button_types Attributes.button_types()
+  @button_variants Attributes.button_variants()
   @input_attributes Attributes.input()
   @select_attributes Attributes.select()
   @textarea_attributes Attributes.textarea()
@@ -27,8 +29,8 @@ defmodule Armature.Components.Atoms do
   end
 
   @doc "A native button with a primary or secondary treatment and a visible name."
-  attr(:type, :string, default: "button", values: ~w(button submit reset))
-  attr(:variant, :string, default: "primary", values: ~w(primary secondary))
+  attr(:type, :string, default: "button", values: @button_types)
+  attr(:variant, :string, default: "primary", values: @button_variants)
   attr(:disabled, :boolean, default: false)
   attr(:rest, :global, include: ~w(form name value))
   slot(:inner_block, required: true)

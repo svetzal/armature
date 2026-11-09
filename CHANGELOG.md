@@ -28,6 +28,11 @@ Until 1.0.0, a minor version can change the public surface.
     `.armature-table thead .armature-button` and `th[aria-sort] .armature-button`,
     and a row's selection button through `.armature-clickable-row .armature-button`.
     Tests that select these classes should use the same selectors.
+- `table_inspector` now takes its toolbar words, query, density and ordering
+  attributes from the same declarations as `table_toolbar` and `data_table`,
+  and `icon_button` takes its `type` and `variant` values from `button`, so
+  the forwarded contracts cannot drift. Names, defaults and allowed values are
+  unchanged; only the attribute order in the generated docs moves.
   - Sort arrows are SVG icons (`arrow-up`, `arrow-down`, `arrow-up-down`)
     rather than text characters. An unsorted column's glyph still takes
     `--armature-sort-opacity`.

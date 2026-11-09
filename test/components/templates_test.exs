@@ -163,6 +163,16 @@ defmodule Armature.Components.TemplatesTest do
 
       assert declared_attrs(:table_inspector, paging) == declared_attrs(:pagination, paging)
     end
+
+    test "declares the toolbar words and query as table_toolbar does" do
+      words = ~w(search_label clear_label count_label query)a
+      assert declared_attrs(:table_inspector, words) == declared_attrs(:table_toolbar, words)
+    end
+
+    test "declares the ordering attributes as data_table does" do
+      ordering = ~w(density sort_by sort_direction sort_label)a
+      assert declared_attrs(:table_inspector, ordering) == declared_attrs(:data_table, ordering)
+    end
   end
 
   describe "table_inspector given its words" do
