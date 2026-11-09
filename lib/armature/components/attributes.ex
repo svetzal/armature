@@ -52,4 +52,30 @@ defmodule Armature.Components.Attributes do
       {:range_label, :any, [default: nil]}
     ]
   end
+
+  @doc "The word and query attributes of `table_toolbar/1`, which `table_inspector/1` forwards."
+  def toolbar do
+    [
+      {:search_label, :string, [default: "Search records"]},
+      {:clear_label, :string, [default: "Clear search"]},
+      {:count_label, :any, [default: nil]},
+      {:query, :string, [default: ""]}
+    ]
+  end
+
+  @doc "The density and ordering attributes of `data_table/1`, which `table_inspector/1` forwards."
+  def ordering do
+    [
+      {:density, :string, [default: "default", values: ~w(default compact)]},
+      {:sort_by, :string, [default: nil]},
+      {:sort_direction, :string, [default: "asc", values: ~w(asc desc)]},
+      {:sort_label, :any, [default: nil]}
+    ]
+  end
+
+  @doc "The native `type` values `button/1` and `icon_button/1` accept."
+  def button_types, do: ~w(button submit reset)
+
+  @doc "The treatments `button/1` and `icon_button/1` accept."
+  def button_variants, do: ~w(primary secondary)
 end

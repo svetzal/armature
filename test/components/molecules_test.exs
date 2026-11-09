@@ -863,6 +863,13 @@ defmodule Armature.Components.MoleculesTest do
     test "marks itself for the square icon button styles", %{doc: doc} do
       assert present?(doc, "#add[data-armature-icon-button]")
     end
+
+    test "accepts the same types and variants as button" do
+      for name <- [:type, :variant] do
+        [{^name, _, _, _, values}] = declared_attrs(:icon_button, [name])
+        [{^name, _, _, _, ^values}] = declared_attrs(:button, [name])
+      end
+    end
   end
 
   test "an icon button cannot render without a label" do

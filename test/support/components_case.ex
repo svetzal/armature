@@ -47,7 +47,9 @@ defmodule Armature.ComponentsCase do
   def declared_attrs(component, names) do
     for attr <- component |> declaration() |> Map.fetch!(:attrs),
         attr.name in names,
-        do: {attr.name, attr.type, attr.required, Keyword.get(attr.opts, :default)}
+        do:
+          {attr.name, attr.type, attr.required, Keyword.get(attr.opts, :default),
+           Keyword.get(attr.opts, :values)}
   end
 
   def rest_include(component) do

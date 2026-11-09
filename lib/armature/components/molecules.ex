@@ -10,11 +10,14 @@ defmodule Armature.Components.Molecules do
   alias Armature.Components.Layouts
 
   @tones Attributes.tones()
+  @button_types Attributes.button_types()
+  @button_variants Attributes.button_variants()
   @themes Armature.Components.themes()
 
   # field/1 declares `multiple` itself, so it is not forwarded through `rest`.
   @field_attributes Attributes.controls() -- ~w(multiple)
   @paging_attributes Attributes.paging()
+  @toolbar_attributes Attributes.toolbar()
 
   @doc """
   A page's h1 with an optional contextual eyebrow and actions or status.
@@ -266,11 +269,8 @@ defmodule Armature.Components.Molecules do
   (default "1,234 results"), so a translation controls the word order.
   """
   attr(:id, :string, required: true)
-  attr(:search_label, :string, default: "Search records")
-  attr(:clear_label, :string, default: "Clear search")
-  attr(:count_label, :any, default: nil)
+  for {name, type, opts} <- @toolbar_attributes, do: attr(name, type, opts)
   attr(:search_event, :string, required: true)
-  attr(:query, :string, default: "")
   attr(:total, :integer, required: true)
   slot(:actions)
 
@@ -321,8 +321,8 @@ defmodule Armature.Components.Molecules do
   """
   attr(:label, :string, required: true)
   attr(:icon, :string, default: nil, values: [nil | Armature.Icons.names()])
-  attr(:type, :string, default: "button", values: ~w(button submit reset))
-  attr(:variant, :string, default: "secondary", values: ~w(primary secondary))
+  attr(:type, :string, default: "button", values: @button_types)
+  attr(:variant, :string, default: "secondary", values: @button_variants)
   attr(:disabled, :boolean, default: false)
   attr(:pressed, :boolean, default: nil)
   attr(:rest, :global, include: ~w(form name value))

@@ -13,6 +13,8 @@ defmodule Armature.Components.Templates do
 
   @column_attributes Attributes.columns()
   @paging_attributes Attributes.paging()
+  @toolbar_attributes Attributes.toolbar()
+  @ordering_attributes Attributes.ordering()
 
   @doc """
   An application shell with a skip link, side navigation, context bar and page heading.
@@ -110,22 +112,16 @@ defmodule Armature.Components.Templates do
   attr(:id, :string, required: true)
   attr(:rows, :list, required: true)
   attr(:caption, :string, required: true)
-  attr(:density, :string, default: "default", values: ~w(default compact))
-  attr(:query, :string, default: "")
   attr(:search_event, :string, required: true)
-  attr(:search_label, :string, default: "Search records")
-  attr(:clear_label, :string, default: "Clear search")
-  attr(:count_label, :any, default: nil)
   attr(:sort_event, :string, required: true)
-  attr(:sort_label, :any, default: nil)
-  attr(:sort_by, :string, default: nil)
-  attr(:sort_direction, :string, default: "asc", values: ~w(asc desc))
   attr(:row_id, :any, default: nil)
   attr(:select_event, :string, required: true)
   attr(:selected_id, :any, default: nil)
   attr(:selection_label, :string, default: "No record selected.")
   attr(:inspector_title, :string, default: "Record details")
   attr(:skip_label, :string, default: nil)
+  for {name, type, opts} <- @toolbar_attributes, do: attr(name, type, opts)
+  for {name, type, opts} <- @ordering_attributes, do: attr(name, type, opts)
   for {name, type, opts} <- @paging_attributes, do: attr(name, type, opts)
 
   slot :col, required: true do

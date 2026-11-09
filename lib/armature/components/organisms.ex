@@ -10,6 +10,7 @@ defmodule Armature.Components.Organisms do
   alias Armature.Components.Layouts
 
   @column_attributes Attributes.columns()
+  @ordering_attributes Attributes.ordering()
 
   @doc """
   A named navigation landmark with an optional brand, section links and footnote.
@@ -188,14 +189,11 @@ defmodule Armature.Components.Organisms do
   attr(:id, :string, required: true)
   attr(:rows, :list, required: true)
   attr(:caption, :string, required: true)
-  attr(:density, :string, default: "default", values: ~w(default compact))
+  for {name, type, opts} <- @ordering_attributes, do: attr(name, type, opts)
   attr(:caption_hidden, :boolean, default: false)
   attr(:empty_label, :string, default: "No records to display.")
   attr(:striped, :boolean, default: true)
-  attr(:sort_by, :string, default: nil)
-  attr(:sort_direction, :string, default: "asc", values: ~w(asc desc))
   attr(:sort_event, :string, default: nil)
-  attr(:sort_label, :any, default: nil)
   attr(:row_id, :any, default: nil)
   attr(:select_event, :string, default: nil)
   attr(:selected_id, :any, default: nil)
